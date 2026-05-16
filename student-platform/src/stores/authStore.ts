@@ -158,9 +158,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
   },
 }))
 
-// Listen to Supabase auth state changes and keep store in sync
+// Keep store in sync with Supabase auth events.
+// INITIAL_SESSION fires on page load — if there's no session we can stop loading immediately
+// rather than waiting for the checkAuth useEffect to run.
 supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT' || !session) {
+  if (event === 'SIGNED_OUT' || (event === 'INITIAL_SESSION' && !session)) {
     useAuthStore.setState({ user: null, profile: null, role: null, loading: false })
   }
 })

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Native pulse for AppLoader (used before Tailwind classes are guaranteed active) */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
 /* ─── Design system tokens ─── */
 :root {
   --primary:       #0F4C5C;

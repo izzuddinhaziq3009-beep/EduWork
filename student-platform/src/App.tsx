@@ -1,202 +1,178 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-
-// Auth pages
-import { LoginPage }          from '@/pages/LoginPage'
-import { SignupPage }         from '@/pages/SignupPage'
-import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
-
-// Dashboard pages
-import { Dashboard }         from '@/pages/Dashboard'
-import { MentorDashboard }   from '@/pages/mentor/MentorDashboard'
-import { CompanyDashboard }  from '@/pages/company/CompanyDashboard'
-import { AdminDashboard }    from '@/pages/admin/AdminDashboard'
-
-// Layout + route guards
-import { Layout }        from '@/components/layout/Layout'
+import { Layout } from '@/components/layout/Layout'
 import {
   StudentRoute, MentorRoute, CompanyRoute, AdminRoute, AuthRoute,
 } from '@/components/auth/ProtectedRoute'
 
-// Shared
-import { NotFoundPage }   from '@/pages/NotFoundPage'
-import { PlaceholderPage } from '@/pages/PlaceholderPage'
+// ── Page-level lazy imports ────────────────────────────────────────────────
+// Each page is a separate chunk. An error in one page won't crash the others.
+const LoginPage           = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const SignupPage           = lazy(() => import('@/pages/SignupPage').then(m => ({ default: m.SignupPage })))
+const ForgotPasswordPage   = lazy(() => import('@/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })))
 
-// ─── Thin layout wrapper for protected routes ───────────────────────
+const Dashboard            = lazy(() => import('@/pages/Dashboard').then(m => ({ default: m.Dashboard })))
+const ModulesPage          = lazy(() => import('@/pages/ModulesPage').then(m => ({ default: m.ModulesPage })))
+const ModuleDetailPage     = lazy(() => import('@/pages/ModuleDetailPage').then(m => ({ default: m.ModuleDetailPage })))
+const ProjectsPage         = lazy(() => import('@/pages/ProjectsPage').then(m => ({ default: m.ProjectsPage })))
+const ProjectDetailPage    = lazy(() => import('@/pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage })))
+const ProgressPage         = lazy(() => import('@/pages/ProgressPage').then(m => ({ default: m.ProgressPage })))
+const MentorshipPage       = lazy(() => import('@/pages/MentorshipPage').then(m => ({ default: m.MentorshipPage })))
+const PortfolioPage        = lazy(() => import('@/pages/PortfolioPage').then(m => ({ default: m.PortfolioPage })))
+const PublicPortfolioPage  = lazy(() => import('@/pages/PublicPortfolioPage').then(m => ({ default: m.PublicPortfolioPage })))
+const IndependentProjectsPage = lazy(() => import('@/pages/IndependentProjectsPage').then(m => ({ default: m.IndependentProjectsPage })))
+const PlaceholderPage      = lazy(() => import('@/pages/PlaceholderPage').then(m => ({ default: m.PlaceholderPage })))
+const NotFoundPage         = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
+
+const MentorDashboard      = lazy(() => import('@/pages/mentor/MentorDashboard').then(m => ({ default: m.MentorDashboard })))
+const CompanyDashboard     = lazy(() => import('@/pages/company/CompanyDashboard').then(m => ({ default: m.CompanyDashboard })))
+const AdminDashboard       = lazy(() => import('@/pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })))
+
+// ── Shared loading screen ─────────────────────────────────────────────────
+function AppLoader() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4"
+      style={{ background: '#F6F5F0' }}>
+      <svg viewBox="0 0 32 32" width="40" height="40" fill="none"
+        style={{ color: '#0F4C5C', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+        <rect x="2" y="2" width="28" height="28" rx="7" fill="currentColor"/>
+        <path d="M9 20.5L16 9l7 11.5H17.5L16 18l-1.5 2.5H9z" fill="#fff"/>
+        <circle cx="16" cy="22.5" r="1.5" fill="#fff"/>
+      </svg>
+      <div style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#8A857D' }}>
+        Loading…
+      </div>
+    </div>
+  )
+}
+
+// ── Layout wrapper ────────────────────────────────────────────────────────
 function AppLayout({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>
 }
 
-// ─── Root redirect based on role ────────────────────────────────────
+// ── Root redirect based on role ───────────────────────────────────────────
 function RootRedirect() {
   const { user, role, loading } = useAuthStore()
-  if (loading) return null
-  if (!user) return <Navigate to="/login" replace />
-  if (role === 'mentor')  return <Navigate to="/mentor/dashboard"  replace />
-  if (role === 'company') return <Navigate to="/company/dashboard" replace />
-  if (role === 'admin')   return <Navigate to="/admin/dashboard"   replace />
-  return <Navigate to="/dashboard" replace />
+  if (loading) return <AppLoader />
+  if (!user)             return <Navigate to="/login"            replace />
+  if (role === 'mentor') return <Navigate to="/mentor/dashboard" replace />
+  if (role === 'company')return <Navigate to="/company/dashboard"replace />
+  if (role === 'admin')  return <Navigate to="/admin/dashboard"  replace />
+  return                        <Navigate to="/dashboard"        replace />
 }
 
+// ─────────────────────────────────────────────────────────────────────────
 export default function App() {
   const { checkAuth } = useAuthStore()
-
-  // Hydrate auth state on first load
   useEffect(() => { checkAuth() }, [checkAuth])
 
   return (
-    <Routes>
-      {/* ── Public ── */}
-      <Route path="/login"            element={<LoginPage />} />
-      <Route path="/signup"           element={<SignupPage />} />
-      <Route path="/forgot-password"  element={<ForgotPasswordPage />} />
+    <Suspense fallback={<AppLoader />}>
+      <Routes>
+        {/* ── Public ── */}
+        <Route path="/login"           element={<LoginPage />} />
+        <Route path="/signup"          element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      {/* ── Root → role-based redirect ── */}
-      <Route path="/" element={<RootRedirect />} />
+        {/* Public portfolio — no auth required */}
+        <Route path="/portfolio/:publicUrl" element={<PublicPortfolioPage />} />
 
-      {/* ── Student routes ── */}
-      <Route path="/dashboard" element={
-        <StudentRoute>
-          <AppLayout><Dashboard /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/modules" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Learning Modules" description="Browse and continue your learning modules." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/modules/:id" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Module Detail" /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/projects" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Projects" description="Submit and track your project work." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/projects/:id" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Project Detail" /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/progress" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="My Progress" description="Track your learning journey and achievements." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/mentorship" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Mentorship" description="Connect with your mentor and request guidance." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/portfolio" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Portfolio" description="Build and publish your digital portfolio." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/independent-projects" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Independent Projects" description="Manage your self-directed projects." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/challenges" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Industry Challenges" description="Browse and submit to real industry challenges." /></AppLayout>
-        </StudentRoute>
-      }/>
-      <Route path="/challenges/:id" element={
-        <StudentRoute>
-          <AppLayout><PlaceholderPage title="Challenge Detail" /></AppLayout>
-        </StudentRoute>
-      }/>
+        {/* Root redirect */}
+        <Route path="/" element={<RootRedirect />} />
 
-      {/* ── Mentor routes ── */}
-      <Route path="/mentor/dashboard" element={
-        <MentorRoute>
-          <AppLayout><MentorDashboard /></AppLayout>
-        </MentorRoute>
-      }/>
-      <Route path="/mentor/submissions" element={
-        <MentorRoute>
-          <AppLayout><PlaceholderPage title="Student Submissions" description="Review and provide feedback on student work." /></AppLayout>
-        </MentorRoute>
-      }/>
-      <Route path="/mentor/mentorship-requests" element={
-        <MentorRoute>
-          <AppLayout><PlaceholderPage title="Mentorship Requests" description="Accept or decline mentorship requests." /></AppLayout>
-        </MentorRoute>
-      }/>
-      <Route path="/mentor/messages" element={
-        <MentorRoute>
-          <AppLayout><PlaceholderPage title="Messages" description="Communicate with your students." /></AppLayout>
-        </MentorRoute>
-      }/>
+        {/* ── Student ── */}
+        <Route path="/dashboard" element={
+          <StudentRoute><AppLayout><Dashboard /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/modules" element={
+          <StudentRoute><AppLayout><ModulesPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/modules/:id" element={
+          <StudentRoute><AppLayout><ModuleDetailPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/projects" element={
+          <StudentRoute><AppLayout><ProjectsPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/projects/:id" element={
+          <StudentRoute><AppLayout><ProjectDetailPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/progress" element={
+          <StudentRoute><AppLayout><ProgressPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/mentorship" element={
+          <StudentRoute><AppLayout><MentorshipPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/portfolio" element={
+          <StudentRoute><AppLayout><PortfolioPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/independent-projects" element={
+          <StudentRoute><AppLayout><IndependentProjectsPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/challenges" element={
+          <StudentRoute><AppLayout><PlaceholderPage title="Industry Challenges" description="Browse and submit to real industry challenges." /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/challenges/:id" element={
+          <StudentRoute><AppLayout><PlaceholderPage title="Challenge Detail" /></AppLayout></StudentRoute>
+        }/>
 
-      {/* ── Company routes ── */}
-      <Route path="/company/dashboard" element={
-        <CompanyRoute>
-          <AppLayout><CompanyDashboard /></AppLayout>
-        </CompanyRoute>
-      }/>
-      <Route path="/company/post-challenge" element={
-        <CompanyRoute>
-          <AppLayout><PlaceholderPage title="Post a Challenge" description="Create a new industry challenge for students." /></AppLayout>
-        </CompanyRoute>
-      }/>
-      <Route path="/company/challenges" element={
-        <CompanyRoute>
-          <AppLayout><PlaceholderPage title="My Challenges" description="Manage your posted challenges." /></AppLayout>
-        </CompanyRoute>
-      }/>
-      <Route path="/company/submissions" element={
-        <CompanyRoute>
-          <AppLayout><PlaceholderPage title="Submissions" description="Review submissions to your challenges." /></AppLayout>
-        </CompanyRoute>
-      }/>
+        {/* ── Mentor ── */}
+        <Route path="/mentor/dashboard" element={
+          <MentorRoute><AppLayout><MentorDashboard /></AppLayout></MentorRoute>
+        }/>
+        <Route path="/mentor/submissions" element={
+          <MentorRoute><AppLayout><PlaceholderPage title="Student Submissions" /></AppLayout></MentorRoute>
+        }/>
+        <Route path="/mentor/mentorship-requests" element={
+          <MentorRoute><AppLayout><PlaceholderPage title="Mentorship Requests" /></AppLayout></MentorRoute>
+        }/>
+        <Route path="/mentor/messages" element={
+          <MentorRoute><AppLayout><PlaceholderPage title="Messages" /></AppLayout></MentorRoute>
+        }/>
 
-      {/* ── Admin routes ── */}
-      <Route path="/admin/dashboard" element={
-        <AdminRoute>
-          <AppLayout><AdminDashboard /></AppLayout>
-        </AdminRoute>
-      }/>
-      <Route path="/admin/users" element={
-        <AdminRoute>
-          <AppLayout><PlaceholderPage title="User Management" description="Manage all platform users." /></AppLayout>
-        </AdminRoute>
-      }/>
-      <Route path="/admin/content" element={
-        <AdminRoute>
-          <AppLayout><PlaceholderPage title="Content Management" description="Manage learning modules and projects." /></AppLayout>
-        </AdminRoute>
-      }/>
-      <Route path="/admin/challenges" element={
-        <AdminRoute>
-          <AppLayout><PlaceholderPage title="Challenge Moderation" description="Approve or reject company challenge submissions." /></AppLayout>
-        </AdminRoute>
-      }/>
-      <Route path="/admin/monitoring" element={
-        <AdminRoute>
-          <AppLayout><PlaceholderPage title="System Monitoring" description="Monitor platform health and activity." /></AppLayout>
-        </AdminRoute>
-      }/>
+        {/* ── Company ── */}
+        <Route path="/company/dashboard" element={
+          <CompanyRoute><AppLayout><CompanyDashboard /></AppLayout></CompanyRoute>
+        }/>
+        <Route path="/company/post-challenge" element={
+          <CompanyRoute><AppLayout><PlaceholderPage title="Post a Challenge" /></AppLayout></CompanyRoute>
+        }/>
+        <Route path="/company/challenges" element={
+          <CompanyRoute><AppLayout><PlaceholderPage title="My Challenges" /></AppLayout></CompanyRoute>
+        }/>
+        <Route path="/company/submissions" element={
+          <CompanyRoute><AppLayout><PlaceholderPage title="Submissions" /></AppLayout></CompanyRoute>
+        }/>
 
-      {/* ── Shared authenticated routes ── */}
-      <Route path="/profile" element={
-        <AuthRoute>
-          <AppLayout><PlaceholderPage title="Profile" description="Manage your account settings." /></AppLayout>
-        </AuthRoute>
-      }/>
-      <Route path="/notifications" element={
-        <AuthRoute>
-          <AppLayout><PlaceholderPage title="Notifications" /></AppLayout>
-        </AuthRoute>
-      }/>
+        {/* ── Admin ── */}
+        <Route path="/admin/dashboard" element={
+          <AdminRoute><AppLayout><AdminDashboard /></AppLayout></AdminRoute>
+        }/>
+        <Route path="/admin/users" element={
+          <AdminRoute><AppLayout><PlaceholderPage title="User Management" /></AppLayout></AdminRoute>
+        }/>
+        <Route path="/admin/content" element={
+          <AdminRoute><AppLayout><PlaceholderPage title="Content Management" /></AppLayout></AdminRoute>
+        }/>
+        <Route path="/admin/challenges" element={
+          <AdminRoute><AppLayout><PlaceholderPage title="Challenge Moderation" /></AppLayout></AdminRoute>
+        }/>
+        <Route path="/admin/monitoring" element={
+          <AdminRoute><AppLayout><PlaceholderPage title="System Monitoring" /></AppLayout></AdminRoute>
+        }/>
 
-      {/* ── 404 ── */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        {/* ── Shared authenticated ── */}
+        <Route path="/profile" element={
+          <AuthRoute><AppLayout><PlaceholderPage title="Profile" /></AppLayout></AuthRoute>
+        }/>
+        <Route path="/notifications" element={
+          <AuthRoute><AppLayout><PlaceholderPage title="Notifications" /></AppLayout></AuthRoute>
+        }/>
+
+        {/* 404 */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   )
 }
