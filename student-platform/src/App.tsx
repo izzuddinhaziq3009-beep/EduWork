@@ -25,9 +25,23 @@ const IndependentProjectsPage = lazy(() => import('@/pages/IndependentProjectsPa
 const PlaceholderPage      = lazy(() => import('@/pages/PlaceholderPage').then(m => ({ default: m.PlaceholderPage })))
 const NotFoundPage         = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
-const MentorDashboard      = lazy(() => import('@/pages/mentor/MentorDashboard').then(m => ({ default: m.MentorDashboard })))
-const CompanyDashboard     = lazy(() => import('@/pages/company/CompanyDashboard').then(m => ({ default: m.CompanyDashboard })))
-const AdminDashboard       = lazy(() => import('@/pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })))
+const MentorDashboard         = lazy(() => import('@/pages/mentor/MentorDashboard').then(m => ({ default: m.MentorDashboard })))
+const SubmissionsPage         = lazy(() => import('@/pages/mentor/SubmissionsPage').then(m => ({ default: m.SubmissionsPage })))
+const SubmissionDetail        = lazy(() => import('@/pages/mentor/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })))
+const MentorshipRequests      = lazy(() => import('@/pages/mentor/MentorshipRequests').then(m => ({ default: m.MentorshipRequests })))
+const MessagesPage            = lazy(() => import('@/pages/MessagesPage').then(m => ({ default: m.MessagesPage })))
+const CompanyDashboard        = lazy(() => import('@/pages/company/CompanyDashboard').then(m => ({ default: m.CompanyDashboard })))
+const CompanyProfilePage      = lazy(() => import('@/pages/company/ProfilePage').then(m => ({ default: m.ProfilePage })))
+const PostChallenge           = lazy(() => import('@/pages/company/PostChallenge').then(m => ({ default: m.PostChallenge })))
+const MyChallenges            = lazy(() => import('@/pages/company/MyChallenges').then(m => ({ default: m.MyChallenges })))
+const EditChallenge           = lazy(() => import('@/pages/company/EditChallenge').then(m => ({ default: m.EditChallenge })))
+const CompanySubmissions      = lazy(() => import('@/pages/company/Submissions').then(m => ({ default: m.CompanySubmissions })))
+const CompanySubmissionDetail = lazy(() => import('@/pages/company/SubmissionDetail').then(m => ({ default: m.CompanySubmissionDetail })))
+
+const ChallengesPage          = lazy(() => import('@/pages/ChallengesPage').then(m => ({ default: m.ChallengesPage })))
+const ChallengeDetail         = lazy(() => import('@/pages/ChallengeDetail').then(m => ({ default: m.ChallengeDetail })))
+
+const AdminDashboard          = lazy(() => import('@/pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })))
 
 // ── Shared loading screen ─────────────────────────────────────────────────
 function AppLoader() {
@@ -111,10 +125,10 @@ export default function App() {
           <StudentRoute><AppLayout><IndependentProjectsPage /></AppLayout></StudentRoute>
         }/>
         <Route path="/challenges" element={
-          <StudentRoute><AppLayout><PlaceholderPage title="Industry Challenges" description="Browse and submit to real industry challenges." /></AppLayout></StudentRoute>
+          <StudentRoute><AppLayout><ChallengesPage /></AppLayout></StudentRoute>
         }/>
         <Route path="/challenges/:id" element={
-          <StudentRoute><AppLayout><PlaceholderPage title="Challenge Detail" /></AppLayout></StudentRoute>
+          <StudentRoute><AppLayout><ChallengeDetail /></AppLayout></StudentRoute>
         }/>
 
         {/* ── Mentor ── */}
@@ -122,27 +136,39 @@ export default function App() {
           <MentorRoute><AppLayout><MentorDashboard /></AppLayout></MentorRoute>
         }/>
         <Route path="/mentor/submissions" element={
-          <MentorRoute><AppLayout><PlaceholderPage title="Student Submissions" /></AppLayout></MentorRoute>
+          <MentorRoute><AppLayout><SubmissionsPage /></AppLayout></MentorRoute>
+        }/>
+        <Route path="/mentor/submissions/:id" element={
+          <MentorRoute><AppLayout><SubmissionDetail /></AppLayout></MentorRoute>
         }/>
         <Route path="/mentor/mentorship-requests" element={
-          <MentorRoute><AppLayout><PlaceholderPage title="Mentorship Requests" /></AppLayout></MentorRoute>
+          <MentorRoute><AppLayout><MentorshipRequests /></AppLayout></MentorRoute>
         }/>
         <Route path="/mentor/messages" element={
-          <MentorRoute><AppLayout><PlaceholderPage title="Messages" /></AppLayout></MentorRoute>
+          <MentorRoute><AppLayout><MessagesPage /></AppLayout></MentorRoute>
         }/>
 
         {/* ── Company ── */}
         <Route path="/company/dashboard" element={
           <CompanyRoute><AppLayout><CompanyDashboard /></AppLayout></CompanyRoute>
         }/>
+        <Route path="/company/profile" element={
+          <CompanyRoute><AppLayout><CompanyProfilePage /></AppLayout></CompanyRoute>
+        }/>
         <Route path="/company/post-challenge" element={
-          <CompanyRoute><AppLayout><PlaceholderPage title="Post a Challenge" /></AppLayout></CompanyRoute>
+          <CompanyRoute><AppLayout><PostChallenge /></AppLayout></CompanyRoute>
         }/>
         <Route path="/company/challenges" element={
-          <CompanyRoute><AppLayout><PlaceholderPage title="My Challenges" /></AppLayout></CompanyRoute>
+          <CompanyRoute><AppLayout><MyChallenges /></AppLayout></CompanyRoute>
+        }/>
+        <Route path="/company/challenges/:id/edit" element={
+          <CompanyRoute><AppLayout><EditChallenge /></AppLayout></CompanyRoute>
         }/>
         <Route path="/company/submissions" element={
-          <CompanyRoute><AppLayout><PlaceholderPage title="Submissions" /></AppLayout></CompanyRoute>
+          <CompanyRoute><AppLayout><CompanySubmissions /></AppLayout></CompanyRoute>
+        }/>
+        <Route path="/company/submissions/:id" element={
+          <CompanyRoute><AppLayout><CompanySubmissionDetail /></AppLayout></CompanyRoute>
         }/>
 
         {/* ── Admin ── */}
@@ -163,6 +189,9 @@ export default function App() {
         }/>
 
         {/* ── Shared authenticated ── */}
+        <Route path="/messages" element={
+          <AuthRoute><AppLayout><MessagesPage /></AppLayout></AuthRoute>
+        }/>
         <Route path="/profile" element={
           <AuthRoute><AppLayout><PlaceholderPage title="Profile" /></AppLayout></AuthRoute>
         }/>

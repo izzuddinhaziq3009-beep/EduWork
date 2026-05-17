@@ -16,6 +16,10 @@ export interface Profile {
   email: string
   avatar_url: string | null
   created_at: string
+  // Company-only fields (added via supabase-company-migration.sql)
+  company_description?: string | null
+  company_website?:     string | null
+  company_industry?:    string | null
 }
 
 export interface LearningModule {
@@ -194,6 +198,9 @@ export interface Database {
           email: string
           avatar_url?: string | null
           created_at?: string
+          company_description?: string | null
+          company_website?: string | null
+          company_industry?: string | null
         }
         Update: {
           full_name?: string
@@ -201,6 +208,9 @@ export interface Database {
           email?: string
           avatar_url?: string | null
           created_at?: string
+          company_description?: string | null
+          company_website?: string | null
+          company_industry?: string | null
         }
       }
       learning_modules: {

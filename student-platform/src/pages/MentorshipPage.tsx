@@ -94,13 +94,23 @@ export function MentorshipPage() {
           )}
         </TabsContent>
 
-        {/* Messages */}
+        {/* Messages — redirect to the shared messages page */}
         <TabsContent value="messages">
-          <EmptyState
-            icon={<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/></svg>}
-            title="Messaging coming soon"
-            description="Once a mentor accepts your request, you'll be able to message them here."
-          />
+          <div className="text-center py-12 space-y-4">
+            <div className="w-14 h-14 rounded-2xl grid place-items-center mx-auto"
+              style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/>
+              </svg>
+            </div>
+            <p className="text-[14px] muted">Message your mentor directly from the messages panel.</p>
+            <a href="/messages"
+              className="inline-flex items-center gap-2 h-10 px-5 rounded-xl text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'var(--primary)' }}>
+              Open messages
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
         </TabsContent>
       </Tabs>
 

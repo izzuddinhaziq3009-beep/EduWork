@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/services/supabase'
+import { useRealtimeNotifications, notifKeys } from '@/hooks/useMessages'
 import type { Notification } from '@/types'
+
+
 
 type P = React.SVGProps<SVGSVGElement>
 const BellIcon    = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2H4.5L6 16z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
@@ -23,16 +26,20 @@ function initials(name: string) {
 
 export function Navbar() {
   const { user, profile, role, signOut } = useAuthStore()
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const qc        = useQueryClient()
 
   const [openBell, setOpenBell] = useState(false)
   const [openMenu, setOpenMenu] = useState(false)
   const bellRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Fetch unread notifications count
+  // Real-time subscription — invalidates the query below when new notifications arrive
+  useRealtimeNotifications(user?.id ?? '')
+
+  // Fetch unread notifications (key matches notifKeys.unread so real-time invalidation works)
   const { data: notifications = [] } = useQuery<Notification[]>({
-    queryKey: ['notifications-unread', user?.id],
+    queryKey: notifKeys.unread(user?.id ?? ''),
     queryFn: async () => {
       if (!user) return []
       const { data } = await supabase
@@ -42,13 +49,24 @@ export function Navbar() {
         .eq('read', false)
         .order('created_at', { ascending: false })
         .limit(10)
-      return data ?? []
+      return (data ?? []) as unknown as Notification[]
     },
     enabled: !!user,
     staleTime: 30_000,
   })
 
   const unreadCount = notifications.length
+
+  const markAllRead = async () => {
+    if (!user || notifications.length === 0) return
+    // Cast required: Supabase's Update type for notifications resolves incorrectly
+    await supabase
+      .from('notifications')
+      .update({ read: true } as Parameters<ReturnType<typeof supabase.from>['update']>[0])
+      .eq('user_id', user.id)
+      .eq('read', false)
+    qc.invalidateQueries({ queryKey: notifKeys.unread(user.id) })
+  }
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -114,7 +132,11 @@ export function Navbar() {
             </button>
 
             {openBell && (
-              <NotificationsPanel items={notifications} onClose={() => setOpenBell(false)} />
+              <NotificationsPanel
+                items={notifications}
+                onClose={() => setOpenBell(false)}
+                onMarkAllRead={() => { markAllRead(); setOpenBell(false) }}
+              />
             )}
           </div>
 
@@ -143,7 +165,7 @@ export function Navbar() {
   )
 }
 
-function NotificationsPanel({ items, onClose }: { items: Notification[]; onClose: () => void }) {
+function NotificationsPanel({ items, onClose, onMarkAllRead }: { items: Notification[]; onClose: () => void; onMarkAllRead: () => void }) {
   const typeColors: Record<string, string> = {
     feedback:   'var(--accent)',
     mentorship: 'var(--primary)',
@@ -157,7 +179,7 @@ function NotificationsPanel({ items, onClose }: { items: Notification[]; onClose
       <div className="px-4 py-3 flex items-center justify-between hairline-b">
         <div className="font-semibold text-[15px]">Notifications</div>
         <button className="text-[12px] font-medium hover:underline" style={{ color: 'var(--primary)' }}
-          onClick={onClose}>Mark all read</button>
+          onClick={onMarkAllRead}>Mark all read</button>
       </div>
       <div className="max-h-[380px] overflow-auto scroll-thin">
         {items.length === 0 ? (
