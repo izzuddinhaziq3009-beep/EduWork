@@ -56,6 +56,7 @@ const COMPANY_NAV: NavItem[] = [
   { label: 'Post Challenge', to: '/company/post-challenge', icon: 'plus', badge: 'NEW' },
   { label: 'My Challenges',  to: '/company/challenges',   icon: 'flag'   },
   { label: 'Submissions',    to: '/company/submissions',  icon: 'inbox'  },
+  { label: 'Messages',       to: '/company/messages',     icon: 'msg'    },
 ]
 
 const ADMIN_NAV: NavItem[] = [

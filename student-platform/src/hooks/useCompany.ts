@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getCompanyProfile, updateCompanyProfile, getCompanyDashboardStats,
   getCompanyChallenges, getChallengeById, createChallenge, updateChallenge, deleteChallenge,
+  getCompanyPendingChallenges, getCompanyApprovedChallenges, getCompanyRejectedChallenges,
+  resubmitChallenge, getCompanyEligibleStudents,
   getAllCompanySubmissions, getChallengeSubmissions, getCompanySubmissionDetail,
   leaveFeedback, getSubmissionFeedback,
 } from '@/services/companyService'
@@ -12,6 +14,9 @@ export const companyKeys = {
   profile:     (id: string)  => ['company-profile',      id] as const,
   stats:       (id: string)  => ['company-stats',        id] as const,
   challenges:  (id: string)  => ['company-challenges',   id] as const,
+  pending:     (id: string)  => ['company-challenges-pending',  id] as const,
+  approved:    (id: string)  => ['company-challenges-approved', id] as const,
+  rejected:    (id: string)  => ['company-challenges-rejected', id] as const,
   challenge:   (id: string)  => ['company-challenge',    id] as const,
   submissions: (id: string)  => ['company-submissions',  id] as const,
   forChallenge:(id: string)  => ['challenge-submissions', id] as const,
@@ -31,8 +36,24 @@ export function useCompanyChallenges(companyId: string) {
   return useQuery({ queryKey: companyKeys.challenges(companyId), queryFn: () => getCompanyChallenges(companyId), enabled: !!companyId })
 }
 
+export function useCompanyPendingChallenges(companyId: string) {
+  return useQuery({ queryKey: companyKeys.pending(companyId), queryFn: () => getCompanyPendingChallenges(companyId), enabled: !!companyId })
+}
+
+export function useCompanyApprovedChallenges(companyId: string) {
+  return useQuery({ queryKey: companyKeys.approved(companyId), queryFn: () => getCompanyApprovedChallenges(companyId), enabled: !!companyId })
+}
+
+export function useCompanyRejectedChallenges(companyId: string) {
+  return useQuery({ queryKey: companyKeys.rejected(companyId), queryFn: () => getCompanyRejectedChallenges(companyId), enabled: !!companyId })
+}
+
 export function useCompanyChallenge(id: string) {
   return useQuery({ queryKey: companyKeys.challenge(id), queryFn: () => getChallengeById(id), enabled: !!id })
+}
+
+export function useCompanyEligibleStudents(companyId: string) {
+  return useQuery({ queryKey: ['company-eligible-students', companyId], queryFn: () => getCompanyEligibleStudents(companyId), enabled: !!companyId, staleTime: 60_000 })
 }
 
 export function useAllCompanySubmissions(companyId: string) {
@@ -88,8 +109,33 @@ export function useUpdateChallenge() {
       updateChallenge(challengeId, payload),
     onSuccess: (_, { companyId, challengeId }) => {
       qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })
+      qc.invalidateQueries({ queryKey: companyKeys.approved(companyId) })
       qc.invalidateQueries({ queryKey: companyKeys.challenge(challengeId) })
       toast({ title: 'Challenge updated!' })
+    },
+    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+}
+
+export function useResubmitChallenge() {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+  return useMutation({
+    mutationFn: ({
+      challengeId, companyName, challengeTitle, payload,
+    }: {
+      challengeId: string
+      companyId: string
+      companyName: string
+      challengeTitle: string
+      payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string }>
+    }) => resubmitChallenge(challengeId, companyName, challengeTitle, payload),
+    onSuccess: (_, { companyId, challengeId }) => {
+      qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })
+      qc.invalidateQueries({ queryKey: companyKeys.pending(companyId) })
+      qc.invalidateQueries({ queryKey: companyKeys.rejected(companyId) })
+      qc.invalidateQueries({ queryKey: companyKeys.challenge(challengeId) })
+      toast({ title: 'Challenge resubmitted!', description: 'It will go live after admin re-approval.' })
     },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })

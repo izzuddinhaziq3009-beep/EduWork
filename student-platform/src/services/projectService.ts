@@ -1,5 +1,13 @@
 import { supabase } from './supabase'
+import { logActivity } from '@/utils/activityLog'
 import type { Project, ProjectSubmission, MentorFeedback } from '@/types'
+
+// Narrow builder bypasses `never[]` insert inference for project_submissions
+type PsInsert = { project_id: string; student_id: string; submission_content: string; file_url: string | null }
+type PsBuilder = {
+  insert(data: PsInsert): { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
+}
+function psTable() { return supabase.from('project_submissions') as unknown as PsBuilder }
 
 export async function getAllProjects(): Promise<Project[]> {
   const { data, error } = await supabase
@@ -72,11 +80,11 @@ export async function submitProject(
   content: string,
   fileUrl?: string,
 ): Promise<ProjectSubmission> {
-  const { data, error } = await supabase
-    .from('project_submissions')
+  const { data, error } = await psTable()
     .insert({ project_id: projectId, student_id: studentId, submission_content: content, file_url: fileUrl ?? null })
     .select()
     .single()
   if (error) throw error
+  await logActivity(studentId, 'project_submitted', `Submitted project ${projectId}`)
   return data as unknown as ProjectSubmission
 }

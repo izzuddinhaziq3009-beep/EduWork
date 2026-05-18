@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-import { useChallenge, useChallengeSubmission, useSubmitChallenge } from '@/hooks/useChallenges'
+import { useChallenge, useChallengeSubmission, useSubmitChallenge, useChallengeFeedback } from '@/hooks/useChallenges'
 import { ChallengeSubmissionForm } from '@/components/features/challenges/ChallengeSubmissionForm'
 import { DifficultyBadge } from '@/components/common/DifficultyBadge'
 import { StarRating } from '@/components/features/challenges/StarRating'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fmtDate, fmtRelative } from '@/utils/formatters'
 import type { GitHubValidationResult } from '@/services/challengeService'
-import { useSubmissionFeedback } from '@/hooks/useCompany'
 
 const COLORS = ['#1E5BFF', '#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A']
 function companyColor(name: string) { return COLORS[name.charCodeAt(0) % COLORS.length] }
@@ -27,7 +26,7 @@ export function ChallengeDetail() {
 
   const { data: challenge, isLoading: loadingChallenge } = useChallenge(id)
   const { data: submission }                              = useChallengeSubmission(id, user?.id ?? '')
-  const { data: feedback }                               = useSubmissionFeedback(submission?.id ?? '')
+  const { data: feedback }                               = useChallengeFeedback(submission?.id ?? '')
   const submit = useSubmitChallenge()
 
   const handleSubmit = (validation: GitHubValidationResult) => {
@@ -110,14 +109,20 @@ export function ChallengeDetail() {
             {feedback && (
               <div className="hairline rounded-xl p-4 space-y-2.5 mt-2"
                 style={{ background: 'var(--accent-soft)' }}>
-                <div className="flex items-center gap-3">
-                  <span className="text-[13.5px] font-semibold" style={{ color: 'var(--accent)' }}>
-                    Company feedback
-                  </span>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-md grid place-items-center font-mono font-bold text-white text-[10px] shrink-0"
+                      style={{ background: companyColor(feedback.company.full_name) }}>
+                      {feedback.company.full_name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-[13.5px] font-semibold" style={{ color: 'var(--accent)' }}>
+                      {feedback.company.full_name}
+                    </span>
+                  </div>
                   <StarRating value={feedback.rating} readonly size={16} />
+                  <span className="text-[11.5px] muted font-mono ml-auto">{fmtRelative(feedback.created_at)}</span>
                 </div>
                 <p className="text-[13.5px] ink-2 leading-relaxed">{feedback.feedback_text}</p>
-                <div className="text-[11.5px] muted font-mono">{fmtRelative(feedback.created_at)}</div>
               </div>
             )}
           </>

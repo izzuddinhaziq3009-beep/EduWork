@@ -37,11 +37,17 @@ const MyChallenges            = lazy(() => import('@/pages/company/MyChallenges'
 const EditChallenge           = lazy(() => import('@/pages/company/EditChallenge').then(m => ({ default: m.EditChallenge })))
 const CompanySubmissions      = lazy(() => import('@/pages/company/Submissions').then(m => ({ default: m.CompanySubmissions })))
 const CompanySubmissionDetail = lazy(() => import('@/pages/company/SubmissionDetail').then(m => ({ default: m.CompanySubmissionDetail })))
+const CompanyMessages         = lazy(() => import('@/pages/company/CompanyMessages').then(m => ({ default: m.CompanyMessages })))
 
 const ChallengesPage          = lazy(() => import('@/pages/ChallengesPage').then(m => ({ default: m.ChallengesPage })))
 const ChallengeDetail         = lazy(() => import('@/pages/ChallengeDetail').then(m => ({ default: m.ChallengeDetail })))
 
 const AdminDashboard          = lazy(() => import('@/pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })))
+const UserManagement          = lazy(() => import('@/pages/admin/UserManagement').then(m => ({ default: m.UserManagement })))
+const UserDetail              = lazy(() => import('@/pages/admin/UserDetail').then(m => ({ default: m.UserDetail })))
+const ContentManagement       = lazy(() => import('@/pages/admin/ContentManagement').then(m => ({ default: m.ContentManagement })))
+const ChallengeModeration     = lazy(() => import('@/pages/admin/ChallengeModeration').then(m => ({ default: m.ChallengeModeration })))
+const SystemMonitoring        = lazy(() => import('@/pages/admin/SystemMonitoring').then(m => ({ default: m.SystemMonitoring })))
 
 // ── Shared loading screen ─────────────────────────────────────────────────
 function AppLoader() {
@@ -170,22 +176,28 @@ export default function App() {
         <Route path="/company/submissions/:id" element={
           <CompanyRoute><AppLayout><CompanySubmissionDetail /></AppLayout></CompanyRoute>
         }/>
+        <Route path="/company/messages" element={
+          <CompanyRoute><AppLayout><CompanyMessages /></AppLayout></CompanyRoute>
+        }/>
 
         {/* ── Admin ── */}
         <Route path="/admin/dashboard" element={
           <AdminRoute><AppLayout><AdminDashboard /></AppLayout></AdminRoute>
         }/>
         <Route path="/admin/users" element={
-          <AdminRoute><AppLayout><PlaceholderPage title="User Management" /></AppLayout></AdminRoute>
+          <AdminRoute><AppLayout><UserManagement /></AppLayout></AdminRoute>
+        }/>
+        <Route path="/admin/users/:id" element={
+          <AdminRoute><AppLayout><UserDetail /></AppLayout></AdminRoute>
         }/>
         <Route path="/admin/content" element={
-          <AdminRoute><AppLayout><PlaceholderPage title="Content Management" /></AppLayout></AdminRoute>
+          <AdminRoute><AppLayout><ContentManagement /></AppLayout></AdminRoute>
         }/>
         <Route path="/admin/challenges" element={
-          <AdminRoute><AppLayout><PlaceholderPage title="Challenge Moderation" /></AppLayout></AdminRoute>
+          <AdminRoute><AppLayout><ChallengeModeration /></AppLayout></AdminRoute>
         }/>
         <Route path="/admin/monitoring" element={
-          <AdminRoute><AppLayout><PlaceholderPage title="System Monitoring" /></AppLayout></AdminRoute>
+          <AdminRoute><AppLayout><SystemMonitoring /></AppLayout></AdminRoute>
         }/>
 
         {/* ── Shared authenticated ── */}

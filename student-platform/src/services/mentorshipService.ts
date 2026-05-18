@@ -1,5 +1,12 @@
 import { supabase } from './supabase'
+import { logActivity } from '@/utils/activityLog'
 import type { Profile, MentorshipRequest } from '@/types'
+
+type MrInsert = { student_id: string; mentor_id: string; message: string }
+type MrBuilder = {
+  insert(data: MrInsert): { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
+}
+function mrTable() { return supabase.from('mentorship_requests') as unknown as MrBuilder }
 
 export async function getAvailableMentors(): Promise<Profile[]> {
   const { data, error } = await supabase
@@ -27,12 +34,12 @@ export async function sendMentorshipRequest(
   mentorId: string,
   message: string,
 ): Promise<MentorshipRequest> {
-  const { data, error } = await supabase
-    .from('mentorship_requests')
+  const { data, error } = await mrTable()
     .insert({ student_id: studentId, mentor_id: mentorId, message })
     .select()
     .single()
   if (error) throw error
+  await logActivity(studentId, 'mentorship_request', `Sent mentorship request to mentor ${mentorId}`)
   return data as unknown as MentorshipRequest
 }
 

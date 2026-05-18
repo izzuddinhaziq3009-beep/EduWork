@@ -16,6 +16,7 @@ export interface Profile {
   email: string
   avatar_url: string | null
   created_at: string
+  is_active?: boolean           // added via supabase-admin-migration.sql
   // Company-only fields (added via supabase-company-migration.sql)
   company_description?: string | null
   company_website?:     string | null
@@ -138,6 +139,8 @@ export interface IndustryChallenge {
   is_active: boolean
   is_approved: boolean
   created_at: string
+  rejection_reason?: string | null   // added via supabase-challenge-rejection-migration.sql
+  rejected_at?:      string | null
 }
 
 export interface ChallengeSubmission {
@@ -198,6 +201,7 @@ export interface Database {
           email: string
           avatar_url?: string | null
           created_at?: string
+          is_active?: boolean
           company_description?: string | null
           company_website?: string | null
           company_industry?: string | null
@@ -208,6 +212,7 @@ export interface Database {
           email?: string
           avatar_url?: string | null
           created_at?: string
+          is_active?: boolean
           company_description?: string | null
           company_website?: string | null
           company_industry?: string | null
@@ -418,6 +423,8 @@ export interface Database {
           deadline?: string
           is_active?: boolean
           is_approved?: boolean
+          rejection_reason?: string | null
+          rejected_at?: string | null
         }
       }
       challenge_submissions: {

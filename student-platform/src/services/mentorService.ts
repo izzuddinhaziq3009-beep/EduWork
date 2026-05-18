@@ -1,5 +1,23 @@
 import { supabase } from './supabase'
+import { logActivity } from '@/utils/activityLog'
 import type { Profile, ProjectSubmission, Project, MentorFeedback, MentorshipRequest } from '@/types'
+
+// Narrow builders for tables whose Insert/Update/Upsert resolves to `never` ─────
+type MfUpsert = { submission_id: string; mentor_id: string; student_id: string; feedback_text: string; status: 'approved' | 'revision_requested' }
+type MfBuilder = { upsert(d: MfUpsert, o: { onConflict: string }): Promise<{ error: Error | null }> }
+function mfTable() { return supabase.from('mentor_feedback') as unknown as MfBuilder }
+
+type PsStatusUpdate = { status: 'submitted' | 'reviewing' | 'approved' | 'revision_requested' }
+type PsUpdateBuilder = { update(d: PsStatusUpdate): { eq(c: string, v: string): Promise<{ error: Error | null }> } }
+function psUpdateTable() { return supabase.from('project_submissions') as unknown as PsUpdateBuilder }
+
+type NotifInsert = { user_id: string; title: string; message: string; type: string }
+type NotifBuilder = { insert(d: NotifInsert): Promise<{ error: Error | null }> }
+function notifTable() { return supabase.from('notifications') as unknown as NotifBuilder }
+
+type MrStatusUpdate = { status: 'pending' | 'accepted' | 'rejected' }
+type MrUpdateBuilder = { update(d: MrStatusUpdate): { eq(c: string, v: string): Promise<{ error: Error | null }> } }
+function mrUpdateTable() { return supabase.from('mentorship_requests') as unknown as MrUpdateBuilder }
 
 export interface MentorDashboardStats {
   pendingReviews: number
@@ -127,29 +145,20 @@ export async function submitFeedback(
   feedbackText: string,
   status: 'approved' | 'revision_requested',
 ): Promise<void> {
-  // Upsert feedback (one feedback record per submission)
-  await supabase
-    .from('mentor_feedback')
-    .upsert(
-      { submission_id: submissionId, mentor_id: mentorId, student_id: studentId, feedback_text: feedbackText, status },
-      { onConflict: 'submission_id' },
-    )
-
-  // Update submission status
-  await supabase
-    .from('project_submissions')
-    .update({ status })
-    .eq('id', submissionId)
-
-  // Notify student
-  await supabase.from('notifications').insert({
-    user_id:  studentId,
-    title:    status === 'approved' ? 'Project approved!' : 'Revision requested',
-    message:  status === 'approved'
+  await mfTable().upsert(
+    { submission_id: submissionId, mentor_id: mentorId, student_id: studentId, feedback_text: feedbackText, status },
+    { onConflict: 'submission_id' },
+  )
+  await psUpdateTable().update({ status }).eq('id', submissionId)
+  await notifTable().insert({
+    user_id: studentId,
+    title:   status === 'approved' ? 'Project approved!' : 'Revision requested',
+    message: status === 'approved'
       ? 'Your project submission has been approved by your mentor.'
       : 'Your mentor has requested revisions on your project submission.',
-    type:    'feedback',
+    type: 'feedback',
   })
+  await logActivity(mentorId, 'feedback_given', `Gave feedback on submission ${submissionId}`)
 }
 
 // ── Mentorship requests ────────────────────────────────────────────────────
@@ -173,26 +182,19 @@ export async function getMentorshipRequests(mentorId: string): Promise<Array<Men
 }
 
 export async function acceptRequest(requestId: string, studentId: string): Promise<void> {
-  await supabase
-    .from('mentorship_requests')
-    .update({ status: 'accepted' })
-    .eq('id', requestId)
-
-  await supabase.from('notifications').insert({
+  await mrUpdateTable().update({ status: 'accepted' }).eq('id', requestId)
+  await notifTable().insert({
     user_id: studentId,
     title:   'Mentorship request accepted!',
     message: 'Your mentorship request has been accepted. You can now message your mentor.',
     type:    'mentorship',
   })
+  await logActivity(studentId, 'mentorship_accepted', `Mentorship request ${requestId} accepted`)
 }
 
 export async function rejectRequest(requestId: string, studentId: string): Promise<void> {
-  await supabase
-    .from('mentorship_requests')
-    .update({ status: 'rejected' })
-    .eq('id', requestId)
-
-  await supabase.from('notifications').insert({
+  await mrUpdateTable().update({ status: 'rejected' }).eq('id', requestId)
+  await notifTable().insert({
     user_id: studentId,
     title:   'Mentorship request update',
     message: 'Your mentorship request was not accepted at this time.',

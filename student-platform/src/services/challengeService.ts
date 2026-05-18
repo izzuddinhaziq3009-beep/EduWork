@@ -1,5 +1,10 @@
 import { supabase } from './supabase'
-import type { IndustryChallenge, ChallengeSubmission, Profile } from '@/types'
+import { logActivity } from '@/utils/activityLog'
+import type { IndustryChallenge, ChallengeSubmission, ChallengeFeedback, Profile } from '@/types'
+
+type CsInsert = { challenge_id: string; student_id: string; github_url: string; github_username: string; github_repo_name: string; github_verified: boolean; github_commit_count: number; readme_exists: boolean; privacy_file_exists: boolean; status: string }
+type CsBuilder = { insert(d: CsInsert): { select(): { single(): Promise<{ data: unknown; error: Error | null }> } } }
+function csTable() { return supabase.from('challenge_submissions') as unknown as CsBuilder }
 
 export interface ChallengeWithCompany extends IndustryChallenge {
   company: Profile
@@ -69,6 +74,56 @@ export async function getChallengeWithCompany(id: string): Promise<ChallengeWith
   }
 }
 
+export interface ChallengeFeedbackWithCompany extends ChallengeFeedback {
+  company: Profile
+}
+
+export interface StudentSubmissionItem {
+  submission: ChallengeSubmission
+  challenge:  IndustryChallenge
+  company:    Profile
+}
+
+export async function getChallengeFeedbackWithCompany(submissionId: string): Promise<ChallengeFeedbackWithCompany | null> {
+  const { data } = await supabase
+    .from('challenge_feedback')
+    .select('*')
+    .eq('submission_id', submissionId)
+    .single()
+  if (!data) return null
+  const feedback = data as unknown as ChallengeFeedback
+  const { data: company } = await supabase.from('profiles').select('*').eq('id', feedback.reviewer_id).single()
+  const fallback = { id: feedback.reviewer_id, full_name: 'Company', role: 'company' as const, email: '', avatar_url: null, created_at: '' }
+  return { ...feedback, company: (company ?? fallback) as unknown as Profile }
+}
+
+export async function getStudentSubmissionsWithContext(studentId: string): Promise<StudentSubmissionItem[]> {
+  const { data, error } = await supabase
+    .from('challenge_submissions')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('submitted_at', { ascending: false })
+  if (error) throw error
+  const submissions = (data ?? []) as unknown as ChallengeSubmission[]
+  if (submissions.length === 0) return []
+
+  const challengeIds = [...new Set(submissions.map(s => s.challenge_id))]
+  const { data: challenges } = await supabase.from('industry_challenges').select('*').in('id', challengeIds)
+  const challengeMap = Object.fromEntries(((challenges ?? []) as unknown as IndustryChallenge[]).map(c => [c.id, c]))
+
+  const companyIds = [...new Set(Object.values(challengeMap).map(c => c.company_id))]
+  const { data: companies } = await supabase.from('profiles').select('*').in('id', companyIds)
+  const companyMap = Object.fromEntries(((companies ?? []) as unknown as Profile[]).map(p => [p.id, p]))
+
+  return submissions
+    .filter(s => challengeMap[s.challenge_id])
+    .map(s => {
+      const challenge = challengeMap[s.challenge_id]
+      const company   = companyMap[challenge.company_id] ?? { id: challenge.company_id, full_name: 'Unknown', role: 'company' as const, email: '', avatar_url: null, created_at: '' }
+      return { submission: s, challenge, company: company as Profile }
+    })
+}
+
 export async function getStudentChallengeSubmissions(studentId: string): Promise<ChallengeSubmission[]> {
   const { data, error } = await supabase
     .from('challenge_submissions')
@@ -94,8 +149,7 @@ export async function submitChallenge(
   studentId: string,
   validation: GitHubValidationResult,
 ): Promise<ChallengeSubmission> {
-  const { data, error } = await supabase
-    .from('challenge_submissions')
+  const { data, error } = await csTable()
     .insert({
       challenge_id:        challengeId,
       student_id:          studentId,
@@ -111,6 +165,7 @@ export async function submitChallenge(
     .select()
     .single()
   if (error) throw error
+  await logActivity(studentId, 'challenge_submitted', `Submitted challenge ${challengeId}`)
   return data as unknown as ChallengeSubmission
 }
 

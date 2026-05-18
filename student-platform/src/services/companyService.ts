@@ -1,6 +1,21 @@
 import { supabase } from './supabase'
 import type { Profile, IndustryChallenge, ChallengeSubmission, ChallengeFeedback, DifficultyLevel } from '@/types'
 
+// Narrow builder for industry_challenges update (bypass `never` inference)
+type IcUpdatePayload = Partial<{
+  title: string; description: string; requirements: string
+  difficulty_level: DifficultyLevel; deadline: string
+  is_approved: boolean; is_active: boolean
+  rejection_reason: string | null; rejected_at: string | null
+}>
+type IcUpdateBuilder = { update(d: IcUpdatePayload): { eq(c: string, v: string): Promise<{ error: Error | null }> } }
+function icTable() { return supabase.from('industry_challenges') as unknown as IcUpdateBuilder }
+
+// Narrow builder for notifications insert
+type NotifInsert = { user_id: string; title: string; message: string; type: string }
+type NotifInsertBuilder = { insert(d: NotifInsert): Promise<{ error: Error | null }> }
+function notifTable() { return supabase.from('notifications') as unknown as NotifInsertBuilder }
+
 export interface ChallengeWithStats extends IndustryChallenge {
   submissionCount: number
 }
@@ -150,10 +165,7 @@ export async function updateChallenge(
     deadline: string
   }>,
 ): Promise<void> {
-  const { error } = await supabase
-    .from('industry_challenges')
-    .update(payload)
-    .eq('id', challengeId)
+  const { error } = await icTable().update(payload).eq('id', challengeId)
   if (error) throw error
 }
 
@@ -164,6 +176,113 @@ export async function deleteChallenge(challengeId: string): Promise<void> {
     .eq('id', challengeId)
     .eq('is_approved', false)
   if (error) throw error
+}
+
+// ── Filtered challenge queries (company view) ──────────────────────────────
+
+export async function getCompanyPendingChallenges(companyId: string): Promise<ChallengeWithStats[]> {
+  const { data, error } = await supabase
+    .from('industry_challenges')
+    .select('*')
+    .eq('company_id', companyId)
+    .eq('is_approved', false)
+    .is('rejection_reason', null)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return attachSubmissionCounts((data ?? []) as unknown as IndustryChallenge[])
+}
+
+export async function getCompanyApprovedChallenges(companyId: string): Promise<ChallengeWithStats[]> {
+  const { data, error } = await supabase
+    .from('industry_challenges')
+    .select('*')
+    .eq('company_id', companyId)
+    .eq('is_approved', true)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return attachSubmissionCounts((data ?? []) as unknown as IndustryChallenge[])
+}
+
+export async function getCompanyRejectedChallenges(companyId: string): Promise<ChallengeWithStats[]> {
+  const { data, error } = await supabase
+    .from('industry_challenges')
+    .select('*')
+    .eq('company_id', companyId)
+    .not('rejection_reason', 'is', null)
+    .order('rejected_at', { ascending: false })
+  if (error) throw error
+  return attachSubmissionCounts((data ?? []) as unknown as IndustryChallenge[])
+}
+
+async function attachSubmissionCounts(challenges: IndustryChallenge[]): Promise<ChallengeWithStats[]> {
+  if (challenges.length === 0) return []
+  const ids = challenges.map(c => c.id)
+  const { data: subs } = await supabase
+    .from('challenge_submissions')
+    .select('challenge_id')
+    .in('challenge_id', ids)
+  const countMap: Record<string, number> = {}
+  for (const s of (subs ?? []) as { challenge_id: string }[]) {
+    countMap[s.challenge_id] = (countMap[s.challenge_id] ?? 0) + 1
+  }
+  return challenges.map(c => ({ ...c, submissionCount: countMap[c.id] ?? 0 }))
+}
+
+export async function resubmitChallenge(
+  challengeId: string,
+  companyName: string,
+  challengeTitle: string,
+  payload: Partial<{
+    title: string; description: string; requirements: string
+    difficulty_level: DifficultyLevel; deadline: string
+  }>,
+): Promise<void> {
+  // Update content + clear rejection fields + reset approval
+  const { error } = await icTable().update({
+    ...payload,
+    rejection_reason: null,
+    rejected_at:      null,
+    is_approved:      false,
+    is_active:        false,
+  }).eq('id', challengeId)
+  if (error) throw error
+
+  // Notify all admins
+  const { data: admins } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'admin')
+  for (const admin of (admins ?? []) as { id: string }[]) {
+    await notifTable().insert({
+      user_id: admin.id,
+      title:   'Challenge Resubmitted',
+      message: `${companyName} resubmitted "${challengeTitle}" after addressing feedback.`,
+      type:    'system',
+    })
+  }
+}
+
+// ── Eligible students (for company messaging) ──────────────────────────────
+
+export async function getCompanyEligibleStudents(companyId: string): Promise<Profile[]> {
+  const { data: challenges } = await supabase
+    .from('industry_challenges')
+    .select('id')
+    .eq('company_id', companyId)
+
+  const ids = ((challenges ?? []) as { id: string }[]).map(c => c.id)
+  if (ids.length === 0) return []
+
+  const { data: subs } = await supabase
+    .from('challenge_submissions')
+    .select('student_id')
+    .in('challenge_id', ids)
+
+  const studentIds = [...new Set(((subs ?? []) as { student_id: string }[]).map(s => s.student_id))]
+  if (studentIds.length === 0) return []
+
+  const { data: profiles } = await supabase.from('profiles').select('*').in('id', studentIds)
+  return (profiles ?? []) as unknown as Profile[]
 }
 
 // ── Submissions ────────────────────────────────────────────────────────────

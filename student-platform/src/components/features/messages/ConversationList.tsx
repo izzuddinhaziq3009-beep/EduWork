@@ -39,15 +39,23 @@ export function ConversationList({ conversations, activePartnerId, onSelect, loa
           </svg>
         </div>
         <div className="text-[13px] font-semibold">No conversations</div>
-        <div className="text-[12px] muted">Messages with mentors and students appear here.</div>
+        <div className="text-[12px] muted">Messages appear here once started.</div>
       </div>
     )
+  }
+
+  const ROLE_BADGE: Record<string, { label: string; bg: string; color: string }> = {
+    mentor:  { label: 'Mentor',  bg: 'var(--primary-soft)', color: 'var(--primary)' },
+    company: { label: 'Company', bg: 'var(--warn-soft)',    color: 'var(--warn)'    },
+    student: { label: 'Student', bg: 'var(--accent-soft)',  color: 'var(--accent)'  },
+    admin:   { label: 'Admin',   bg: 'var(--rose-soft)',    color: 'var(--rose)'    },
   }
 
   return (
     <div className="space-y-0.5 p-2 overflow-y-auto scroll-thin">
       {conversations.map(conv => {
         const isActive = conv.partnerId === activePartnerId
+        const rb = ROLE_BADGE[conv.partner.role]
         return (
           <button key={conv.partnerId} onClick={() => onSelect(conv.partnerId)}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors ${isActive ? 'bg-[var(--primary-soft)]' : 'hover:bg-[var(--hair-2)]'}`}>
@@ -56,10 +64,18 @@ export function ConversationList({ conversations, activePartnerId, onSelect, loa
               {fmtInitials(conv.partner.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-baseline justify-between gap-1">
-                <span className={`text-[13.5px] truncate ${conv.unreadCount > 0 ? 'font-semibold ink' : 'font-medium ink-2'}`}>
-                  {conv.partner.full_name}
-                </span>
+              <div className="flex items-center justify-between gap-1 mb-0.5">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className={`text-[13.5px] truncate ${conv.unreadCount > 0 ? 'font-semibold ink' : 'font-medium ink-2'}`}>
+                    {conv.partner.full_name}
+                  </span>
+                  {rb && (
+                    <span className="shrink-0 text-[9.5px] font-semibold px-1.5 py-0.5 rounded"
+                      style={{ background: rb.bg, color: rb.color }}>
+                      {rb.label}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[11px] font-mono muted shrink-0">
                   {fmtRelative(conv.lastMessage.created_at)}
                 </span>

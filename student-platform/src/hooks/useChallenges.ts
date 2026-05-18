@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getActiveChallenges, getChallengeWithCompany,
   getStudentChallengeSubmissions, getChallengeSubmission,
+  getChallengeFeedbackWithCompany, getStudentSubmissionsWithContext,
   submitChallenge, validateGitHubUrl,
 } from '@/services/challengeService'
 import type { GitHubValidationResult } from '@/services/challengeService'
@@ -12,7 +13,9 @@ export const challengeKeys = {
   active:      ['challenges-active']            as const,
   byId:        (id: string) => ['challenge', id] as const,
   mySubs:      (sid: string) => ['challenge-subs', sid] as const,
+  mySUbsCtx:   (sid: string) => ['challenge-subs-ctx', sid] as const,
   subFor:      (cid: string, sid: string) => ['challenge-sub', cid, sid] as const,
+  feedback:    (sid: string) => ['challenge-feedback', sid] as const,
   validate:    (url: string) => ['github-validate', url] as const,
 }
 
@@ -29,6 +32,22 @@ export function useStudentChallengeSubmissions(studentId: string) {
     queryKey: challengeKeys.mySubs(studentId),
     queryFn:  () => getStudentChallengeSubmissions(studentId),
     enabled:  !!studentId,
+  })
+}
+
+export function useStudentSubmissionsWithContext(studentId: string) {
+  return useQuery({
+    queryKey: challengeKeys.mySUbsCtx(studentId),
+    queryFn:  () => getStudentSubmissionsWithContext(studentId),
+    enabled:  !!studentId,
+  })
+}
+
+export function useChallengeFeedback(submissionId: string) {
+  return useQuery({
+    queryKey: challengeKeys.feedback(submissionId),
+    queryFn:  () => getChallengeFeedbackWithCompany(submissionId),
+    enabled:  !!submissionId,
   })
 }
 

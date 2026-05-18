@@ -6,7 +6,12 @@ import { supabase } from '@/services/supabase'
 import { useRealtimeNotifications, notifKeys } from '@/hooks/useMessages'
 import type { Notification } from '@/types'
 
-
+// Narrow builders for notifications.update — bypasses `never` inference
+type EqP = Promise<{ error: unknown }>
+type NotifBulkReadBuilder   = { update(d: { read: boolean }): { eq(c: string, v: string): { eq(c: string, v: string | boolean): EqP } } }
+type NotifSingleReadBuilder  = { update(d: { read: boolean }): { eq(c: string, v: string): EqP } }
+function notifBulkTable()   { return supabase.from('notifications') as unknown as NotifBulkReadBuilder  }
+function notifSingleTable() { return supabase.from('notifications') as unknown as NotifSingleReadBuilder }
 
 type P = React.SVGProps<SVGSVGElement>
 const BellIcon    = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2H4.5L6 16z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
@@ -59,13 +64,32 @@ export function Navbar() {
 
   const markAllRead = async () => {
     if (!user || notifications.length === 0) return
-    // Cast required: Supabase's Update type for notifications resolves incorrectly
-    await supabase
-      .from('notifications')
-      .update({ read: true } as Parameters<ReturnType<typeof supabase.from>['update']>[0])
-      .eq('user_id', user.id)
-      .eq('read', false)
+    await notifBulkTable().update({ read: true }).eq('user_id', user.id).eq('read', 'false')
     qc.invalidateQueries({ queryKey: notifKeys.unread(user.id) })
+  }
+
+  const markOneRead = async (notifId: string) => {
+    await notifSingleTable().update({ read: true }).eq('id', notifId)
+    if (user) qc.invalidateQueries({ queryKey: notifKeys.unread(user.id) })
+  }
+
+  const handleNotifClick = (n: Notification) => {
+    markOneRead(n.id)
+    setOpenBell(false)
+    const lTitle = n.title.toLowerCase()
+    let path = '/dashboard'
+    if (n.type === 'challenge') {
+      if (lTitle.includes('approved') || lTitle.includes('rejected')) {
+        path = role === 'company' ? '/company/challenges' : '/challenges'
+      } else {
+        path = role === 'company' ? '/company/submissions' : '/challenges'
+      }
+    } else if (n.type === 'mentorship') {
+      path = role === 'mentor' ? '/mentor/mentorship-requests' : '/mentorship'
+    } else if (n.type === 'feedback' || n.type === 'project') {
+      path = role === 'mentor' ? '/mentor/submissions' : '/projects'
+    }
+    navigate(path)
   }
 
   // Close dropdowns on outside click
@@ -136,6 +160,7 @@ export function Navbar() {
                 items={notifications}
                 onClose={() => setOpenBell(false)}
                 onMarkAllRead={() => { markAllRead(); setOpenBell(false) }}
+                onItemClick={handleNotifClick}
               />
             )}
           </div>
@@ -165,7 +190,7 @@ export function Navbar() {
   )
 }
 
-function NotificationsPanel({ items, onClose, onMarkAllRead }: { items: Notification[]; onClose: () => void; onMarkAllRead: () => void }) {
+function NotificationsPanel({ items, onClose, onMarkAllRead, onItemClick }: { items: Notification[]; onClose: () => void; onMarkAllRead: () => void; onItemClick: (n: Notification) => void }) {
   const typeColors: Record<string, string> = {
     feedback:   'var(--accent)',
     mentorship: 'var(--primary)',
@@ -185,7 +210,8 @@ function NotificationsPanel({ items, onClose, onMarkAllRead }: { items: Notifica
         {items.length === 0 ? (
           <div className="px-4 py-8 text-center text-[13px] muted">No new notifications</div>
         ) : items.map(n => (
-          <div key={n.id} className="flex gap-3 px-4 py-3 hover:bg-[var(--hair-2)] cursor-pointer">
+          <div key={n.id} onClick={() => onItemClick(n)}
+            className="flex gap-3 px-4 py-3 hover:bg-[var(--hair-2)] cursor-pointer">
             <div className="mt-1.5 w-2 h-2 rounded-full shrink-0"
               style={{ background: typeColors[n.type] ?? 'var(--muted)' }} />
             <div className="flex-1 min-w-0">

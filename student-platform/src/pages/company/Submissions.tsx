@@ -102,11 +102,20 @@ export function CompanySubmissions() {
                       <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <Link to={`/company/submissions/${submission.id}`}
-                        className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
-                        style={{ color: 'var(--primary)' }}>
-                        Review →
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link to={`/company/messages?with=${student.id}`}
+                          className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center gap-1.5 transition-colors"
+                          style={{ color: 'var(--ink-2)' }}
+                          title={`Message ${student.full_name}`}>
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/></svg>
+                          Message
+                        </Link>
+                        <Link to={`/company/submissions/${submission.id}`}
+                          className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
+                          style={{ color: 'var(--primary)' }}>
+                          Review →
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )
