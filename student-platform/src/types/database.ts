@@ -8,6 +8,10 @@ export type IndependentProjectStatus = 'in_progress' | 'submitted' | 'completed'
 export type ChallengeSubmissionStatus = 'submitted' | 'reviewing' | 'feedback_given' | 'completed'
 export type ReviewerType = 'company' | 'mentor' | 'admin'
 export type NotificationType = 'feedback' | 'mentorship' | 'challenge' | 'project' | 'system'
+export type ModuleType = 'simple' | 'structured'
+export type ContentItemType = 'text' | 'video' | 'pdf' | 'image'
+export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer'
+export type ModuleItemType = 'content' | 'quiz'
 
 export interface Profile {
   id: string
@@ -33,6 +37,8 @@ export interface LearningModule {
   created_by: string
   created_at: string
   is_active: boolean
+  module_type: ModuleType            // added via supabase-module-sections-migration.sql
+  simple_content?: string | null
 }
 
 export interface StudentModuleProgress {
@@ -43,6 +49,102 @@ export interface StudentModuleProgress {
   completed: boolean
   completed_at: string | null
   last_accessed: string
+}
+
+export interface ModuleItem {
+  id: string
+  module_id: string
+  type: ModuleItemType
+  title: string
+  description: string | null
+  order_index: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ModuleItemContent {
+  id: string
+  item_id: string
+  content_type: ContentItemType
+  title: string
+  description: string | null
+  content_text: string | null
+  file_url: string | null
+  order_index: number
+  created_at: string
+}
+
+export interface ModuleItemQuiz {
+  id: string
+  item_id: string
+  passing_score: number
+  time_limit_minutes: number | null
+  shuffle_questions: boolean
+  show_correct_answers: boolean
+  attempts_allowed: number      // -1 = unlimited
+  created_at: string
+  updated_at: string
+}
+
+export interface StudentItemProgress {
+  id: string
+  student_id: string
+  item_id: string
+  is_completed: boolean
+  quiz_passed: boolean
+  completed_at: string | null
+  created_at: string
+}
+
+export interface QuizQuestion {
+  id: string
+  quiz_id: string
+  type: QuestionType
+  question_text: string
+  description: string | null
+  order_index: number
+  points: number
+  created_at: string
+}
+
+export interface QuizQuestionOption {
+  id: string
+  question_id: string
+  option_text: string
+  is_correct: boolean
+  order_index: number
+  created_at: string
+}
+
+export interface QuizQuestionAnswer {
+  id: string
+  question_id: string
+  answer_text: string
+  is_correct: boolean
+  created_at: string
+}
+
+export interface StudentQuizAttempt {
+  id: string
+  student_id: string
+  quiz_id: string
+  started_at: string
+  completed_at: string | null
+  score: number | null
+  passed: boolean | null
+  time_spent_seconds: number | null
+  attempt_number: number
+  created_at: string
+}
+
+export interface StudentQuizAnswer {
+  id: string
+  attempt_id: string
+  question_id: string
+  student_answer: string | null
+  is_correct: boolean | null
+  points_earned: number | null
+  created_at: string
 }
 
 export interface Project {
@@ -230,6 +332,8 @@ export interface Database {
           created_by: string
           created_at?: string
           is_active?: boolean
+          module_type?: ModuleType
+          simple_content?: string | null
         }
         Update: {
           title?: string
@@ -238,6 +342,175 @@ export interface Database {
           duration_hours?: number
           content?: Record<string, unknown>
           is_active?: boolean
+          simple_content?: string | null
+        }
+      }
+      module_items: {
+        Row: ModuleItem
+        Insert: {
+          id?: string
+          module_id: string
+          type: ModuleItemType
+          title: string
+          description?: string | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          title?: string
+          description?: string | null
+          order_index?: number
+          updated_at?: string
+        }
+      }
+      module_item_content: {
+        Row: ModuleItemContent
+        Insert: {
+          id?: string
+          item_id: string
+          content_type: ContentItemType
+          title?: string
+          description?: string | null
+          content_text?: string | null
+          file_url?: string | null
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          content_type?: ContentItemType
+          title?: string
+          description?: string | null
+          content_text?: string | null
+          file_url?: string | null
+          order_index?: number
+        }
+      }
+      module_item_quizzes: {
+        Row: ModuleItemQuiz
+        Insert: {
+          id?: string
+          item_id: string
+          passing_score?: number
+          time_limit_minutes?: number | null
+          shuffle_questions?: boolean
+          show_correct_answers?: boolean
+          attempts_allowed?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          passing_score?: number
+          time_limit_minutes?: number | null
+          shuffle_questions?: boolean
+          show_correct_answers?: boolean
+          attempts_allowed?: number
+          updated_at?: string
+        }
+      }
+      student_item_progress: {
+        Row: StudentItemProgress
+        Insert: {
+          id?: string
+          student_id: string
+          item_id: string
+          is_completed?: boolean
+          quiz_passed?: boolean
+          completed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          is_completed?: boolean
+          quiz_passed?: boolean
+          completed_at?: string | null
+        }
+      }
+      quiz_questions: {
+        Row: QuizQuestion
+        Insert: {
+          id?: string
+          quiz_id: string
+          type: QuestionType
+          question_text: string
+          description?: string | null
+          order_index?: number
+          points?: number
+          created_at?: string
+        }
+        Update: {
+          type?: QuestionType
+          question_text?: string
+          description?: string | null
+          order_index?: number
+          points?: number
+        }
+      }
+      quiz_question_options: {
+        Row: QuizQuestionOption
+        Insert: {
+          id?: string
+          question_id: string
+          option_text: string
+          is_correct?: boolean
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          option_text?: string
+          is_correct?: boolean
+          order_index?: number
+        }
+      }
+      quiz_question_answers: {
+        Row: QuizQuestionAnswer
+        Insert: {
+          id?: string
+          question_id: string
+          answer_text: string
+          is_correct?: boolean
+          created_at?: string
+        }
+        Update: {
+          answer_text?: string
+          is_correct?: boolean
+        }
+      }
+      student_quiz_attempts: {
+        Row: StudentQuizAttempt
+        Insert: {
+          id?: string
+          student_id: string
+          quiz_id: string
+          started_at?: string
+          completed_at?: string | null
+          score?: number | null
+          passed?: boolean | null
+          time_spent_seconds?: number | null
+          attempt_number?: number
+          created_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          score?: number | null
+          passed?: boolean | null
+          time_spent_seconds?: number | null
+        }
+      }
+      student_quiz_answers: {
+        Row: StudentQuizAnswer
+        Insert: {
+          id?: string
+          attempt_id: string
+          question_id: string
+          student_answer?: string | null
+          is_correct?: boolean | null
+          points_earned?: number | null
+          created_at?: string
+        }
+        Update: {
+          student_answer?: string | null
+          is_correct?: boolean | null
+          points_earned?: number | null
         }
       }
       student_module_progress: {

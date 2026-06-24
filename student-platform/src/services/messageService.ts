@@ -1,6 +1,14 @@
 import { supabase } from './supabase'
 import type { Message, Profile } from '@/types'
 
+// Narrow builder bypasses Supabase's `never` insert/update inference for messages
+type MsgInsert = { sender_id: string; receiver_id: string; content: string }
+type MsgBuilder = {
+  insert(d: MsgInsert): { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
+  update(d: { read: boolean }): { eq(c: string, v: string): { eq(c: string, v: string): { eq(c: string, v: boolean): Promise<{ error: Error | null }> } } }
+}
+function msgTable() { return supabase.from('messages') as unknown as MsgBuilder }
+
 export interface ConversationPreview {
   partnerId:    string
   partner:      Profile
@@ -22,22 +30,15 @@ export async function getConversation(userId1: string, userId2: string): Promise
 }
 
 export async function sendMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
-  const { data, error } = await supabase
-    .from('messages')
+  const { data, error } = await msgTable()
     .insert({ sender_id: senderId, receiver_id: receiverId, content })
-    .select()
-    .single()
+    .select().single()
   if (error) throw error
   return data as unknown as Message
 }
 
 export async function markMessagesAsRead(senderId: string, receiverId: string): Promise<void> {
-  await supabase
-    .from('messages')
-    .update({ read: true })
-    .eq('sender_id', senderId)
-    .eq('receiver_id', receiverId)
-    .eq('read', false)
+  await msgTable().update({ read: true }).eq('sender_id', senderId).eq('receiver_id', receiverId).eq('read', false)
 }
 
 export async function getConversationList(userId: string): Promise<ConversationPreview[]> {

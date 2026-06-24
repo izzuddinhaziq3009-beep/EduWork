@@ -1,6 +1,20 @@
 import { supabase } from './supabase'
 import type { DigitalPortfolio, PortfolioItem } from '@/types'
 
+// Narrow builders bypass Supabase's `never` insert/update inference
+type DpInsert = { student_id: string; title: string; bio: string; skills: string[] }
+type DpUpdate = Partial<{ title: string; bio: string; skills: string[]; updated_at: string; is_public: boolean; public_url: string | null }>
+type EqOne = { eq(c: string, v: string): Promise<{ error: Error | null }> }
+type DpBuilder = {
+  insert(d: DpInsert): { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
+  update(d: DpUpdate): EqOne
+}
+function dpTable() { return supabase.from('digital_portfolio') as unknown as DpBuilder }
+
+type PiInsert = { portfolio_id: string; type: string; reference_id: string; title: string; description: string }
+type PiBuilder = { insert(d: PiInsert[]): Promise<{ error: Error | null }> }
+function piTable() { return supabase.from('portfolio_items') as unknown as PiBuilder }
+
 export interface PortfolioWithItems {
   portfolio: DigitalPortfolio
   items: PortfolioItem[]
@@ -30,11 +44,9 @@ export async function createPortfolio(
   studentId: string,
   payload: { title: string; bio: string; skills: string[] },
 ): Promise<DigitalPortfolio> {
-  const { data, error } = await supabase
-    .from('digital_portfolio')
+  const { data, error } = await dpTable()
     .insert({ student_id: studentId, ...payload })
-    .select()
-    .single()
+    .select().single()
   if (error) throw error
   return data as unknown as DigitalPortfolio
 }
@@ -43,19 +55,13 @@ export async function updatePortfolio(
   portfolioId: string,
   payload: Partial<{ title: string; bio: string; skills: string[] }>,
 ): Promise<void> {
-  const { error } = await supabase
-    .from('digital_portfolio')
-    .update({ ...payload, updated_at: new Date().toISOString() })
-    .eq('id', portfolioId)
+  const { error } = await dpTable().update({ ...payload, updated_at: new Date().toISOString() }).eq('id', portfolioId)
   if (error) throw error
 }
 
 export async function togglePublic(portfolioId: string, isPublic: boolean): Promise<void> {
   const publicUrl = isPublic ? `${portfolioId.slice(0, 8)}` : null
-  const { error } = await supabase
-    .from('digital_portfolio')
-    .update({ is_public: isPublic, public_url: publicUrl, updated_at: new Date().toISOString() })
-    .eq('id', portfolioId)
+  const { error } = await dpTable().update({ is_public: isPublic, public_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', portfolioId)
   if (error) throw error
 }
 
@@ -119,6 +125,6 @@ export async function autoGeneratePortfolioItems(
   }
 
   if (toInsert.length > 0) {
-    await supabase.from('portfolio_items').insert(toInsert)
+    await piTable().insert(toInsert)
   }
 }

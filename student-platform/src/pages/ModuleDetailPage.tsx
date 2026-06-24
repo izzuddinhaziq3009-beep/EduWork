@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-import { useModule, useProgressForModule, useEnrollModule, useUpdateProgress, useCompleteModule } from '@/hooks/useModules'
-import { ModuleContent } from '@/components/features/modules/ModuleContent'
+import { useModuleDetail, useProgressForModule, useEnrollModule, useUpdateProgress, useCompleteModule } from '@/hooks/useModules'
+import { SimpleModuleView } from '@/components/features/modules/SimpleModuleView'
+import { StructuredModuleView } from '@/components/features/modules/StructuredModuleView'
 import { DifficultyBadge } from '@/components/common/DifficultyBadge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fmtDuration } from '@/utils/formatters'
@@ -12,7 +13,7 @@ export function ModuleDetailPage() {
   const { user } = useAuthStore()
   const [progressVal, setProgressVal] = useState<number | null>(null)
 
-  const { data: module,   isLoading: loadingModule   } = useModule(id)
+  const { data: module,   isLoading: loadingModule   } = useModuleDetail(id)
   const { data: progress, isLoading: loadingProgress } = useProgressForModule(id, user?.id ?? '')
 
   const enroll       = useEnrollModule()
@@ -25,7 +26,7 @@ export function ModuleDetailPage() {
 
   if (loadingModule || loadingProgress) {
     return (
-      <div className="p-6 lg:p-8 max-w-[900px]">
+      <div className="p-6 lg:p-8">
         <Skeleton className="h-4 w-24 mb-6" />
         <Skeleton className="h-9 w-2/3 mb-3" />
         <Skeleton className="h-4 w-full mb-8" />
@@ -37,7 +38,7 @@ export function ModuleDetailPage() {
   if (!module) return <div className="p-8 muted">Module not found.</div>
 
   return (
-    <div className="p-6 lg:p-8 max-w-[900px]">
+    <div className="p-6 lg:p-8">
       <Link to="/modules" className="text-[13px] font-medium flex items-center gap-1.5 mb-6"
         style={{ color: 'var(--primary)' }}>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -80,7 +81,7 @@ export function ModuleDetailPage() {
             <div className="pbar teal" style={{ height: 8 }}>
               <span style={{ width: `${pct}%` }} />
             </div>
-            {!completed && (
+            {module.module_type === 'simple' && !completed && (
               <div className="flex items-center gap-3">
                 <input type="range" min={0} max={100} value={pct}
                   onChange={e => setProgressVal(Number(e.target.value))}
@@ -96,7 +97,7 @@ export function ModuleDetailPage() {
                 </button>
               </div>
             )}
-            {!completed && pct >= 80 && (
+            {module.module_type === 'simple' && !completed && pct >= 80 && (
               <button
                 onClick={() => user && completeModule.mutate({ moduleId: id, studentId: user.id })}
                 disabled={completeModule.isPending}
@@ -104,6 +105,9 @@ export function ModuleDetailPage() {
                 style={{ background: 'var(--accent)' }}>
                 {completeModule.isPending ? 'Marking…' : '✓ Mark as completed'}
               </button>
+            )}
+            {module.module_type === 'structured' && !completed && (
+              <p className="text-[12.5px] muted">Progress is tracked automatically as you complete items below.</p>
             )}
             {completed && (
               <div className="flex items-center gap-2" style={{ color: 'var(--accent)' }}>
@@ -117,8 +121,14 @@ export function ModuleDetailPage() {
 
       {/* Content */}
       <div className="bg-surface hairline rounded-2xl p-6 lg:p-8">
-        <h2 className="font-display text-[22px] font-semibold tracking-tight mb-6">Module content</h2>
-        <ModuleContent content={module.content as Record<string, unknown>} />
+        {module.module_type === 'simple' ? (
+          <>
+            <h2 className="font-display text-[22px] font-semibold tracking-tight mb-6">Module content</h2>
+            <SimpleModuleView module={module} />
+          </>
+        ) : (
+          user && <StructuredModuleView key={module.id} module={module} studentId={user.id} />
+        )}
       </div>
     </div>
   )

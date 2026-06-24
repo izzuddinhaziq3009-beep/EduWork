@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Profile, LearningModule, Project, IndustryChallenge, ActivityLog, UserRole, DifficultyLevel } from '@/types'
+import type { Profile, LearningModule, Project, IndustryChallenge, ActivityLog, UserRole } from '@/types'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -41,8 +41,6 @@ export interface PaginatedActivityLogs {
 // ── Narrow builders — bypass Supabase `never` insert/update inference ──────
 
 type ProfileUpdate = { full_name?: string; email?: string; is_active?: boolean }
-type LmInsert = { created_by: string; title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number; content: Record<string, unknown> }
-type LmUpdate = Partial<{ title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number; is_active: boolean }>
 type ProjInsert = { created_by: string; title: string; description: string; requirements: string; due_date: string; module_id: string | null }
 type ProjUpdate = Partial<{ title: string; description: string; requirements: string; due_date: string; module_id: string | null; is_active: boolean }>
 type IcUpdate = { is_approved?: boolean; is_active?: boolean; rejection_reason?: string | null; rejected_at?: string | null }
@@ -52,13 +50,11 @@ type EqOne = { eq(c: string, v: string): Promise<{ error: Error | null }> }
 type SelectSingle = { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
 
 type ProfileBuilder = { update(d: ProfileUpdate): EqOne }
-type LmBuilder      = { insert(d: LmInsert): SelectSingle; update(d: LmUpdate): EqOne }
 type ProjBuilder    = { insert(d: ProjInsert): SelectSingle; update(d: ProjUpdate): EqOne }
 type IcBuilder      = { update(d: IcUpdate): EqOne }
 type NotifBuilder   = { insert(d: NotifInsert): Promise<{ error: Error | null }> }
 
 function profileTable() { return supabase.from('profiles')            as unknown as ProfileBuilder }
-function lmTable()      { return supabase.from('learning_modules')    as unknown as LmBuilder      }
 function projTable()    { return supabase.from('projects')            as unknown as ProjBuilder    }
 function icTable()      { return supabase.from('industry_challenges') as unknown as IcBuilder      }
 function notifTable()   { return supabase.from('notifications')       as unknown as NotifBuilder   }
@@ -200,31 +196,6 @@ export async function getAllModulesAdmin(): Promise<LearningModule[]> {
   const { data, error } = await supabase.from('learning_modules').select('*').order('created_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as unknown as LearningModule[]
-}
-
-export async function createModule(adminId: string, payload: {
-  title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number; content?: Record<string, unknown>
-}): Promise<LearningModule> {
-  const { data, error } = await lmTable()
-    .insert({ created_by: adminId, ...payload, content: payload.content ?? {} })
-    .select().single()
-  if (error) throw error
-  return data as unknown as LearningModule
-}
-
-export async function updateModule(id: string, payload: LmUpdate): Promise<void> {
-  const { error } = await lmTable().update(payload).eq('id', id)
-  if (error) throw error
-}
-
-export async function deleteModule(id: string): Promise<void> {
-  const { error } = await supabase.from('learning_modules').delete().eq('id', id)
-  if (error) throw error
-}
-
-export async function toggleModuleActive(id: string, isActive: boolean): Promise<void> {
-  const { error } = await lmTable().update({ is_active: isActive }).eq('id', id)
-  if (error) throw error
 }
 
 // ── Projects CRUD ───────────────────────────────────────────────────────────

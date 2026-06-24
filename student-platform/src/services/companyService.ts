@@ -1,20 +1,41 @@
 import { supabase } from './supabase'
 import type { Profile, IndustryChallenge, ChallengeSubmission, ChallengeFeedback, DifficultyLevel } from '@/types'
 
-// Narrow builder for industry_challenges update (bypass `never` inference)
+type EqOne = { eq(c: string, v: string): Promise<{ error: Error | null }> }
+type SelectSingle = { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
+
+// Narrow builder for profiles update (bypass `never` inference)
+type ProfileUpdatePayload = Partial<{ full_name: string; company_description: string; company_website: string; company_industry: string }>
+type ProfileBuilder = { update(d: ProfileUpdatePayload): EqOne }
+function profileTable() { return supabase.from('profiles') as unknown as ProfileBuilder }
+
+// Narrow builder for industry_challenges insert/update (bypass `never` inference)
+type IcInsertPayload = {
+  company_id: string; title: string; description: string; requirements: string
+  difficulty_level: DifficultyLevel; deadline: string; is_approved: boolean; is_active: boolean
+}
 type IcUpdatePayload = Partial<{
   title: string; description: string; requirements: string
   difficulty_level: DifficultyLevel; deadline: string
   is_approved: boolean; is_active: boolean
   rejection_reason: string | null; rejected_at: string | null
 }>
-type IcUpdateBuilder = { update(d: IcUpdatePayload): { eq(c: string, v: string): Promise<{ error: Error | null }> } }
-function icTable() { return supabase.from('industry_challenges') as unknown as IcUpdateBuilder }
+type IcBuilder = { insert(d: IcInsertPayload): SelectSingle; update(d: IcUpdatePayload): EqOne }
+function icTable() { return supabase.from('industry_challenges') as unknown as IcBuilder }
 
 // Narrow builder for notifications insert
 type NotifInsert = { user_id: string; title: string; message: string; type: string }
 type NotifInsertBuilder = { insert(d: NotifInsert): Promise<{ error: Error | null }> }
 function notifTable() { return supabase.from('notifications') as unknown as NotifInsertBuilder }
+
+// Narrow builder for challenge_feedback insert
+type CfInsert = { submission_id: string; reviewer_id: string; reviewer_type: string; feedback_text: string; rating: number }
+type CfBuilder = { insert(d: CfInsert): Promise<{ error: Error | null }> }
+function cfTable() { return supabase.from('challenge_feedback') as unknown as CfBuilder }
+
+// Narrow builder for challenge_submissions status update
+type CsUpdateBuilder = { update(d: { status: string }): EqOne }
+function csTable() { return supabase.from('challenge_submissions') as unknown as CsUpdateBuilder }
 
 export interface ChallengeWithStats extends IndustryChallenge {
   submissionCount: number
@@ -60,10 +81,7 @@ export async function updateCompanyProfile(
     company_industry?: string
   },
 ): Promise<void> {
-  const { error } = await supabase
-    .from('profiles')
-    .update(payload)
-    .eq('id', companyId)
+  const { error } = await profileTable().update(payload).eq('id', companyId)
   if (error) throw error
 }
 
@@ -146,11 +164,9 @@ export async function createChallenge(
     deadline: string
   },
 ): Promise<IndustryChallenge> {
-  const { data, error } = await supabase
-    .from('industry_challenges')
+  const { data, error } = await icTable()
     .insert({ company_id: companyId, ...payload, is_approved: false, is_active: true })
-    .select()
-    .single()
+    .select().single()
   if (error) throw error
   return data as unknown as IndustryChallenge
 }
@@ -373,18 +389,15 @@ export async function leaveFeedback(
   feedbackText: string,
   rating: number,
 ): Promise<void> {
-  await supabase.from('challenge_feedback').insert({
+  await cfTable().insert({
     submission_id: submissionId,
     reviewer_id:   reviewerId,
     reviewer_type: 'company',
     feedback_text: feedbackText,
     rating,
   })
-  await supabase
-    .from('challenge_submissions')
-    .update({ status: 'feedback_given' })
-    .eq('id', submissionId)
-  await supabase.from('notifications').insert({
+  await csTable().update({ status: 'feedback_given' }).eq('id', submissionId)
+  await notifTable().insert({
     user_id: studentId,
     title:   'Feedback received on your challenge submission!',
     message: 'A company has reviewed and left feedback on your challenge submission.',

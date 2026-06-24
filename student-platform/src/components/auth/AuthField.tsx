@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { AlertIcon, LockIcon, EyeIcon, EyeOffIcon } from './AuthIcons'
-import type { ReactNode, SVGProps } from 'react'
+import type { ReactElement, ReactNode, SVGProps } from 'react'
 
-type IconComponent = (p: SVGProps<SVGSVGElement>) => JSX.Element
+type IconComponent = (p: SVGProps<SVGSVGElement>) => ReactElement
 
 interface FieldProps {
   Icon?: IconComponent

@@ -2,6 +2,11 @@ import { create } from 'zustand'
 import { supabase } from '@/services/supabase'
 import type { Profile, UserRole } from '@/types'
 
+// Narrow builder bypasses Supabase's `never` upsert inference for profiles
+type ProfileUpsert = { id: string; email: string; full_name: string; role: UserRole }
+type ProfileBuilder = { upsert(d: ProfileUpsert, opts: { onConflict: string }): Promise<{ error: Error | null }> }
+function profileTable() { return supabase.from('profiles') as unknown as ProfileBuilder }
+
 async function fetchProfile(id: string): Promise<Profile | null> {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single()
   if (error && error.code !== 'PGRST116') {
@@ -19,9 +24,7 @@ async function ensureProfile(
 ): Promise<Profile | null> {
   const role = (metadata?.role as UserRole | undefined) ?? 'student'
   const fullName = (metadata?.full_name as string | undefined) ?? ''
-  await supabase
-    .from('profiles')
-    .upsert({ id: userId, email, full_name: fullName, role }, { onConflict: 'id' })
+  await profileTable().upsert({ id: userId, email, full_name: fullName, role }, { onConflict: 'id' })
   return fetchProfile(userId)
 }
 

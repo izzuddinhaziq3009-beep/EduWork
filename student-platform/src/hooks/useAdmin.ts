@@ -2,14 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getSystemStats, getRecentActivity,
   getAllUsers, getUserById, updateUser, deactivateUser, reactivateUser, createUser, getUserAdminStats,
-  getAllModulesAdmin, createModule, updateModule, deleteModule, toggleModuleActive,
+  getAllModulesAdmin,
   getAllProjectsAdmin, createProject, updateProject, deleteProject, toggleProjectActive,
   getAllIndependentProjectsAdmin, deleteIndependentProject,
   getPendingChallenges, getApprovedChallenges, getRejectedChallenges, getAllChallengesAdmin, approveChallenge, rejectChallenge,
   getActivityLogs, getUserActivityLogs, getLearningActivityLogs, getProjectActivityLogs, getChallengeActivityLogs,
 } from '@/services/adminService'
 import { useToast } from './use-toast'
-import type { UserRole, DifficultyLevel } from '@/types'
+import type { UserRole } from '@/types'
 
 export const adminKeys = {
   stats:       ['admin-stats']             as const,
@@ -79,41 +79,9 @@ export function useCreateUser() {
 }
 
 // ── Modules ────────────────────────────────────────────────────────────────
+// Module create/update/delete/toggle hooks live in @/hooks/useModules (handle both simple & structured types)
 export function useAllModulesAdmin() {
   return useQuery({ queryKey: adminKeys.modules, queryFn: getAllModulesAdmin })
-}
-export function useCreateModule() {
-  const qc = useQueryClient(); const { toast } = useToast()
-  return useMutation({
-    mutationFn: ({ adminId, payload }: { adminId: string; payload: { title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number } }) =>
-      createModule(adminId, payload),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.modules }); qc.invalidateQueries({ queryKey: adminKeys.stats }); toast({ title: 'Module created!' }) },
-    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
-  })
-}
-export function useUpdateModule() {
-  const qc = useQueryClient(); const { toast } = useToast()
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<{ title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number }> }) =>
-      updateModule(id, payload),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.modules }); toast({ title: 'Module updated.' }) },
-    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
-  })
-}
-export function useDeleteModule() {
-  const qc = useQueryClient(); const { toast } = useToast()
-  return useMutation({
-    mutationFn: (id: string) => deleteModule(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.modules }); toast({ title: 'Module deleted.' }) },
-    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
-  })
-}
-export function useToggleModuleActive() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => toggleModuleActive(id, isActive),
-    onSuccess: () => qc.invalidateQueries({ queryKey: adminKeys.modules }),
-  })
 }
 
 // ── Projects ────────────────────────────────────────────────────────────────
