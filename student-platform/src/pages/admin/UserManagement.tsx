@@ -69,10 +69,10 @@ export function UserManagement() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <Input placeholder="Search name or email…" value={search} onChange={e => setSearch(e.target.value)} className="max-w-[300px] h-10" />
-        <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit">
+        <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
           {(['all','student','mentor','company'] as const).map(r => (
             <button key={r} onClick={() => setRoleFilter(r)}
-              className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors capitalize ${roleFilter === r ? 'bg-white shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
+              className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors capitalize ${roleFilter === r ? 'bg-[var(--surface)] shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
               {r}
             </button>
           ))}

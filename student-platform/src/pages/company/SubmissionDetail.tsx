@@ -128,7 +128,7 @@ export function CompanySubmissionDetail() {
                 { label: 'README.md', value: submission.readme_exists ? '✓ Found' : 'Missing' },
                 { label: 'Privacy file', value: submission.privacy_file_exists ? '✓ Found' : 'Missing' },
               ].map(i => (
-                <div key={i.label} className="hairline rounded-xl p-3" style={{ background: '#FBFAF5' }}>
+                <div key={i.label} className="hairline rounded-xl p-3" style={{ background: 'var(--hair-2)' }}>
                   <div className="text-[11px] font-mono muted uppercase tracking-wide">{i.label}</div>
                   <div className="text-[14px] font-semibold mt-0.5"
                     style={{ color: i.value.startsWith('✓') ? 'var(--accent)' : 'var(--ink)' }}>

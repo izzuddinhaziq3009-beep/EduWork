@@ -8,6 +8,7 @@ import {
 
 // ── Page-level lazy imports ────────────────────────────────────────────────
 // Each page is a separate chunk. An error in one page won't crash the others.
+const LandingPage          = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })))
 const LoginPage           = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const SignupPage           = lazy(() => import('@/pages/SignupPage').then(m => ({ default: m.SignupPage })))
 const ForgotPasswordPage   = lazy(() => import('@/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })))
@@ -53,14 +54,14 @@ const SystemMonitoring        = lazy(() => import('@/pages/admin/SystemMonitorin
 function AppLoader() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4"
-      style={{ background: '#F6F5F0' }}>
+      style={{ background: '#F8FAFC' }}>
       <svg viewBox="0 0 32 32" width="40" height="40" fill="none"
-        style={{ color: '#0F4C5C', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+        style={{ color: '#4F46E5', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
         <rect x="2" y="2" width="28" height="28" rx="7" fill="currentColor"/>
         <path d="M9 20.5L16 9l7 11.5H17.5L16 18l-1.5 2.5H9z" fill="#fff"/>
         <circle cx="16" cy="22.5" r="1.5" fill="#fff"/>
       </svg>
-      <div style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#8A857D' }}>
+      <div style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#475569' }}>
         Loading…
       </div>
     </div>
@@ -73,14 +74,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 }
 
 // ── Root redirect based on role ───────────────────────────────────────────
+// Logged-out visitors see the public landing page; logged-in users skip
+// straight to their role's dashboard.
 function RootRedirect() {
   const { user, role, loading } = useAuthStore()
   if (loading) return <AppLoader />
-  if (!user)             return <Navigate to="/login"            replace />
-  if (role === 'mentor') return <Navigate to="/mentor/dashboard" replace />
-  if (role === 'company')return <Navigate to="/company/dashboard"replace />
-  if (role === 'admin')  return <Navigate to="/admin/dashboard"  replace />
-  return                        <Navigate to="/dashboard"        replace />
+  if (!user)              return <LandingPage />
+  if (role === 'mentor')  return <Navigate to="/mentor/dashboard" replace />
+  if (role === 'company') return <Navigate to="/company/dashboard" replace />
+  if (role === 'admin')   return <Navigate to="/admin/dashboard"  replace />
+  return                         <Navigate to="/dashboard"        replace />
 }
 
 // ─────────────────────────────────────────────────────────────────────────

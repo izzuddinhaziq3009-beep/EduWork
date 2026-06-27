@@ -87,7 +87,7 @@ export function ForgotPasswordPage() {
               </Link>
             </p>
 
-            <div className="hairline rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: '#FBFAF5' }}>
+            <div className="hairline rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: 'var(--hair-2)' }}>
               <ShieldIcon width={15} height={15} className="text-[color:var(--accent)]" />
               <div className="text-[11.5px] ink-2">Reset links expire after <strong>60 minutes</strong></div>
             </div>

@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { SimpleContentEditor } from '@/components/features/modules/editors/SimpleContentEditor'
 import { ModuleItemsManager } from '@/components/features/modules/editors/ModuleItemsManager'
+import { ModuleImageUploader } from '@/components/features/modules/editors/ModuleImageUploader'
+import { ColorPicker } from '@/components/features/modules/editors/ColorPicker'
 import { parseSimpleContent } from '@/services/moduleService'
 import type { ModuleWithItems, SimpleContentAttachment } from '@/services/moduleService'
 import type { DifficultyLevel } from '@/types'
@@ -41,6 +43,8 @@ function EditModuleForm({ module, onClose }: { module: ModuleWithItems; onClose:
   const [description, setDescription] = useState(module.description)
   const [difficulty,  setDifficulty]  = useState<DifficultyLevel>(module.difficulty_level)
   const [duration,    setDuration]    = useState(module.duration_hours)
+  const [imageUrl,    setImageUrl]    = useState(module.module_image_url ?? null)
+  const [color,       setColor]       = useState(module.module_color ?? null)
 
   const initialSimple = module.module_type === 'simple' ? parseSimpleContent(module.simple_content) : null
   const [simpleText,  setSimpleText]  = useState(initialSimple?.text ?? '')
@@ -50,7 +54,7 @@ function EditModuleForm({ module, onClose }: { module: ModuleWithItems; onClose:
     (module.module_type === 'simple' ? simpleText.trim().length > 0 : true)
 
   const handleSaveBasicInfo = () => {
-    const moduleData = { title: title.trim(), description: description.trim(), difficulty_level: difficulty, duration_hours: duration }
+    const moduleData = { title: title.trim(), description: description.trim(), difficulty_level: difficulty, duration_hours: duration, module_image_url: imageUrl, module_color: color }
     if (module.module_type === 'simple') {
       updateModule.mutate(
         { type: 'simple', moduleId: module.id, moduleData, simpleContent: { text: simpleText, attachments } },
@@ -84,6 +88,9 @@ function EditModuleForm({ module, onClose }: { module: ModuleWithItems; onClose:
           <Input type="number" min={1} value={duration} onChange={e => setDuration(Number(e.target.value))} />
         </div>
       </div>
+
+      <ModuleImageUploader value={imageUrl} onChange={setImageUrl} />
+      <ColorPicker value={color} onChange={setColor} />
 
       {module.module_type === 'simple' ? (
         <>

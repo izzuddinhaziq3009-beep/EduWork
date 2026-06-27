@@ -62,7 +62,7 @@ export function ChatWindow({ currentUserId, partner }: Props) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto scroll-thin px-5 py-4 space-y-3"
-        style={{ background: '#FAFAF7' }}>
+        style={{ background: 'var(--hair-2)' }}>
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (

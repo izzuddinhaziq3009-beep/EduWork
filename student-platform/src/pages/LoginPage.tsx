@@ -57,9 +57,9 @@ export function LoginPage() {
       <main className="flex flex-col p-8 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
         {/* Top bar */}
         <header className="flex items-center justify-between mb-10">
-          <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit">
+          <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
             <Link to="/login"
-              className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-white shadow-card ink">
+              className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-[var(--surface)] shadow-card ink">
               Log in
             </Link>
             <Link to="/signup"
@@ -174,7 +174,7 @@ function Spinner() {
 
 function SecurityNote() {
   return (
-    <div className="hairline rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: '#FBFAF5' }}>
+    <div className="hairline rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: 'var(--hair-2)' }}>
       <ShieldIcon width={15} height={15} className="text-[color:var(--accent)]" />
       <div className="text-[11.5px] ink-2">
         Protected by 2FA · SOC 2 Type II

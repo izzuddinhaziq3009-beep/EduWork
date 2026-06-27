@@ -52,10 +52,10 @@ export function ModulesPage() {
           onChange={e => setSearch(e.target.value)}
           className="max-w-[320px] h-10"
         />
-        <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit">
+        <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
           {DIFFICULTIES.map(d => (
             <button key={d.value} onClick={() => setDiff(d.value)}
-              className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${diff === d.value ? 'bg-white shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
+              className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${diff === d.value ? 'bg-[var(--surface)] shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
               {d.label}
             </button>
           ))}

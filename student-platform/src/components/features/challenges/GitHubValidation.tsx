@@ -71,7 +71,7 @@ export function GitHubValidation({ result, loading, hasUrl }: Props) {
   if (!hasUrl) return null
 
   return (
-    <div className="hairline rounded-xl p-4 space-y-3" style={{ background: '#FBFAF5' }}>
+    <div className="hairline rounded-xl p-4 space-y-3" style={{ background: 'var(--hair-2)' }}>
       <div className="text-[12px] font-mono tracking-wide muted uppercase">Repository requirements</div>
       {STEPS.map((step, i) => {
         const stepData = s?.[step.key]

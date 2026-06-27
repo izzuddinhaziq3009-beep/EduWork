@@ -84,7 +84,7 @@ export function UserDetail() {
             ...(user.company_industry ? [{ label: 'Industry', value: user.company_industry }] : []),
             ...(user.company_website  ? [{ label: 'Website',  value: user.company_website  }] : []),
           ].map(d => (
-            <div key={d.label} className="hairline rounded-xl p-3" style={{ background: '#FBFAF5' }}>
+            <div key={d.label} className="hairline rounded-xl p-3" style={{ background: 'var(--hair-2)' }}>
               <div className="text-[11px] font-mono muted uppercase tracking-wide">{d.label}</div>
               <div className="text-[13.5px] font-medium mt-0.5 truncate">{d.value}</div>
             </div>
@@ -100,7 +100,7 @@ export function UserDetail() {
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 {ROLE_STATS[user.role].map(s => (
-                  <div key={s.label} className="hairline rounded-xl p-3 text-center" style={{ background: '#FBFAF5' }}>
+                  <div key={s.label} className="hairline rounded-xl p-3 text-center" style={{ background: 'var(--hair-2)' }}>
                     <div className="font-display text-[28px] font-semibold leading-none" style={{ color: roleColor }}>{s.value}</div>
                     <div className="text-[11px] font-mono muted mt-1">{s.label}</div>
                   </div>

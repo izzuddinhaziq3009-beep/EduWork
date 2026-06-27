@@ -37,10 +37,10 @@ export function SubmissionsPage() {
       />
 
       {/* Filters */}
-      <div className="hairline rounded-xl p-1 flex flex-wrap gap-0.5 bg-[#FBFAF5] w-fit mb-6">
+      <div className="hairline rounded-xl p-1 flex flex-wrap gap-0.5 bg-[var(--hair-2)] w-fit mb-6">
         {FILTERS.map(f => (
           <button key={f.value} onClick={() => setFilter(f.value)}
-            className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${filter === f.value ? 'bg-white shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
+            className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${filter === f.value ? 'bg-[var(--surface)] shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
             {f.label}
           </button>
         ))}

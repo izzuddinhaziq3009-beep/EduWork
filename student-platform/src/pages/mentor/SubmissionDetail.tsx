@@ -91,7 +91,7 @@ export function SubmissionDetail() {
               <h3 className="text-[15px] font-semibold">Submitted work</h3>
               <span className="text-[12px] font-mono muted">{fmtDateTime(submission.submitted_at)}</span>
             </div>
-            <div className="text-[14px] ink-2 leading-relaxed whitespace-pre-wrap bg-[#FBFAF5] rounded-xl p-4">
+            <div className="text-[14px] ink-2 leading-relaxed whitespace-pre-wrap bg-[var(--hair-2)] rounded-xl p-4">
               {submission.submission_content}
             </div>
             {submission.file_url && (

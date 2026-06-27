@@ -55,10 +55,10 @@ export function ChallengesPage() {
       />
 
       {/* Tab switcher */}
-      <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit mb-6">
+      <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit mb-6">
         {(['browse', 'mine'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${tab === t ? 'bg-white shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
+            className={`px-4 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${tab === t ? 'bg-[var(--surface)] shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
             {t === 'browse' ? 'Browse' : `My Submissions${mySubmissions.length > 0 ? ` (${mySubmissions.length})` : ''}`}
           </button>
         ))}
@@ -74,10 +74,10 @@ export function ChallengesPage() {
               onChange={e => setSearch(e.target.value)}
               className="max-w-[320px] h-10"
             />
-            <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit">
+            <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
               {DIFFICULTIES.map(d => (
                 <button key={d.value} onClick={() => setDiff(d.value)}
-                  className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${diff === d.value ? 'bg-white shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
+                  className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${diff === d.value ? 'bg-[var(--surface)] shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
                   {d.label}
                 </button>
               ))}

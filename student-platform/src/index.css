@@ -8,49 +8,67 @@
   50%       { opacity: 0.4; }
 }
 
-/* ─── Design system tokens ─── */
+/* ─── Design system tokens — light content, indigo/cyan brand accents ─── */
 :root {
-  --primary:       #0F4C5C;
-  --primary-2:     #1A6B7E;
-  --primary-soft:  rgba(15, 76, 92, 0.10);
-  --accent:        #2C9D6E;
-  --accent-soft:   rgba(44, 157, 110, 0.10);
-  --warn:          #C97A2D;
-  --warn-soft:     rgba(201, 122, 45, 0.10);
-  --rose:          #B8456A;
-  --rose-soft:     rgba(184, 69, 106, 0.10);
-  --cta:           #1E5BFF;
-  --cta-hover:     #1648d6;
+  --primary:       #4F46E5;
+  --primary-2:     #6366F1;
+  --primary-soft:  rgba(79, 70, 229, 0.10);
+  --accent:        #06B6D4;
+  --accent-soft:   rgba(6, 182, 212, 0.10);
+  --warn:          #D97706;
+  --warn-soft:     rgba(217, 119, 6, 0.10);
+  --rose:          #E11D48;
+  --rose-soft:     rgba(225, 29, 72, 0.10);
+  --cta:           #4F46E5;
+  --cta-hover:     #4338CA;
 
-  --bg:            #F6F5F0;
+  --bg:            #F8FAFC;
   --surface:       #FFFFFF;
-  --ink:           #0E0D0A;
-  --ink-2:         #3D3A35;
-  --muted:         #8A857D;
-  --hair:          #E6E4DF;
-  --hair-2:        #EDECEA;
+  --ink:           #0F172A;
+  --ink-2:         #334155;
+  --muted:         #475569;
+  --hair:          #E2E8F0;
+  --hair-2:        #F1F5F9;
 
-  /* shadcn/ui compat */
-  --background:        0 0% 100%;
-  --foreground:        20 14% 6%;
+  /* shadcn/ui compat — light slate, indigo/cyan/rose accents */
+  --background:        210 40% 98%;
+  --foreground:        222.2 47% 11%;
   --card:              0 0% 100%;
-  --card-foreground:   20 14% 6%;
+  --card-foreground:   222.2 47% 11%;
   --popover:           0 0% 100%;
-  --popover-foreground: 20 14% 6%;
-  --primary-hsl:       193 72% 21%;
+  --popover-foreground: 222.2 47% 11%;
+  --primary-hsl:        243 75% 59%;
   --primary-foreground: 210 40% 98%;
-  --secondary:         60 5% 94%;
-  --secondary-foreground: 20 14% 6%;
-  --muted-hsl:         60 5% 94%;
-  --muted-foreground:  25 5% 55%;
-  --accent-hsl:        60 5% 94%;
-  --accent-foreground: 20 14% 6%;
-  --destructive:       340 64% 50%;
+  --secondary:         210 40% 96%;
+  --secondary-foreground: 222.2 47% 11%;
+  --muted-hsl:         210 40% 96%;
+  --muted-foreground:   215 16% 47%;
+  --accent-hsl:          189 94% 43%;
+  --accent-foreground:  210 40% 98%;
+  --destructive:         347 77% 50%;
   --destructive-foreground: 210 40% 98%;
-  --border:            30 6% 88%;
-  --input:             30 6% 88%;
-  --ring:              193 72% 21%;
+  --border:            214 32% 91%;
+  --input:             214 32% 91%;
+  --ring:                243 75% 59%;
   --radius:            0.5rem;
+}
+
+/* ─── Dark chrome scope — applied to Navbar/Sidebar only ───
+   Re-defines the same tokens to dark values within their subtree, so the
+   page content (using the same classes/vars) stays on the light :root
+   theme above while just the chrome stays dark. */
+.chrome-dark {
+  --bg:            #0F172A;
+  --surface:       #1F2937;
+  --ink:           #F8FAFC;
+  --ink-2:         #CBD5E1;
+  --muted:         #94A3B8;
+  --hair:          rgba(255, 255, 255, 0.10);
+  --hair-2:        rgba(255, 255, 255, 0.06);
+  --primary-soft:  rgba(79, 70, 229, 0.16);
+  --accent-soft:   rgba(6, 182, 212, 0.16);
+  --warn-soft:     rgba(245, 158, 11, 0.16);
+  --rose-soft:     rgba(244, 63, 94, 0.16);
 }
 
 @layer base {
@@ -92,7 +110,7 @@
   box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
 }
 .shadow-cta {
-  box-shadow: 0 4px 14px rgba(30,91,255,0.35);
+  box-shadow: 0 4px 14px rgba(79,70,229,0.45);
 }
 
 /* ─── Progress bar ─── */
@@ -174,7 +192,7 @@
 
 /* ─── Hero background (auth panel) ─── */
 .hero-bg {
-  background: linear-gradient(145deg, #0F4C5C 0%, #0B3743 55%, #061E28 100%);
+  background: linear-gradient(145deg, #312E81 0%, #1E1B4B 55%, #0F172A 100%);
 }
 .hero-grid {
   background-image:
@@ -191,7 +209,7 @@
 .stripe-soft {
   background: repeating-linear-gradient(
     135deg,
-    rgba(15,76,92,0.04) 0 12px,
+    rgba(79,70,229,0.07) 0 12px,
     transparent 12px 24px
   );
 }

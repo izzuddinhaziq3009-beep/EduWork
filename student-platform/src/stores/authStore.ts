@@ -169,3 +169,18 @@ supabase.auth.onAuthStateChange((event, session) => {
     useAuthStore.setState({ user: null, profile: null, role: null, loading: false })
   }
 })
+
+// supabase-js's built-in autoRefreshToken relies on a timer scheduled ahead of
+// expiry, but browsers throttle/suspend timers in backgrounded tabs — so a tab
+// left idle past the access token's lifetime (1hr by default) can come back
+// with a stale token. Requests then get silently filtered by RLS (auth.uid()
+// resolves to null) instead of failing loudly, which looks like a permissions
+// bug rather than an auth one. Forcing a session check on tab-visible/focus
+// triggers supabase-js to refresh it before the next request needs it.
+if (typeof document !== 'undefined') {
+  const refreshIfStale = () => { void supabase.auth.getSession() }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshIfStale()
+  })
+  window.addEventListener('focus', refreshIfStale)
+}

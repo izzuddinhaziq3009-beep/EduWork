@@ -178,7 +178,7 @@ function QuizEditorForm({ moduleId, itemId, initialTitle, initialDescription, or
 
       {step === 3 && (
         <div className="space-y-5">
-          <div className="hairline rounded-xl p-4" style={{ background: '#FBFAF5' }}>
+          <div className="hairline rounded-xl p-4" style={{ background: 'var(--hair-2)' }}>
             <div className="text-[15px] font-semibold">{title}</div>
             {description && <p className="text-[13px] muted mt-1">{description}</p>}
             <div className="flex items-center gap-3 mt-2 text-[12px] font-mono muted">

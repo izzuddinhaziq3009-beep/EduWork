@@ -24,13 +24,14 @@ export function AuthField({ Icon, label, type = 'text', value, onChange, placeho
         <span className="text-[12.5px] font-medium ink-2">{label}</span>
         {rightSlot}
       </div>
-      <div className={`hairline rounded-xl flex items-center gap-3 px-3.5 h-12 bg-[#FBFAF5] transition-colors ${error ? 'border-[color:var(--rose)] bg-[var(--rose-soft)]' : 'focus-within:border-[color:var(--primary)]'}`}>
+      <div className={`hairline rounded-xl flex items-center gap-3 px-3.5 h-12 bg-[var(--surface)] transition-colors ${error ? 'border-[color:var(--rose)] bg-[var(--rose-soft)]' : 'focus-within:border-[color:var(--primary)]'}`}>
         {Icon && <Icon width={18} height={18} className="text-[color:var(--muted)] shrink-0" />}
         <input
           type={type} name={name} value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder} autoComplete={autoComplete}
           className="bg-transparent outline-none flex-1 text-[14px] placeholder:text-[color:var(--muted)]"
+          style={{ color: 'var(--ink)' }}
         />
       </div>
       {error && (
@@ -61,7 +62,7 @@ export function PasswordField({ label, value, onChange, error, name, hint, right
         <span className="text-[12.5px] font-medium ink-2">{label}</span>
         {rightSlot}
       </div>
-      <div className={`hairline rounded-xl flex items-center gap-3 px-3.5 h-12 bg-[#FBFAF5] transition-colors ${error ? 'border-[color:var(--rose)] bg-[var(--rose-soft)]' : 'focus-within:border-[color:var(--primary)]'}`}>
+      <div className={`hairline rounded-xl flex items-center gap-3 px-3.5 h-12 bg-[var(--surface)] transition-colors ${error ? 'border-[color:var(--rose)] bg-[var(--rose-soft)]' : 'focus-within:border-[color:var(--primary)]'}`}>
         <LockIcon width={18} height={18} className="text-[color:var(--muted)] shrink-0" />
         <input
           type={show ? 'text' : 'password'} name={name} value={value}
@@ -69,6 +70,7 @@ export function PasswordField({ label, value, onChange, error, name, hint, right
           placeholder={show ? 'your-password' : '••••••••••'}
           autoComplete={autoComplete}
           className="bg-transparent outline-none flex-1 text-[14px] placeholder:text-[color:var(--muted)] font-mono tracking-wider"
+          style={{ color: 'var(--ink)' }}
         />
         <button type="button" onClick={() => setShow(s => !s)}
           className="w-8 h-8 grid place-items-center rounded-lg hover:bg-[var(--hair-2)]">

@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SimpleContentEditor } from '@/components/features/modules/editors/SimpleContentEditor'
 import { ModuleItemsManager } from '@/components/features/modules/editors/ModuleItemsManager'
+import { ModuleImageUploader } from '@/components/features/modules/editors/ModuleImageUploader'
+import { ColorPicker } from '@/components/features/modules/editors/ColorPicker'
 import type { SimpleContentAttachment } from '@/services/moduleService'
 import type { DifficultyLevel, ModuleType } from '@/types'
 
@@ -28,13 +30,16 @@ export function CreateModuleDialog({ open, onClose }: Props) {
   const [difficulty,      setDifficulty]      = useState<DifficultyLevel>('beginner')
   const [duration,        setDuration]        = useState(1)
   const [moduleType,      setModuleType]      = useState<ModuleType>('simple')
+  const [imageUrl,        setImageUrl]        = useState<string | null>(null)
+  const [color,           setColor]           = useState<string | null>(null)
   const [simpleText,      setSimpleText]      = useState('')
   const [attachments,     setAttachments]     = useState<SimpleContentAttachment[]>([])
   const [createdModuleId, setCreatedModuleId] = useState<string | null>(null)
 
   const reset = () => {
     setStep(1); setTitle(''); setDescription(''); setDifficulty('beginner'); setDuration(1)
-    setModuleType('simple'); setSimpleText(''); setAttachments([]); setCreatedModuleId(null)
+    setModuleType('simple'); setImageUrl(null); setColor(null)
+    setSimpleText(''); setAttachments([]); setCreatedModuleId(null)
   }
   const handleClose = () => { reset(); onClose() }
 
@@ -46,7 +51,7 @@ export function CreateModuleDialog({ open, onClose }: Props) {
   const handleNext = () => {
     if (step === 2 && moduleType === 'structured' && !createdModuleId) {
       if (!user) return
-      const moduleData = { title: title.trim(), description: description.trim(), difficulty_level: difficulty, duration_hours: duration }
+      const moduleData = { title: title.trim(), description: description.trim(), difficulty_level: difficulty, duration_hours: duration, module_image_url: imageUrl, module_color: color }
       createModule.mutate({ type: 'structured', adminId: user.id, moduleData }, {
         onSuccess: m => { setCreatedModuleId(m.id); setStep(3) },
       })
@@ -57,7 +62,7 @@ export function CreateModuleDialog({ open, onClose }: Props) {
 
   const handleCreateSimple = () => {
     if (!user) return
-    const moduleData = { title: title.trim(), description: description.trim(), difficulty_level: difficulty, duration_hours: duration }
+    const moduleData = { title: title.trim(), description: description.trim(), difficulty_level: difficulty, duration_hours: duration, module_image_url: imageUrl, module_color: color }
     createModule.mutate(
       { type: 'simple', adminId: user.id, moduleData, simpleContent: { text: simpleText, attachments } },
       { onSuccess: handleClose },
@@ -102,6 +107,8 @@ export function CreateModuleDialog({ open, onClose }: Props) {
                   <Input type="number" min={1} value={duration} onChange={e => setDuration(Number(e.target.value))} />
                 </div>
               </div>
+              <ModuleImageUploader value={imageUrl} onChange={setImageUrl} />
+              <ColorPicker value={color} onChange={setColor} />
             </>
           )}
 

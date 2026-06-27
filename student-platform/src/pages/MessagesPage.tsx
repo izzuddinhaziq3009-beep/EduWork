@@ -63,7 +63,7 @@ export function MessagesPage() {
           <ChatWindow currentUserId={user.id} partner={partner} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8"
-            style={{ background: '#FAFAF7' }}>
+            style={{ background: 'var(--hair-2)' }}>
             <div className="w-14 h-14 rounded-2xl grid place-items-center"
               style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
               <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">

@@ -87,7 +87,7 @@ export function Sidebar() {
       : location.pathname === to || location.pathname.startsWith(to + '/')
 
   return (
-    <aside className="hairline-r bg-surface flex flex-col" style={{ width: 264, minHeight: '100%' }}>
+    <aside className="chrome-dark hairline-r bg-surface flex flex-col" style={{ width: 264, minHeight: '100%' }}>
       <div className="px-5 pt-6 pb-3">
         <div className="font-mono text-[10px] tracking-[0.14em] muted">{sectionLabel}</div>
       </div>
@@ -131,7 +131,7 @@ export function Sidebar() {
             <div className="font-mono text-[10px] tracking-[0.14em] muted">YOUR TRACK</div>
           </div>
           <div className="px-3 pb-4">
-            <div className="hairline rounded-xl p-4 relative overflow-hidden" style={{ background: '#FBFAF5' }}>
+            <div className="hairline rounded-xl p-4 relative overflow-hidden" style={{ background: 'var(--hair-2)' }}>
               <div className="absolute inset-0 stripe-soft opacity-60 pointer-events-none" />
               <div className="relative">
                 <div className="text-[11px] font-mono muted uppercase">PRODUCT DESIGN · YR 2</div>

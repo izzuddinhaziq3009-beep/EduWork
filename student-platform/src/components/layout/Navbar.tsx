@@ -115,7 +115,7 @@ export function Navbar() {
   const badge    = role ? ROLE_LABELS[role] ?? role.toUpperCase() : ''
 
   return (
-    <header className="hairline-b bg-surface sticky top-0 z-40" style={{ height: 64 }}>
+    <header className="chrome-dark hairline-b bg-surface sticky top-0 z-40" style={{ height: 64 }}>
       <div className="h-full flex items-center px-6 gap-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 select-none shrink-0" style={{ color: 'var(--primary)' }}>
@@ -133,10 +133,10 @@ export function Navbar() {
 
         {/* Search */}
         <div className="flex-1 max-w-[520px] hidden md:block">
-          <label className="flex items-center gap-3 hairline rounded-xl px-3.5 h-10 bg-[#FAF9F4] focus-within:ring-2 focus-within:ring-[var(--primary-soft)] focus-within:border-[color:var(--primary)] cursor-text">
+          <label className="flex items-center gap-3 hairline rounded-xl px-3.5 h-10 bg-[var(--surface)] focus-within:ring-2 focus-within:ring-[var(--primary-soft)] focus-within:border-[color:var(--primary)] cursor-text">
             <SearchIcon width={17} height={17} className="text-[color:var(--muted)] shrink-0" />
             <input className="bg-transparent outline-none flex-1 text-sm placeholder:text-[color:var(--muted)]"
-              placeholder="Search modules, projects, mentors…" />
+              placeholder="Search modules, projects, mentors…" style={{ color: 'var(--ink)' }} />
             <span className="kbd hidden lg:inline">⌘K</span>
           </label>
         </div>

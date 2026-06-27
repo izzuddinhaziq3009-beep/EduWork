@@ -5,7 +5,7 @@ import {
   getItemProgress, markItemComplete,
   createContentItem, updateContentItem, createQuizItem, updateItemMeta, deleteItem, reorderItems,
   createSimpleModule, createStructuredModule, updateSimpleModule, updateModuleBasicInfo,
-  deleteModule, toggleModuleActive,
+  deleteModule, toggleModuleActive, uploadModuleImage,
 } from '@/services/moduleService'
 import type { ModuleBasicInfo, SimpleContentData, ContentPieceInput } from '@/services/moduleService'
 import { useToast } from './use-toast'
@@ -151,11 +151,16 @@ export function useUpdateModule() {
       payload.type === 'simple'
         ? updateSimpleModule(payload.moduleId, payload.moduleData, payload.simpleContent)
         : updateModuleBasicInfo(payload.moduleId, payload.moduleData),
-    onSuccess: (_, payload) => {
-      qc.invalidateQueries({ queryKey: adminModulesKey })
-      qc.invalidateQueries({ queryKey: moduleKeys.all })
-      qc.invalidateQueries({ queryKey: moduleKeys.detail(payload.moduleId) })
-      qc.invalidateQueries({ queryKey: moduleKeys.byId(payload.moduleId) })
+    onSuccess: async (_, payload) => {
+      // Awaited so the dialog's onClose (chained after this) only fires once the
+      // cache is actually fresh — otherwise reopening the dialog right after saving
+      // can race the background refetch and briefly show pre-edit data again.
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: adminModulesKey }),
+        qc.invalidateQueries({ queryKey: moduleKeys.all }),
+        qc.invalidateQueries({ queryKey: moduleKeys.detail(payload.moduleId) }),
+        qc.invalidateQueries({ queryKey: moduleKeys.byId(payload.moduleId) }),
+      ])
       toast({ title: 'Module updated.' })
     },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
@@ -184,6 +189,14 @@ export function useToggleModuleActive() {
       qc.invalidateQueries({ queryKey: adminModulesKey })
       qc.invalidateQueries({ queryKey: moduleKeys.all })
     },
+  })
+}
+
+export function useUploadModuleImage() {
+  const { toast } = useToast()
+  return useMutation({
+    mutationFn: ({ file, adminId }: { file: File; adminId: string }) => uploadModuleImage(file, adminId),
+    onError: (err: Error) => toast({ title: 'Image upload failed', description: err.message, variant: 'destructive' }),
   })
 }
 

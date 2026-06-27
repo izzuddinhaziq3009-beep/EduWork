@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { DifficultyBadge, difficultyColor } from '@/components/common/DifficultyBadge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fmtDuration } from '@/utils/formatters'
+import { resolveModuleColor } from '@/utils/moduleColors'
 import type { LearningModule, StudentModuleProgress } from '@/types'
 
 const PATTERNS: Record<string, string> = {
@@ -18,17 +19,26 @@ interface Props {
 }
 
 export function ModuleCard({ module, progress, onEnroll, enrolling }: Props) {
-  const color = difficultyColor(module.difficulty_level)
+  const color = resolveModuleColor(module.module_color) ?? difficultyColor(module.difficulty_level)
+  const hasImage = !!module.module_image_url
   const pct   = progress?.progress ?? 0
   const enrolled = !!progress
   const completed = progress?.completed
 
   return (
     <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden flex flex-col hover:shadow-pop transition-shadow">
-      {/* Coloured header */}
+      {/* Coloured / image header */}
       <div className="h-[140px] relative" style={{ background: color }}>
-        <div className="absolute inset-0" style={{ backgroundImage: PATTERNS[module.difficulty_level] }} />
-        <div className="absolute inset-0 p-4 flex flex-col justify-between text-white">
+        {hasImage ? (
+          <>
+            <div className="absolute inset-0" style={{ backgroundImage: `url(${module.module_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            {/* Semi-transparent color overlay keeps badges/text readable over arbitrary images */}
+            <div className="absolute inset-0" style={{ background: color, opacity: 0.35 }} />
+          </>
+        ) : (
+          <div className="absolute inset-0" style={{ backgroundImage: PATTERNS[module.difficulty_level] }} />
+        )}
+        <div className="absolute inset-0 p-4 flex flex-col justify-between text-white" style={hasImage ? { textShadow: '0 1px 3px rgba(0,0,0,0.55)' } : undefined}>
           <DifficultyBadge level={module.difficulty_level} />
           <div className="flex items-end justify-between">
             {/* Mini ring */}

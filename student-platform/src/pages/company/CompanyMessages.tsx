@@ -79,7 +79,7 @@ export function CompanyMessages() {
 
         {/* Student picker */}
         {showPicker && (
-          <div className="hairline-b px-3 py-3 space-y-1 bg-[#FAFAF7]">
+          <div className="hairline-b px-3 py-3 space-y-1 bg-[var(--hair-2)]">
             <div className="text-[11px] font-mono tracking-wide muted uppercase px-2 mb-2">Students who submitted</div>
             {eligible.length === 0 ? (
               <p className="text-[12.5px] muted px-2">No students yet. They appear once they submit to your challenges.</p>
@@ -119,7 +119,7 @@ export function CompanyMessages() {
           <ChatWindow currentUserId={user.id} partner={partner} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8"
-            style={{ background: '#FAFAF7' }}>
+            style={{ background: 'var(--hair-2)' }}>
             <div className="w-14 h-14 rounded-2xl grid place-items-center"
               style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
               <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">

@@ -48,7 +48,7 @@ export function ContentItemEditorCard({ moduleId, item, orderIndex, onClose }: P
   }
 
   return (
-    <div className="hairline rounded-2xl p-5 space-y-4" style={{ background: '#FBFAF5' }}>
+    <div className="hairline rounded-2xl p-5 space-y-4" style={{ background: 'var(--hair-2)' }}>
       <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Item title</label><Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Introduction" /></div>
       <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Description <span className="muted font-normal">(optional)</span></label><Textarea rows={2} value={description} onChange={e => setDescription(e.target.value)} /></div>
 

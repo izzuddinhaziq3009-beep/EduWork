@@ -59,10 +59,10 @@ export function ContentItemFormModal({ initial, nextOrderIndex, allowedTypes, on
         <div className="space-y-4">
           <div>
             <label className="text-[12.5px] font-medium ink-2 block mb-1.5">Content type</label>
-            <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit">
+            <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
               {types.map(t => (
                 <button key={t.value} onClick={() => setType(t.value)}
-                  className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${type === t.value ? 'bg-white shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
+                  className={`px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors ${type === t.value ? 'bg-[var(--surface)] shadow-card ink' : 'muted hover:text-[color:var(--ink)]'}`}>
                   {t.label}
                 </button>
               ))}

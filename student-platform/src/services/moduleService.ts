@@ -22,12 +22,26 @@ function smpTable() { return supabase.from('student_module_progress') as unknown
 type LmInsert = {
   created_by: string; title: string; description: string; difficulty_level: DifficultyLevel
   duration_hours: number; content?: Record<string, unknown>; module_type: ModuleType; simple_content?: string | null
+  module_image_url?: string | null; module_color?: string | null
 }
-type LmUpdate = Partial<{ title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number; simple_content: string | null; is_active: boolean }>
+type LmUpdate = Partial<{
+  title: string; description: string; difficulty_level: DifficultyLevel; duration_hours: number
+  simple_content: string | null; is_active: boolean; module_image_url: string | null; module_color: string | null
+}>
 type SelectSingle = { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
 type EqOne = { eq(c: string, v: string): Promise<{ error: Error | null }> }
-type LmBuilder = { insert(d: LmInsert): SelectSingle; update(d: LmUpdate): EqOne }
+// .update().eq() alone returns 0 affected rows *without an error* if RLS silently
+// filters the row out — requesting an exact count lets callers detect that
+// without depending on the SELECT policy (unlike chaining .select() to read the row back).
+type EqWithCount = { eq(c: string, v: string): Promise<{ error: Error | null; count: number | null }> }
+type LmBuilder = { insert(d: LmInsert): SelectSingle; update(d: LmUpdate, opts: { count: 'exact' }): EqWithCount }
 function lmTable() { return supabase.from('learning_modules') as unknown as LmBuilder }
+
+async function assertModuleUpdated(moduleId: string, moduleData: LmUpdate): Promise<void> {
+  const { error, count } = await lmTable().update(moduleData, { count: 'exact' }).eq('id', moduleId)
+  if (error) throw error
+  if (!count) throw new Error("Update didn't apply — the module wasn't found, or you don't have permission to edit it. Check that your admin role is set correctly.")
+}
 
 type MiInsert = { module_id: string; type: ModuleItemType; title: string; description: string | null; order_index: number }
 type MiUpdate = Partial<{ title: string; description: string | null; order_index: number; updated_at: string }>
@@ -89,6 +103,50 @@ export async function getModuleById(id: string): Promise<LearningModule> {
     .single()
   if (error) throw error
   return data as unknown as LearningModule
+}
+
+// ── Public landing page (works for logged-out visitors too) ────────────────
+
+export interface ModuleWithLearnerCount extends LearningModule {
+  learnerCount: number
+}
+
+export async function getActiveModulesForLanding(limit = 24): Promise<ModuleWithLearnerCount[]> {
+  const { data: modules, error } = await supabase
+    .from('learning_modules')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  const moduleRows = (modules ?? []) as unknown as LearningModule[]
+  if (moduleRows.length === 0) return []
+
+  const { data: counts } = await supabase.rpc('get_module_learner_counts')
+  const countRows = (counts ?? []) as unknown as { module_id: string; learner_count: number }[]
+  const countMap = Object.fromEntries(countRows.map(c => [c.module_id, c.learner_count]))
+
+  return moduleRows
+    .map(m => ({ ...m, learnerCount: countMap[m.id] ?? 0 }))
+    .sort((a, b) => b.learnerCount - a.learnerCount)
+}
+
+export interface LandingStats {
+  totalStudents: number
+  totalModules: number
+  totalEnrollments: number
+}
+
+export async function getLandingStats(): Promise<LandingStats> {
+  const { data, error } = await supabase.rpc('get_landing_stats')
+  if (error) throw error
+  const rows = (data ?? []) as unknown as { total_students: number; total_modules: number; total_enrollments: number }[]
+  const row = rows[0]
+  return {
+    totalStudents:    row?.total_students    ?? 0,
+    totalModules:     row?.total_modules     ?? 0,
+    totalEnrollments: row?.total_enrollments ?? 0,
+  }
 }
 
 export interface ModuleItemWithContent extends ModuleItem {
@@ -322,6 +380,34 @@ export interface ModuleBasicInfo {
   description: string
   difficulty_level: DifficultyLevel
   duration_hours: number
+  module_image_url?: string | null
+  module_color?: string | null
+}
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5MB
+
+export async function uploadModuleImage(file: File, adminId: string): Promise<string> {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    throw new Error('Only JPG, PNG, or WEBP images are allowed.')
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error('Image must be less than 5MB.')
+  }
+  const ext = file.name.split('.').pop()
+  const path = `${adminId}/${Date.now()}.${ext}`
+  const { error } = await supabase.storage.from('module-thumbnails').upload(path, file)
+  if (error) throw new Error(`Image upload failed: ${error.message}`)
+  const { data } = supabase.storage.from('module-thumbnails').getPublicUrl(path)
+  return data.publicUrl
+}
+
+export async function deleteModuleImage(imageUrl: string): Promise<void> {
+  const marker = '/module-thumbnails/'
+  const idx = imageUrl.indexOf(marker)
+  if (idx === -1) return
+  const path = imageUrl.slice(idx + marker.length)
+  await supabase.storage.from('module-thumbnails').remove([path])
 }
 
 export async function createSimpleModule(
@@ -351,13 +437,11 @@ export async function updateSimpleModule(
 ): Promise<void> {
   const payload: LmUpdate = { ...moduleData }
   if (simpleContent) payload.simple_content = serializeSimpleContent(simpleContent)
-  const { error } = await lmTable().update(payload).eq('id', moduleId)
-  if (error) throw error
+  await assertModuleUpdated(moduleId, payload)
 }
 
 export async function updateModuleBasicInfo(moduleId: string, moduleData: Partial<ModuleBasicInfo>): Promise<void> {
-  const { error } = await lmTable().update(moduleData).eq('id', moduleId)
-  if (error) throw error
+  await assertModuleUpdated(moduleId, moduleData)
 }
 
 export async function deleteModule(moduleId: string): Promise<void> {
@@ -366,6 +450,5 @@ export async function deleteModule(moduleId: string): Promise<void> {
 }
 
 export async function toggleModuleActive(id: string, isActive: boolean): Promise<void> {
-  const { error } = await lmTable().update({ is_active: isActive }).eq('id', id)
-  if (error) throw error
+  await assertModuleUpdated(id, { is_active: isActive })
 }

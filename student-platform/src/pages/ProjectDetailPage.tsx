@@ -70,7 +70,7 @@ export function ProjectDetailPage() {
             <div className="flex items-center gap-2 text-[12.5px] muted font-mono">
               <span>Submitted {fmtRelative(submission.submitted_at)}</span>
             </div>
-            <div className="hairline rounded-xl p-4 text-[14px] ink-2 leading-relaxed whitespace-pre-wrap bg-[#FBFAF5]">
+            <div className="hairline rounded-xl p-4 text-[14px] ink-2 leading-relaxed whitespace-pre-wrap bg-[var(--hair-2)]">
               {submission.submission_content}
             </div>
           </div>

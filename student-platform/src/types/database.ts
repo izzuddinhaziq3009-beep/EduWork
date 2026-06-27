@@ -39,6 +39,8 @@ export interface LearningModule {
   is_active: boolean
   module_type: ModuleType            // added via supabase-module-sections-migration.sql
   simple_content?: string | null
+  module_image_url?: string | null   // added via supabase-module-thumbnails-migration.sql
+  module_color?: string | null       // preset name (e.g. 'indigo') or literal hex (e.g. '#3B82F6')
 }
 
 export interface StudentModuleProgress {
@@ -334,6 +336,8 @@ export interface Database {
           is_active?: boolean
           module_type?: ModuleType
           simple_content?: string | null
+          module_image_url?: string | null
+          module_color?: string | null
         }
         Update: {
           title?: string
@@ -342,6 +346,8 @@ export interface Database {
           duration_hours?: number
           content?: Record<string, unknown>
           is_active?: boolean
+          module_image_url?: string | null
+          module_color?: string | null
           simple_content?: string | null
         }
       }
@@ -779,7 +785,14 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_landing_stats: {
+        Args: Record<string, never>
+        Returns: { total_students: number; total_modules: number; total_enrollments: number }[]
+      }
+      get_module_learner_counts: {
+        Args: Record<string, never>
+        Returns: { module_id: string; learner_count: number }[]
+      }
     }
     Enums: {
       user_role: UserRole

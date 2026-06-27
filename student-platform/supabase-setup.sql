@@ -314,12 +314,25 @@ CREATE POLICY "Admins have full profile access"
 -- learning_modules
 DROP POLICY IF EXISTS "Active modules viewable by authenticated users" ON learning_modules;
 DROP POLICY IF EXISTS "Admins and mentors can manage modules"          ON learning_modules;
-CREATE POLICY "Active modules viewable by authenticated users"
+DROP POLICY IF EXISTS "Modules viewable by authenticated users"        ON learning_modules;
+DROP POLICY IF EXISTS "Admins and mentors can create modules"          ON learning_modules;
+DROP POLICY IF EXISTS "Admins and mentors can update modules"          ON learning_modules;
+DROP POLICY IF EXISTS "Admins and mentors can delete modules"          ON learning_modules;
+CREATE POLICY "Modules viewable by authenticated users"
   ON learning_modules FOR SELECT TO authenticated
   USING (is_active = TRUE OR created_by = auth.uid()
          OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
-CREATE POLICY "Admins and mentors can manage modules"
-  ON learning_modules FOR ALL TO authenticated
+-- Split into explicit per-action policies (rather than one FOR ALL USING-only
+-- policy) so INSERT's WITH CHECK is never left to Postgres's implicit fallback.
+CREATE POLICY "Admins and mentors can create modules"
+  ON learning_modules FOR INSERT TO authenticated
+  WITH CHECK ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
+CREATE POLICY "Admins and mentors can update modules"
+  ON learning_modules FOR UPDATE TO authenticated
+  USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'))
+  WITH CHECK ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
+CREATE POLICY "Admins and mentors can delete modules"
+  ON learning_modules FOR DELETE TO authenticated
   USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
 
 -- student_module_progress

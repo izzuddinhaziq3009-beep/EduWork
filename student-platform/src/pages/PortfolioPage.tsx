@@ -93,7 +93,7 @@ export function PortfolioPage() {
                   <div>
                     <div className="text-[12.5px] font-medium ink-2 mb-1.5">Share link</div>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 hairline rounded-lg px-3 py-2 text-[12px] font-mono muted truncate bg-[#FBFAF5]">
+                      <div className="flex-1 hairline rounded-lg px-3 py-2 text-[12px] font-mono muted truncate bg-[var(--hair-2)]">
                         {shareUrl}
                       </div>
                       <button onClick={copyLink}

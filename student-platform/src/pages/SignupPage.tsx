@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { BrandPanel } from '@/components/auth/BrandPanel'
 import { AuthField, PasswordField, StrengthBar, passwordStrength } from '@/components/auth/AuthField'
@@ -15,6 +15,7 @@ const ROLES = [
 
 export function SignupPage() {
   const navigate  = useNavigate()
+  const [params]  = useSearchParams()
   const { signUp } = useAuthStore()
 
   const [name, setName]         = useState('')
@@ -45,8 +46,10 @@ export function SignupPage() {
     setAuthError('')
     try {
       await signUp(email, password, name, role)
-      const redirect = role === 'mentor' ? '/mentor/dashboard' : role === 'company' ? '/company/dashboard' : '/dashboard'
-      navigate(redirect)
+      const roleDefault = role === 'mentor' ? '/mentor/dashboard' : role === 'company' ? '/company/dashboard' : '/dashboard'
+      // A `redirect` param (e.g. from the landing page's "Enroll" CTA) only makes sense for students
+      const redirectTo = params.get('redirect')
+      navigate(role === 'student' && redirectTo ? redirectTo : roleDefault)
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : 'Signup failed.')
     } finally {
@@ -62,13 +65,13 @@ export function SignupPage() {
 
       <main className="flex flex-col p-8 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
         <header className="flex items-center justify-between mb-10">
-          <div className="hairline rounded-xl p-1 flex bg-[#FBFAF5] w-fit">
+          <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
             <Link to="/login"
               className="px-4 py-1.5 rounded-lg text-[13px] font-semibold muted hover:text-[color:var(--ink)]">
               Log in
             </Link>
             <Link to="/signup"
-              className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-white shadow-card ink">
+              className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-[var(--surface)] shadow-card ink">
               Sign up
             </Link>
           </div>
@@ -137,7 +140,7 @@ export function SignupPage() {
                       <button key={r.id} type="button"
                         onClick={() => setRole(r.id)}
                         data-on={on}
-                        className="role hairline rounded-xl px-3 py-3 text-left flex flex-col gap-2 bg-[#FBFAF5] hover:border-[color:var(--ink-2)]">
+                        className="role hairline rounded-xl px-3 py-3 text-left flex flex-col gap-2 bg-[var(--hair-2)] hover:border-[color:var(--ink-2)]">
                         <div className="flex items-center justify-between">
                           <span className="w-8 h-8 rounded-lg grid place-items-center role-ico"
                             style={{ background: on ? 'rgba(255,255,255,0.10)' : 'var(--primary-soft)', color: on ? '#fff' : 'var(--primary)' }}>
@@ -224,7 +227,7 @@ function Spinner() {
 
 function SecurityNote() {
   return (
-    <div className="hairline rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: '#FBFAF5' }}>
+    <div className="hairline rounded-xl px-3.5 py-2.5 flex items-center gap-2.5" style={{ background: 'var(--hair-2)' }}>
       <ShieldIcon width={15} height={15} className="text-[color:var(--accent)]" />
       <div className="text-[11.5px] ink-2">
         Protected by 2FA · SOC 2 Type II
