@@ -40,7 +40,8 @@ export interface PaginatedActivityLogs {
 
 // ── Narrow builders — bypass Supabase `never` insert/update inference ──────
 
-type ProfileUpdate = { full_name?: string; email?: string; is_active?: boolean }
+type ProfileUpdate = { full_name?: string; email?: string; is_active?: boolean; is_approved?: boolean }
+type ProfileUpsertAdmin = { id: string; email: string; full_name: string; role: UserRole; is_approved: boolean }
 type ProjInsert = { created_by: string; title: string; description: string; requirements: string; due_date: string; module_id: string | null }
 type ProjUpdate = Partial<{ title: string; description: string; requirements: string; due_date: string; module_id: string | null; is_active: boolean }>
 type IcUpdate = { is_approved?: boolean; is_active?: boolean; rejection_reason?: string | null; rejected_at?: string | null }
@@ -49,7 +50,7 @@ type NotifInsert = { user_id: string; title: string; message: string; type: stri
 type EqOne = { eq(c: string, v: string): Promise<{ error: Error | null }> }
 type SelectSingle = { select(): { single(): Promise<{ data: unknown; error: Error | null }> } }
 
-type ProfileBuilder = { update(d: ProfileUpdate): EqOne }
+type ProfileBuilder = { update(d: ProfileUpdate): EqOne; upsert(d: ProfileUpsertAdmin, opts: { onConflict: string }): Promise<{ error: Error | null }> }
 type ProjBuilder    = { insert(d: ProjInsert): SelectSingle; update(d: ProjUpdate): EqOne }
 type IcBuilder      = { update(d: IcUpdate): EqOne }
 type NotifBuilder   = { insert(d: NotifInsert): Promise<{ error: Error | null }> }
@@ -141,25 +142,50 @@ export async function reactivateUser(userId: string): Promise<void> {
   if (error) throw error
 }
 
+export async function approveUser(userId: string): Promise<void> {
+  const { error } = await profileTable().update({ is_approved: true }).eq('id', userId)
+  if (error) throw error
+}
+
 export async function createUser(payload: {
   email: string; password: string; full_name: string; role: UserRole
 }): Promise<Profile> {
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: payload.email,
     password: payload.password,
     options: { data: { full_name: payload.full_name, role: payload.role } },
   })
   if (error) throw error
+  const newUserId = data.user?.id
 
-  // Give the trigger time to create the profile, then fetch by email
-  // (avoids JSON coercion error from parsing signUp session data)
+  // Give the trigger time to create the profile, then fetch by email.
   await new Promise(r => setTimeout(r, 800))
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('email', payload.email)
     .single()
+
+  // The DB trigger has proven unreliable for some accounts — create the
+  // profile directly rather than failing the whole operation. An account
+  // an admin creates here is always pre-approved.
+  if (!profile && newUserId) {
+    await profileTable().upsert(
+      { id: newUserId, email: payload.email, full_name: payload.full_name, role: payload.role, is_approved: true },
+      { onConflict: 'id' },
+    )
+    const { data: created } = await supabase.from('profiles').select('*').eq('id', newUserId).single()
+    profile = created
+  }
+
   if (!profile) throw new Error('Profile was not created. Check that email confirmation is disabled in Supabase.')
+
+  // The trigger marks self-signup mentor/company accounts unapproved by
+  // default — an account an admin creates directly is implicitly approved.
+  if (payload.role === 'mentor' || payload.role === 'company') {
+    await approveUser((profile as unknown as Profile).id)
+    return { ...(profile as unknown as Profile), is_approved: true }
+  }
   return profile as unknown as Profile
 }
 

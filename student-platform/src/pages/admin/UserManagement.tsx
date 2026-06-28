@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  useAllUsers, useUpdateUser, useDeactivateUser, useReactivateUser, useCreateUser,
+  useAllUsers, useUpdateUser, useDeactivateUser, useReactivateUser, useApproveUser, useCreateUser,
 } from '@/hooks/useAdmin'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -36,7 +36,10 @@ export function UserManagement() {
   const updateUser   = useUpdateUser()
   const deactivate   = useDeactivateUser()
   const reactivate   = useReactivateUser()
+  const approve      = useApproveUser()
   const createUser   = useCreateUser()
+
+  const isPending = (u: Profile) => (u.role === 'mentor' || u.role === 'company') && u.is_approved === false
 
   const filtered = users.filter(u =>
     !search || u.full_name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()),
@@ -111,6 +114,7 @@ export function UserManagement() {
                 {filtered.map(u => {
                   const rc = ROLE_COLORS[u.role]
                   const isActive = u.is_active !== false
+                  const pending = isPending(u)
                   return (
                     <tr key={u.id} className="hover:bg-[var(--hair-2)] transition-colors">
                       <td className="px-5 py-3.5">
@@ -130,11 +134,15 @@ export function UserManagement() {
                         <span className="tag capitalize" style={{ background: rc.bg, color: rc.color }}>{u.role}</span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="tag" style={isActive
-                          ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
-                          : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
-                          {isActive ? 'Active' : 'Inactive'}
-                        </span>
+                        {pending ? (
+                          <span className="tag" style={{ background: 'var(--warn-soft)', color: 'var(--warn)' }}>Pending approval</span>
+                        ) : (
+                          <span className="tag" style={isActive
+                            ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
+                            : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
+                            {isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-3.5 text-[12.5px] font-mono muted">{fmtDate(u.created_at)}</td>
                       <td className="px-5 py-3.5">
@@ -143,7 +151,13 @@ export function UserManagement() {
                             className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">
                             Edit
                           </button>
-                          {isActive ? (
+                          {pending ? (
+                            <button onClick={() => approve.mutate(u.id)} disabled={approve.isPending}
+                              className="h-7 px-2.5 rounded-lg text-[12px] font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+                              style={{ background: 'var(--accent)' }}>
+                              Approve
+                            </button>
+                          ) : isActive ? (
                             <button onClick={() => deactivate.mutate(u.id)} disabled={u.role === 'admin'}
                               className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] disabled:opacity-40 transition-colors"
                               style={{ color: 'var(--rose)' }}>
@@ -173,6 +187,7 @@ export function UserManagement() {
             {filtered.map(u => {
               const rc = ROLE_COLORS[u.role]
               const isActive = u.is_active !== false
+              const pending = isPending(u)
               return (
                 <div key={u.id} className="bg-surface hairline rounded-2xl shadow-card p-4">
                   <div className="flex items-center gap-2.5 mb-3">
@@ -188,13 +203,17 @@ export function UserManagement() {
                       <div className="text-[12px] muted font-mono truncate">{u.email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <span className="tag capitalize" style={{ background: rc.bg, color: rc.color }}>{u.role}</span>
-                    <span className="tag" style={isActive
-                      ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
-                      : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
-                      {isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    {pending ? (
+                      <span className="tag" style={{ background: 'var(--warn-soft)', color: 'var(--warn)' }}>Pending approval</span>
+                    ) : (
+                      <span className="tag" style={isActive
+                        ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
+                        : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
+                        {isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    )}
                     <span className="text-[11.5px] font-mono muted ml-auto">{fmtDate(u.created_at)}</span>
                   </div>
                   <div className="flex gap-1.5">
@@ -202,7 +221,13 @@ export function UserManagement() {
                       className="flex-1 h-8 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">
                       Edit
                     </button>
-                    {isActive ? (
+                    {pending ? (
+                      <button onClick={() => approve.mutate(u.id)} disabled={approve.isPending}
+                        className="flex-1 h-8 rounded-lg text-[12.5px] font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+                        style={{ background: 'var(--accent)' }}>
+                        Approve
+                      </button>
+                    ) : isActive ? (
                       <button onClick={() => deactivate.mutate(u.id)} disabled={u.role === 'admin'}
                         className="flex-1 h-8 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--rose-soft)] disabled:opacity-40 transition-colors"
                         style={{ color: 'var(--rose)' }}>

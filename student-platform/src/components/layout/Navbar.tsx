@@ -91,6 +91,8 @@ export function Navbar() {
       path = role === 'mentor' ? '/mentor/mentorship-requests' : '/mentorship'
     } else if (n.type === 'feedback' || n.type === 'project') {
       path = role === 'mentor' ? '/mentor/submissions' : '/projects'
+    } else if (n.type === 'system') {
+      path = '/admin/users'
     }
     navigate(path)
   }
@@ -216,7 +218,7 @@ function NotificationsPanel({ items, onClose, onMarkAllRead, onItemClick }: { it
   return (
     <div className="pop-in absolute right-0 top-12 w-[360px] bg-surface hairline rounded-2xl shadow-pop overflow-hidden z-50">
       <div className="px-4 py-3 flex items-center justify-between hairline-b">
-        <div className="font-semibold text-[15px]">Notifications</div>
+        <div className="font-semibold text-[15px] ink-2">Notifications</div>
         <button className="text-[12px] font-medium hover:underline" style={{ color: 'var(--primary)' }}
           onClick={onMarkAllRead}>Mark all read</button>
       </div>
@@ -229,7 +231,7 @@ function NotificationsPanel({ items, onClose, onMarkAllRead, onItemClick }: { it
             <div className="mt-1.5 w-2 h-2 rounded-full shrink-0"
               style={{ background: typeColors[n.type] ?? 'var(--muted)' }} />
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-semibold truncate">{n.title}</div>
+              <div className="text-[13px] font-semibold truncate ink-2">{n.title}</div>
               <div className="text-[12px] muted truncate">{n.message}</div>
             </div>
           </div>

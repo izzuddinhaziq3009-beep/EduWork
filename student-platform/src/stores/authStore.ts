@@ -3,7 +3,7 @@ import { supabase } from '@/services/supabase'
 import type { Profile, UserRole } from '@/types'
 
 // Narrow builder bypasses Supabase's `never` upsert inference for profiles
-type ProfileUpsert = { id: string; email: string; full_name: string; role: UserRole }
+type ProfileUpsert = { id: string; email: string; full_name: string; role: UserRole; is_approved: boolean }
 type ProfileBuilder = { upsert(d: ProfileUpsert, opts: { onConflict: string }): Promise<{ error: Error | null }> }
 function profileTable() { return supabase.from('profiles') as unknown as ProfileBuilder }
 
@@ -15,8 +15,12 @@ async function fetchProfile(id: string): Promise<Profile | null> {
   return (data ?? null) as Profile | null
 }
 
-// If the DB trigger never created a profile (e.g. old account / trigger failure),
-// create it from the metadata Supabase stored during signup.
+// The DB trigger that normally creates a profile row on signup has proven
+// unreliable for some accounts (intermittent failures unrelated to role or
+// the approval feature — see project notes). This fallback is the actual
+// primary path now, not just a rare-edge-case backstop: it runs whenever a
+// profile is missing, and is solely responsible for correctly setting
+// is_approved (mentor/company start false; everyone else starts true).
 async function ensureProfile(
   userId: string,
   email: string,
@@ -24,9 +28,42 @@ async function ensureProfile(
 ): Promise<Profile | null> {
   const role = (metadata?.role as UserRole | undefined) ?? 'student'
   const fullName = (metadata?.full_name as string | undefined) ?? ''
-  await profileTable().upsert({ id: userId, email, full_name: fullName, role }, { onConflict: 'id' })
+  const isApproved = !(role === 'mentor' || role === 'company')
+  await profileTable().upsert({ id: userId, email, full_name: fullName, role, is_approved: isApproved }, { onConflict: 'id' })
   return fetchProfile(userId)
 }
+
+// Mentor/company accounts need admin approval before they can use the app.
+// Students and admins are never gated.
+function needsApproval(role: UserRole, profile: Profile | null): boolean {
+  return (role === 'mentor' || role === 'company') && profile?.is_approved === false
+}
+
+type NotifInsert = { user_id: string; title: string; message: string; type: 'system' }
+type NotifBuilder = { insert(d: NotifInsert): Promise<{ error: Error | null }> }
+function notifTable() { return supabase.from('notifications') as unknown as NotifBuilder }
+
+// Tell every admin a new mentor/company signup needs their review. Best-effort —
+// a notification failure must never block the signup itself.
+async function notifyAdminsOfPendingApproval(name: string, email: string, role: UserRole): Promise<void> {
+  try {
+    const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'admin')
+    const list = (admins ?? []) as { id: string }[]
+    await Promise.all(list.map(a => notifTable().insert({
+      user_id: a.id,
+      title: `New ${role} awaiting approval`,
+      message: `${name} (${email}) signed up as a ${role} and needs your approval before they can log in.`,
+      type: 'system',
+    })))
+  } catch {
+    // Non-critical — admins can still see pending accounts in User Management.
+  }
+}
+
+// Thrown by signUp when a brand-new mentor/company account is pending —
+// the signup page checks for this exact message to show a distinct
+// "awaiting approval" panel instead of a generic error.
+export const PENDING_APPROVAL_MESSAGE = 'PENDING_APPROVAL'
 
 interface AuthState {
   user: { id: string; email: string } | null
@@ -71,6 +108,14 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       const role: UserRole =
         profile?.role ?? (u.user_metadata?.role as UserRole | undefined) ?? 'student'
 
+      // A still-pending mentor/company account (or one a previous session
+      // cached before approval) must not stay signed in.
+      if (needsApproval(role, profile)) {
+        await supabase.auth.signOut()
+        set({ user: null, profile: null, role: null, loading: false })
+        return
+      }
+
       set({
         user: { id: u.id, email: u.email! },
         profile,
@@ -95,11 +140,24 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       if (error) throw error
       if (!data.user) throw new Error('Signup failed — no user returned.')
 
-      // The handle_new_user trigger creates the profile automatically.
-      // Only fetch the profile if we already have a live session
-      // (i.e. email confirmation is disabled in the Supabase project).
+      // The handle_new_user DB trigger is supposed to create the profile
+      // automatically, but has proven unreliable — ensureProfile is the
+      // real fallback here, not a rare edge case, so it must run whenever
+      // the trigger didn't leave a row behind.
       if (data.session) {
-        const profile = await fetchProfile(data.user.id)
+        let profile = await fetchProfile(data.user.id)
+        if (!profile) {
+          profile = await ensureProfile(data.user.id, data.user.email!, { full_name: fullName, role })
+        }
+
+        // New mentor/company self-signups start unapproved — don't let
+        // them stay signed in until an admin approves.
+        if (needsApproval(role, profile)) {
+          await notifyAdminsOfPendingApproval(fullName, email, role)
+          await supabase.auth.signOut()
+          set({ user: null, profile: null, role: null, loading: false })
+          throw new Error(PENDING_APPROVAL_MESSAGE)
+        }
 
         set({
           user: { id: data.user.id, email: data.user.email! },
@@ -142,6 +200,14 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       // Role: profile row → auth metadata → null
       const role: UserRole =
         profile?.role ?? (u.user_metadata?.role as UserRole | undefined) ?? 'student'
+
+      if (needsApproval(role, profile)) {
+        await supabase.auth.signOut()
+        set({ user: null, profile: null, role: null, loading: false })
+        throw new Error(
+          `Your ${role} account is awaiting admin approval. You'll be able to log in once it's approved.`,
+        )
+      }
 
       set({
         user: { id: u.id, email: u.email! },

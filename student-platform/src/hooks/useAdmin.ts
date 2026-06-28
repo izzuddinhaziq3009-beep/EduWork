@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getSystemStats, getRecentActivity,
-  getAllUsers, getUserById, updateUser, deactivateUser, reactivateUser, createUser, getUserAdminStats,
+  getAllUsers, getUserById, updateUser, deactivateUser, reactivateUser, approveUser, createUser, getUserAdminStats,
   getAllModulesAdmin,
   getAllProjectsAdmin, createProject, updateProject, deleteProject, toggleProjectActive,
   getAllIndependentProjectsAdmin, deleteIndependentProject,
@@ -66,6 +66,14 @@ export function useReactivateUser() {
   return useMutation({
     mutationFn: (userId: string) => reactivateUser(userId),
     onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.users() }); toast({ title: 'User reactivated.' }) },
+    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+}
+export function useApproveUser() {
+  const qc = useQueryClient(); const { toast } = useToast()
+  return useMutation({
+    mutationFn: (userId: string) => approveUser(userId),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.users() }); toast({ title: 'Account approved.', description: 'They can now log in.' }) },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })
 }

@@ -21,6 +21,7 @@ export interface Profile {
   avatar_url: string | null
   created_at: string
   is_active?: boolean           // added via supabase-admin-migration.sql
+  is_approved?: boolean         // added via supabase-mentor-company-approval.sql
   // Company-only fields (added via supabase-company-migration.sql)
   company_description?: string | null
   company_website?:     string | null
@@ -306,6 +307,7 @@ export interface Database {
           avatar_url?: string | null
           created_at?: string
           is_active?: boolean
+          is_approved?: boolean
           company_description?: string | null
           company_website?: string | null
           company_industry?: string | null
@@ -317,6 +319,7 @@ export interface Database {
           avatar_url?: string | null
           created_at?: string
           is_active?: boolean
+          is_approved?: boolean
           company_description?: string | null
           company_website?: string | null
           company_industry?: string | null

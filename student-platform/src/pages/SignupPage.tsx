@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, PENDING_APPROVAL_MESSAGE } from '@/stores/authStore'
 import { BrandPanel } from '@/components/auth/BrandPanel'
 import { AuthField, PasswordField, StrengthBar, passwordStrength } from '@/components/auth/AuthField'
 import { MailIcon, UserIcon, ArrowIcon, ShieldIcon, GoogleIcon,
@@ -27,6 +27,7 @@ export function SignupPage() {
   const [submitting, setSub]    = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [authError, setAuthError] = useState('')
+  const [pendingApproval, setPendingApproval] = useState(false)
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -52,7 +53,11 @@ export function SignupPage() {
       const redirectTo = params.get('redirect')
       navigate(role === 'student' && redirectTo ? redirectTo : roleDefault)
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Signup failed.')
+      if (err instanceof Error && err.message === PENDING_APPROVAL_MESSAGE) {
+        setPendingApproval(true)
+      } else {
+        setAuthError(err instanceof Error ? err.message : 'Signup failed.')
+      }
     } finally {
       setSub(false)
     }
@@ -95,6 +100,26 @@ export function SignupPage() {
 
         <div className="flex-1 flex items-start justify-center overflow-y-auto pb-4">
           <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-5 sm:p-8 lg:p-10">
+            {pendingApproval ? (
+              <div className="slide-up text-center flex flex-col items-center gap-4 py-4">
+                <div className="w-16 h-16 rounded-full grid place-items-center check-pop"
+                  style={{ background: 'var(--warn-soft)', color: 'var(--warn)' }}>
+                  <ShieldIcon width={28} height={28} />
+                </div>
+                <div>
+                  <h2 className="font-display text-[26px] font-semibold tracking-tight">Account created.</h2>
+                  <p className="muted text-[14px] mt-2 leading-relaxed max-w-sm">
+                    Your <strong className="ink-2 capitalize">{role}</strong> account is awaiting admin approval.
+                    We'll let you know once it's approved — you can then log in as usual.
+                  </p>
+                </div>
+                <Link to="/login"
+                  className="mt-2 shadow-cta text-white font-semibold text-[13.5px] h-11 px-6 rounded-xl flex items-center gap-1.5 transition-opacity hover:opacity-90"
+                  style={{ background: 'var(--cta)' }}>
+                  Back to login <ArrowIcon width={14} height={14} />
+                </Link>
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 slide-up">
               <header>
                 <div className="font-mono text-[11px] tracking-[0.18em] uppercase muted mb-1.5">Join Eduwork</div>
@@ -212,6 +237,7 @@ export function SignupPage() {
 
               <SecurityNote />
             </form>
+            )}
           </section>
         </div>
 
