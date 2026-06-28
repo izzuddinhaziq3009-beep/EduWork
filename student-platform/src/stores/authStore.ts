@@ -39,6 +39,7 @@ interface AuthState {
 interface AuthActions {
   signUp: (email: string, password: string, fullName: string, role: UserRole) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   checkAuth: () => Promise<void>
   clearError: () => void
@@ -152,6 +153,22 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
       const msg = err instanceof Error ? err.message : 'Login failed.'
       set({ loading: false, error: msg })
       throw err
+    }
+  },
+
+  // Google sign-in is student-only: there's no role picker in the OAuth flow,
+  // so new accounts created this way fall through to ensureProfile's 'student'
+  // default (no `role` key in Google's metadata). Existing mentor/company/admin
+  // accounts always go through the email/password form instead.
+  signInWithGoogle: async () => {
+    set({ error: null })
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+    if (error) {
+      set({ error: error.message })
+      throw error
     }
   },
 

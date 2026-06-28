@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { BrandPanel } from '@/components/auth/BrandPanel'
 import { AuthField, PasswordField, StrengthBar, passwordStrength } from '@/components/auth/AuthField'
-import { MailIcon, UserIcon, ArrowIcon, ShieldIcon, GoogleIcon, GithubIcon,
+import { MailIcon, UserIcon, ArrowIcon, ShieldIcon, GoogleIcon,
          CheckIcon, AlertIcon, BadgeIcon, BuildingIcon } from '@/components/auth/AuthIcons'
 import type { UserRole } from '@/types'
 
@@ -16,7 +16,7 @@ const ROLES = [
 export function SignupPage() {
   const navigate  = useNavigate()
   const [params]  = useSearchParams()
-  const { signUp } = useAuthStore()
+  const { signUp, signInWithGoogle } = useAuthStore()
 
   const [name, setName]         = useState('')
   const [email, setEmail]       = useState('')
@@ -25,6 +25,7 @@ export function SignupPage() {
   const [tos, setTos]           = useState(false)
   const [errors, setErrors]     = useState<Record<string, string>>({})
   const [submitting, setSub]    = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [authError, setAuthError] = useState('')
 
   const validate = () => {
@@ -54,6 +55,17 @@ export function SignupPage() {
       setAuthError(err instanceof Error ? err.message : 'Signup failed.')
     } finally {
       setSub(false)
+    }
+  }
+
+  const handleGoogle = async () => {
+    setAuthError('')
+    setGoogleLoading(true)
+    try {
+      await signInWithGoogle()
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Google sign-in failed.')
+      setGoogleLoading(false)
     }
   }
 
@@ -90,22 +102,20 @@ export function SignupPage() {
                 <p className="muted text-[14px] mt-1.5">Three minutes to set up, then we'll match you to your first challenge.</p>
               </header>
 
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button"
-                  className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GoogleIcon width={18} height={18} />Google
+              {role === 'student' && (
+                <button type="button" onClick={handleGoogle} disabled={googleLoading}
+                  className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] disabled:opacity-60 transition-colors">
+                  <GoogleIcon width={18} height={18} />{googleLoading ? 'Redirecting…' : 'Continue with Google'}
                 </button>
-                <button type="button"
-                  className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GithubIcon width={18} height={18} />GitHub
-                </button>
-              </div>
+              )}
 
-              <div className="flex items-center gap-3 text-[11.5px] font-mono uppercase tracking-widest muted">
-                <span className="flex-1 h-px" style={{ background: 'var(--hair)' }} />
-                <span>or sign up with email</span>
-                <span className="flex-1 h-px" style={{ background: 'var(--hair)' }} />
-              </div>
+              {role === 'student' && (
+                <div className="flex items-center gap-3 text-[11.5px] font-mono uppercase tracking-widest muted">
+                  <span className="flex-1 h-px" style={{ background: 'var(--hair)' }} />
+                  <span>or sign up with email</span>
+                  <span className="flex-1 h-px" style={{ background: 'var(--hair)' }} />
+                </div>
+              )}
 
               {authError && (
                 <div className="hairline rounded-xl px-4 py-3 text-[13px] font-medium"

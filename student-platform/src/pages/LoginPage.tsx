@@ -3,17 +3,18 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { BrandPanel } from '@/components/auth/BrandPanel'
 import { AuthField, PasswordField } from '@/components/auth/AuthField'
-import { MailIcon, ArrowIcon, ShieldIcon, GoogleIcon, GithubIcon, CheckIcon } from '@/components/auth/AuthIcons'
+import { MailIcon, ArrowIcon, ShieldIcon, GoogleIcon, CheckIcon } from '@/components/auth/AuthIcons'
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { signIn, role } = useAuthStore()
+  const { signIn, signInWithGoogle } = useAuthStore()
 
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [errors, setErrors]     = useState<Record<string, string>>({})
   const [submitting, setSub]    = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [authError, setAuthError] = useState('')
 
   const roleRedirect = (r: string | null) => {
@@ -48,6 +49,19 @@ export function LoginPage() {
     }
   }
 
+  const handleGoogle = async () => {
+    setAuthError('')
+    setGoogleLoading(true)
+    try {
+      await signInWithGoogle()
+      // On success the browser navigates away to Google immediately — this
+      // component unmounts, so there's no further state to set here.
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Google sign-in failed.')
+      setGoogleLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen grid lg:grid-cols-[1fr_minmax(560px,680px)]">
       <div className="hidden lg:block">
@@ -75,7 +89,7 @@ export function LoginPage() {
 
         {/* Card */}
         <div className="flex-1 flex items-start justify-center">
-          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[400px] p-5 sm:p-6 lg:p-7">
+          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-5 sm:p-8 lg:p-10">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 slide-up">
               <header>
                 <div className="font-mono text-[11px] tracking-[0.18em] uppercase muted mb-1.5">Log in to Eduwork</div>
@@ -84,16 +98,10 @@ export function LoginPage() {
               </header>
 
               {/* OAuth row */}
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button"
-                  className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GoogleIcon width={18} height={18} className="shrink-0" />Google
-                </button>
-                <button type="button"
-                  className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GithubIcon width={18} height={18} className="shrink-0" />GitHub
-                </button>
-              </div>
+              <button type="button" onClick={handleGoogle} disabled={googleLoading}
+                className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] disabled:opacity-60 transition-colors">
+                <GoogleIcon width={18} height={18} className="shrink-0" />{googleLoading ? 'Redirecting…' : 'Continue with Google'}
+              </button>
 
               <div className="flex items-center gap-3 text-[11.5px] font-mono uppercase tracking-widest muted">
                 <span className="flex-1 h-px" style={{ background: 'var(--hair)' }} />
