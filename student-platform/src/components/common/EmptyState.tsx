@@ -7,7 +7,7 @@ interface Props {
 
 export function EmptyState({ icon, title, description, action }: Props) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="flex flex-col items-center justify-center py-10 sm:py-12 lg:py-16 px-4 text-center">
       {icon && (
         <div className="w-14 h-14 rounded-2xl grid place-items-center mb-4"
           style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>

@@ -207,13 +207,18 @@ export async function getProgressForModule(
   return (data ?? null) as unknown as StudentModuleProgress | null
 }
 
+async function getModuleTitle(moduleId: string): Promise<string> {
+  const { data } = await supabase.from('learning_modules').select('title').eq('id', moduleId).single()
+  return (data as { title: string } | null)?.title ?? 'a module'
+}
+
 export async function enrollInModule(moduleId: string, studentId: string): Promise<void> {
   const { error } = await smpTable().upsert(
     { student_id: studentId, module_id: moduleId, progress: 0, completed: false, last_accessed: new Date().toISOString() },
     { onConflict: 'student_id,module_id' },
   )
   if (error) throw error
-  await logActivity(studentId, 'module_enrolled', `Enrolled in module ${moduleId}`)
+  await logActivity(studentId, 'module_enrolled', `Enrolled in ${await getModuleTitle(moduleId)}`)
 }
 
 export async function updateProgress(moduleId: string, studentId: string, progress: number): Promise<void> {
@@ -230,7 +235,7 @@ export async function markAsCompleted(moduleId: string, studentId: string): Prom
     .eq('student_id', studentId)
     .eq('module_id', moduleId)
   if (error) throw error
-  await logActivity(studentId, 'module_completed', `Completed module ${moduleId}`)
+  await logActivity(studentId, 'module_completed', `Completed ${await getModuleTitle(moduleId)}`)
 }
 
 // ── Item progress (student, structured modules) ──────────────────────────────
@@ -280,7 +285,7 @@ export async function markItemComplete(
     },
     { onConflict: 'student_id,module_id' },
   )
-  if (allComplete) await logActivity(studentId, 'module_completed', `Completed module ${moduleId}`)
+  if (allComplete) await logActivity(studentId, 'module_completed', `Completed ${await getModuleTitle(moduleId)}`)
 }
 
 // ── Module items CRUD (admin) ─────────────────────────────────────────────────

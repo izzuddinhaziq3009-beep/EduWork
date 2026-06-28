@@ -65,64 +65,112 @@ export function CompanySubmissions() {
           description={filter === 'all' ? 'Students will appear here once they submit to your challenges.' : 'No submissions for this challenge yet.'}
         />
       ) : (
-        <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="hairline-b">
-                {['Student', 'Challenge', 'GitHub', 'Commits', 'Submitted', 'Status', ''].map(h => (
-                  <th key={h} className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--hair)]">
-              {filtered.map(({ submission, challenge, student }) => {
-                const st = STATUS_STYLE[submission.status]
-                return (
-                  <tr key={submission.id} className="hover:bg-[var(--hair-2)] transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg grid place-items-center font-mono font-semibold text-white text-[11px] shrink-0"
-                          style={{ background: avatarColor(student.full_name) }}>
-                          {fmtInitials(student.full_name)}
+        <>
+          {/* Desktop: table */}
+          <div className="hidden lg:block bg-surface hairline rounded-2xl shadow-card overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="hairline-b">
+                  {['Student', 'Challenge', 'GitHub', 'Commits', 'Submitted', 'Status', ''].map(h => (
+                    <th key={h} className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--hair)]">
+                {filtered.map(({ submission, challenge, student }) => {
+                  const st = STATUS_STYLE[submission.status]
+                  return (
+                    <tr key={submission.id} className="hover:bg-[var(--hair-2)] transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg grid place-items-center font-mono font-semibold text-white text-[11px] shrink-0"
+                            style={{ background: avatarColor(student.full_name) }}>
+                            {fmtInitials(student.full_name)}
+                          </div>
+                          <span className="text-[13.5px] font-medium">{student.full_name}</span>
                         </div>
-                        <span className="text-[13.5px] font-medium">{student.full_name}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-[13px] ink-2 max-w-[200px] truncate">{challenge.title}</td>
-                    <td className="px-5 py-3.5">
-                      <a href={submission.github_url} target="_blank" rel="noopener noreferrer"
-                        className="text-[12.5px] font-mono hover:underline truncate block max-w-[160px]"
-                        style={{ color: 'var(--primary)' }}>
-                        {submission.github_repo_name}
-                      </a>
-                    </td>
-                    <td className="px-5 py-3.5 text-[13px] font-mono muted">{submission.github_commit_count}</td>
-                    <td className="px-5 py-3.5 text-[12px] font-mono muted whitespace-nowrap">{fmtRelative(submission.submitted_at)}</td>
-                    <td className="px-5 py-3.5">
-                      <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link to={`/company/messages?with=${student.id}`}
-                          className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center gap-1.5 transition-colors"
-                          style={{ color: 'var(--ink-2)' }}
-                          title={`Message ${student.full_name}`}>
-                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/></svg>
-                          Message
-                        </Link>
-                        <Link to={`/company/submissions/${submission.id}`}
-                          className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
+                      </td>
+                      <td className="px-5 py-3.5 text-[13px] ink-2 max-w-[200px] truncate">{challenge.title}</td>
+                      <td className="px-5 py-3.5">
+                        <a href={submission.github_url} target="_blank" rel="noopener noreferrer"
+                          className="text-[12.5px] font-mono hover:underline truncate block max-w-[160px]"
                           style={{ color: 'var(--primary)' }}>
-                          Review →
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                          {submission.github_repo_name}
+                        </a>
+                      </td>
+                      <td className="px-5 py-3.5 text-[13px] font-mono muted">{submission.github_commit_count}</td>
+                      <td className="px-5 py-3.5 text-[12px] font-mono muted whitespace-nowrap">{fmtRelative(submission.submitted_at)}</td>
+                      <td className="px-5 py-3.5">
+                        <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link to={`/company/messages?with=${student.id}`}
+                            className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center gap-1.5 transition-colors"
+                            style={{ color: 'var(--ink-2)' }}
+                            title={`Message ${student.full_name}`}>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/></svg>
+                            Message
+                          </Link>
+                          <Link to={`/company/submissions/${submission.id}`}
+                            className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
+                            style={{ color: 'var(--primary)' }}>
+                            Review →
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile/tablet: cards */}
+          <div className="lg:hidden space-y-3">
+            {filtered.map(({ submission, challenge, student }) => {
+              const st = STATUS_STYLE[submission.status]
+              return (
+                <div key={submission.id} className="bg-surface hairline rounded-2xl shadow-card p-4">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
+                      style={{ background: avatarColor(student.full_name) }}>
+                      {fmtInitials(student.full_name)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[13.5px] font-medium truncate">{student.full_name}</div>
+                      <div className="text-[12px] muted truncate">{challenge.title}</div>
+                    </div>
+                    <span className="tag shrink-0" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[12px] mb-3">
+                    <a href={submission.github_url} target="_blank" rel="noopener noreferrer"
+                      className="font-mono hover:underline truncate" style={{ color: 'var(--primary)' }}>
+                      {submission.github_repo_name}
+                    </a>
+                    <span className="font-mono muted shrink-0 ml-2">{submission.github_commit_count} commits</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11.5px] font-mono muted">{fmtRelative(submission.submitted_at)}</span>
+                    <div className="flex items-center gap-2">
+                      <Link to={`/company/messages?with=${student.id}`}
+                        className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center gap-1.5 transition-colors"
+                        style={{ color: 'var(--ink-2)' }}>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/></svg>
+                        Message
+                      </Link>
+                      <Link to={`/company/submissions/${submission.id}`}
+                        className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
+                        style={{ color: 'var(--primary)' }}>
+                        Review →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
     </div>
   )

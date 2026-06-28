@@ -68,7 +68,7 @@ export function UserManagement() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <Input placeholder="Search name or email…" value={search} onChange={e => setSearch(e.target.value)} className="max-w-[300px] h-10" />
+        <Input placeholder="Search name or email…" value={search} onChange={e => setSearch(e.target.value)} className="max-w-[300px]" />
         <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
           {(['all','student','mentor','company'] as const).map(r => (
             <button key={r} onClick={() => setRoleFilter(r)}
@@ -96,75 +96,134 @@ export function UserManagement() {
           description={search ? 'Try a different name or email.' : 'Users will appear here once they register.'}
         />
       ) : (
-        <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="hairline-b">
-                {['User','Email','Role','Status','Joined','Actions'].map(h => (
-                  <th key={h} className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--hair)]">
-              {filtered.map(u => {
-                const rc = ROLE_COLORS[u.role]
-                const isActive = u.is_active !== false
-                return (
-                  <tr key={u.id} className="hover:bg-[var(--hair-2)] transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg grid place-items-center font-mono font-semibold text-white text-[11px] shrink-0"
-                          style={{ background: avatarColor(u.full_name) }}>
-                          {fmtInitials(u.full_name)}
+        <>
+          {/* Desktop: table */}
+          <div className="hidden lg:block bg-surface hairline rounded-2xl shadow-card overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="hairline-b">
+                  {['User','Email','Role','Status','Joined','Actions'].map(h => (
+                    <th key={h} className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--hair)]">
+                {filtered.map(u => {
+                  const rc = ROLE_COLORS[u.role]
+                  const isActive = u.is_active !== false
+                  return (
+                    <tr key={u.id} className="hover:bg-[var(--hair-2)] transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg grid place-items-center font-mono font-semibold text-white text-[11px] shrink-0"
+                            style={{ background: avatarColor(u.full_name) }}>
+                            {fmtInitials(u.full_name)}
+                          </div>
+                          <Link to={`/admin/users/${u.id}`}
+                            className="text-[13.5px] font-medium hover:underline" style={{ color: 'var(--primary)' }}>
+                            {u.full_name}
+                          </Link>
                         </div>
-                        <Link to={`/admin/users/${u.id}`}
-                          className="text-[13.5px] font-medium hover:underline" style={{ color: 'var(--primary)' }}>
-                          {u.full_name}
-                        </Link>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-[13px] muted font-mono">{u.email}</td>
-                    <td className="px-5 py-3.5">
-                      <span className="tag capitalize" style={{ background: rc.bg, color: rc.color }}>{u.role}</span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <span className="tag" style={isActive
-                        ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
-                        : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
-                        {isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-[12.5px] font-mono muted">{fmtDate(u.created_at)}</td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex gap-1.5">
-                        <button onClick={() => openEdit(u)}
-                          className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">
-                          Edit
-                        </button>
-                        {isActive ? (
-                          <button onClick={() => deactivate.mutate(u.id)} disabled={u.role === 'admin'}
-                            className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] disabled:opacity-40 transition-colors"
-                            style={{ color: 'var(--rose)' }}>
-                            Deactivate
+                      </td>
+                      <td className="px-5 py-3.5 text-[13px] muted font-mono">{u.email}</td>
+                      <td className="px-5 py-3.5">
+                        <span className="tag capitalize" style={{ background: rc.bg, color: rc.color }}>{u.role}</span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="tag" style={isActive
+                          ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
+                          : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
+                          {isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-[12.5px] font-mono muted">{fmtDate(u.created_at)}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex gap-1.5">
+                          <button onClick={() => openEdit(u)}
+                            className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">
+                            Edit
                           </button>
-                        ) : (
-                          <button onClick={() => reactivate.mutate(u.id)}
-                            className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--accent-soft)] transition-colors"
-                            style={{ color: 'var(--accent)' }}>
-                            Reactivate
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          <div className="px-5 py-3 hairline-t text-[12px] font-mono muted">
-            Showing {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
+                          {isActive ? (
+                            <button onClick={() => deactivate.mutate(u.id)} disabled={u.role === 'admin'}
+                              className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] disabled:opacity-40 transition-colors"
+                              style={{ color: 'var(--rose)' }}>
+                              Deactivate
+                            </button>
+                          ) : (
+                            <button onClick={() => reactivate.mutate(u.id)}
+                              className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--accent-soft)] transition-colors"
+                              style={{ color: 'var(--accent)' }}>
+                              Reactivate
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            <div className="px-5 py-3 hairline-t text-[12px] font-mono muted">
+              Showing {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
+            </div>
           </div>
-        </div>
+
+          {/* Mobile: cards */}
+          <div className="lg:hidden space-y-3">
+            {filtered.map(u => {
+              const rc = ROLE_COLORS[u.role]
+              const isActive = u.is_active !== false
+              return (
+                <div key={u.id} className="bg-surface hairline rounded-2xl shadow-card p-4">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
+                      style={{ background: avatarColor(u.full_name) }}>
+                      {fmtInitials(u.full_name)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <Link to={`/admin/users/${u.id}`}
+                        className="text-[14px] font-medium hover:underline block truncate" style={{ color: 'var(--primary)' }}>
+                        {u.full_name}
+                      </Link>
+                      <div className="text-[12px] muted font-mono truncate">{u.email}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="tag capitalize" style={{ background: rc.bg, color: rc.color }}>{u.role}</span>
+                    <span className="tag" style={isActive
+                      ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
+                      : { background: 'var(--rose-soft)',   color: 'var(--rose)'   }}>
+                      {isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    <span className="text-[11.5px] font-mono muted ml-auto">{fmtDate(u.created_at)}</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button onClick={() => openEdit(u)}
+                      className="flex-1 h-8 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">
+                      Edit
+                    </button>
+                    {isActive ? (
+                      <button onClick={() => deactivate.mutate(u.id)} disabled={u.role === 'admin'}
+                        className="flex-1 h-8 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--rose-soft)] disabled:opacity-40 transition-colors"
+                        style={{ color: 'var(--rose)' }}>
+                        Deactivate
+                      </button>
+                    ) : (
+                      <button onClick={() => reactivate.mutate(u.id)}
+                        className="flex-1 h-8 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--accent-soft)] transition-colors"
+                        style={{ color: 'var(--accent)' }}>
+                        Reactivate
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            <div className="text-[12px] font-mono muted text-center pt-1">
+              Showing {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+        </>
       )}
 
       {/* Edit dialog */}

@@ -21,7 +21,7 @@ export function ProgressPage() {
       <PageHeader label="Your journey" title="My Progress" description="Track everything you've completed across modules, projects, and challenges." />
 
       {/* Summary KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {loading ? Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="bg-surface hairline rounded-2xl p-5"><Skeleton className="h-10 w-full" /></div>
         )) : [

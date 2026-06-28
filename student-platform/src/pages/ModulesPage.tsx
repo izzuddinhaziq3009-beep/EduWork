@@ -50,7 +50,7 @@ export function ModulesPage() {
           placeholder="Search modules…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="max-w-[320px] h-10"
+          className="max-w-[320px]"
         />
         <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
           {DIFFICULTIES.map(d => (

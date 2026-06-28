@@ -68,9 +68,9 @@ function ModulesTab() {
         <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
           <div className="divide-y divide-[var(--hair)]">
             {modules.map(m => (
-              <div key={m.id} className="flex items-center gap-4 px-5 py-3.5">
+              <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <span className="text-[14px] font-semibold truncate">{m.title}</span>
                     <span className="tag" style={{ background: m.module_type === 'structured' ? 'var(--primary-soft)' : 'var(--accent-soft)', color: m.module_type === 'structured' ? 'var(--primary)' : 'var(--accent)' }}>
                       {m.module_type === 'structured' ? 'Structured' : 'Simple'}
@@ -81,13 +81,13 @@ function ModulesTab() {
                   <div className="text-[12px] font-mono muted">{fmtDuration(m.duration_hours)} duration</div>
                 </div>
                 <div className="flex gap-1.5 shrink-0">
-                  <button onClick={() => setEditingId(m.id)} className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">Edit</button>
+                  <button onClick={() => setEditingId(m.id)} className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">Edit</button>
                   <button onClick={() => toggleActive.mutate({ id: m.id, isActive: !m.is_active })}
-                    className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors"
+                    className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors"
                     style={{ color: m.is_active ? 'var(--warn)' : 'var(--accent)' }}>
                     {m.is_active ? 'Deactivate' : 'Activate'}
                   </button>
-                  <button onClick={() => setDelId(m.id)} className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] transition-colors" style={{ color: 'var(--rose)' }}>Delete</button>
+                  <button onClick={() => setDelId(m.id)} className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] transition-colors" style={{ color: 'var(--rose)' }}>Delete</button>
                 </div>
               </div>
             ))}
@@ -142,22 +142,22 @@ function ProjectsTab() {
         <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
           <div className="divide-y divide-[var(--hair)]">
             {projects.map(p => (
-              <div key={p.id} className="flex items-center gap-4 px-5 py-3.5">
+              <div key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <span className="text-[14px] font-semibold truncate">{p.title}</span>
                     {!p.is_active && <span className="tag" style={{ background: 'var(--hair-2)', color: 'var(--muted)' }}>Inactive</span>}
                   </div>
                   <div className="text-[12px] font-mono muted">Due {fmtDate(p.due_date)}</div>
                 </div>
                 <div className="flex gap-1.5 shrink-0">
-                  <button onClick={() => openEdit(p)} className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">Edit</button>
+                  <button onClick={() => openEdit(p)} className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">Edit</button>
                   <button onClick={() => toggleActive.mutate({ id: p.id, isActive: !p.is_active })}
-                    className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors"
+                    className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors"
                     style={{ color: p.is_active ? 'var(--warn)' : 'var(--accent)' }}>
                     {p.is_active ? 'Deactivate' : 'Activate'}
                   </button>
-                  <button onClick={() => setDelId(p.id)} className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] transition-colors" style={{ color: 'var(--rose)' }}>Delete</button>
+                  <button onClick={() => setDelId(p.id)} className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] transition-colors" style={{ color: 'var(--rose)' }}>Delete</button>
                 </div>
               </div>
             ))}
@@ -172,7 +172,7 @@ function ProjectsTab() {
             <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Title</label><Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} /></div>
             <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Description</label><Textarea rows={2} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} /></div>
             <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Requirements</label><Textarea rows={3} value={form.requirements} onChange={e => setForm(p => ({ ...p, requirements: e.target.value }))} /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Due date</label><Input type="date" value={form.due_date} onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))} /></div>
               <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Linked module <span className="muted font-normal">(opt.)</span></label>
                 <Select value={form.module_id || 'none'} onValueChange={v => setForm(p => ({ ...p, module_id: v === 'none' ? '' : v }))}>
@@ -220,15 +220,15 @@ function IndieProjectsTab() {
             {projects.map(p => {
               const st = STATUS_STYLE[p.status] ?? STATUS_STYLE.in_progress
               return (
-                <div key={p.id} className="flex items-center gap-4 px-5 py-3.5">
+                <div key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                       <span className="text-[14px] font-semibold truncate">{p.title}</span>
                       <span className="tag capitalize" style={{ background: st.bg, color: st.color }}>{p.status.replace('_',' ')}</span>
                     </div>
                     <div className="text-[12px] font-mono muted">{p.profiles?.full_name ?? '—'} · {p.profiles?.email ?? '—'}</div>
                   </div>
-                  <button onClick={() => setDelId(p.id)} className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] transition-colors shrink-0" style={{ color: 'var(--rose)' }}>Delete</button>
+                  <button onClick={() => setDelId(p.id)} className="h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--rose-soft)] transition-colors shrink-0 self-start sm:self-auto" style={{ color: 'var(--rose)' }}>Delete</button>
                 </div>
               )
             })}

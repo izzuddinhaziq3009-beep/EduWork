@@ -72,7 +72,7 @@ export function ChallengesPage() {
               placeholder="Search challenges or companies…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="max-w-[320px] h-10"
+              className="max-w-[320px]"
             />
             <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
               {DIFFICULTIES.map(d => (
@@ -128,64 +128,104 @@ export function ChallengesPage() {
             description="Browse challenges and submit your GitHub repository to get started."
           />
         ) : (
-          <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="hairline-b">
-                  {['Challenge', 'Company', 'Difficulty', 'Submitted', 'Status', ''].map(h => (
-                    <th key={h} className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--hair)]">
-                {mySubmissions.map(({ submission, challenge, company }) => {
-                  const st = SUB_STATUS[submission.status]
-                  const hasReview = submission.status === 'feedback_given' || submission.status === 'completed'
-                  return (
-                    <tr key={submission.id} className="hover:bg-[var(--hair-2)] transition-colors">
-                      <td className="px-5 py-3.5 max-w-[220px]">
-                        <div className="text-[13.5px] font-medium truncate">{challenge.title}</div>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md grid place-items-center font-mono font-bold text-white text-[10px] shrink-0"
+          <>
+            {/* Desktop: table */}
+            <div className="hidden lg:block bg-surface hairline rounded-2xl shadow-card overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="hairline-b">
+                    {['Challenge', 'Company', 'Difficulty', 'Submitted', 'Status', ''].map(h => (
+                      <th key={h} className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--hair)]">
+                  {mySubmissions.map(({ submission, challenge, company }) => {
+                    const st = SUB_STATUS[submission.status]
+                    const hasReview = submission.status === 'feedback_given' || submission.status === 'completed'
+                    return (
+                      <tr key={submission.id} className="hover:bg-[var(--hair-2)] transition-colors">
+                        <td className="px-5 py-3.5 max-w-[220px]">
+                          <div className="text-[13.5px] font-medium truncate">{challenge.title}</div>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-md grid place-items-center font-mono font-bold text-white text-[10px] shrink-0"
+                              style={{ background: companyColor(company.full_name) }}>
+                              {company.full_name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-[13px] ink-2 truncate max-w-[120px]">{company.full_name}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <DifficultyBadge level={challenge.difficulty_level} />
+                        </td>
+                        <td className="px-5 py-3.5 text-[12px] font-mono muted whitespace-nowrap">
+                          {fmtRelative(submission.submitted_at)}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                            {hasReview && (
+                              <span title="Feedback received">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)' }}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <Link to={`/challenges/${challenge.id}`}
+                            className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
+                            style={{ color: 'var(--primary)' }}>
+                            View →
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile: cards */}
+            <div className="lg:hidden space-y-3">
+              {mySubmissions.map(({ submission, challenge, company }) => {
+                const st = SUB_STATUS[submission.status]
+                const hasReview = submission.status === 'feedback_given' || submission.status === 'completed'
+                return (
+                  <Link key={submission.id} to={`/challenges/${challenge.id}`}
+                    className="block bg-surface hairline rounded-2xl shadow-card p-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0">
+                        <div className="text-[14px] font-medium truncate">{challenge.title}</div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <div className="w-5 h-5 rounded-md grid place-items-center font-mono font-bold text-white text-[9px] shrink-0"
                             style={{ background: companyColor(company.full_name) }}>
                             {company.full_name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-[13px] ink-2 truncate max-w-[120px]">{company.full_name}</span>
+                          <span className="text-[12px] muted truncate">{company.full_name}</span>
                         </div>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <DifficultyBadge level={challenge.difficulty_level} />
-                      </td>
-                      <td className="px-5 py-3.5 text-[12px] font-mono muted whitespace-nowrap">
-                        {fmtRelative(submission.submitted_at)}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                          {hasReview && (
-                            <span title="Feedback received">
-                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)' }}>
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                              </svg>
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <Link to={`/challenges/${challenge.id}`}
-                          className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
-                          style={{ color: 'var(--primary)' }}>
-                          View →
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                      <DifficultyBadge level={challenge.difficulty_level} />
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-2">
+                        <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                        {hasReview && (
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)' }}>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-[11.5px] font-mono muted">{fmtRelative(submission.submitted_at)}</span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </>
         )
       )}
     </div>

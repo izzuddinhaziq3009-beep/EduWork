@@ -30,9 +30,9 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-center p-4 sm:p-6">
       {/* Logo */}
-      <Link to="/login" className="flex items-center gap-2.5 mb-10" style={{ color: 'var(--primary)' }}>
+      <Link to="/login" className="flex items-center gap-2.5 mb-8 sm:mb-10" style={{ color: 'var(--primary)' }}>
         <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
           <rect x="2" y="2" width="28" height="28" rx="7" fill="currentColor"/>
           <path d="M9 20.5L16 9l7 11.5H17.5L16 18l-1.5 2.5H9z" fill="#fff"/>
@@ -41,7 +41,7 @@ export function ForgotPasswordPage() {
         <span className="font-display text-[22px] font-semibold tracking-tight" style={{ color: 'var(--ink)' }}>Eduwork</span>
       </Link>
 
-      <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[460px] p-10">
+      <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[460px] p-6 sm:p-8 lg:p-10">
         {sent ? (
           <div className="slide-up text-center flex flex-col items-center gap-4 py-4">
             <div className="w-16 h-16 rounded-full grid place-items-center check-pop"

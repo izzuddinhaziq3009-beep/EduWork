@@ -4,11 +4,13 @@ import {
   getModuleProgressDetails,
   getProjectProgressDetails,
 } from '@/services/progressService'
+import { getUserActivity } from '@/utils/activityLog'
 
 export const progressKeys = {
   overall: (studentId: string) => ['progress-overall', studentId] as const,
   modules: (studentId: string) => ['progress-modules', studentId] as const,
   projects: (studentId: string) => ['progress-projects', studentId] as const,
+  activity: (userId: string) => ['user-activity', userId] as const,
 }
 
 export function useOverallProgress(studentId: string) {
@@ -33,5 +35,14 @@ export function useProjectProgressDetails(studentId: string) {
     queryKey: progressKeys.projects(studentId),
     queryFn: () => getProjectProgressDetails(studentId),
     enabled: !!studentId,
+  })
+}
+
+export function useUserActivity(userId: string) {
+  return useQuery({
+    queryKey: progressKeys.activity(userId),
+    queryFn: () => getUserActivity(userId),
+    enabled: !!userId,
+    staleTime: 1000 * 60,
   })
 }

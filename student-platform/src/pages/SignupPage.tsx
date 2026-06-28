@@ -63,8 +63,8 @@ export function SignupPage() {
         <BrandPanel />
       </div>
 
-      <main className="flex flex-col p-8 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
-        <header className="flex items-center justify-between mb-10">
+      <main className="flex flex-col p-4 sm:p-6 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
+        <header className="flex items-center justify-between flex-wrap gap-3 mb-8 sm:mb-10">
           <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
             <Link to="/login"
               className="px-4 py-1.5 rounded-lg text-[13px] font-semibold muted hover:text-[color:var(--ink)]">
@@ -82,11 +82,11 @@ export function SignupPage() {
         </header>
 
         <div className="flex-1 flex items-start justify-center overflow-y-auto pb-4">
-          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-8 lg:p-10">
+          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-5 sm:p-8 lg:p-10">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 slide-up">
               <header>
                 <div className="font-mono text-[11px] tracking-[0.18em] uppercase muted mb-1.5">Join Eduwork</div>
-                <h2 className="font-display text-[32px] font-semibold tracking-tight leading-tight">Create your account.</h2>
+                <h2 className="font-display text-[26px] sm:text-[30px] lg:text-[32px] font-semibold tracking-tight leading-tight">Create your account.</h2>
                 <p className="muted text-[14px] mt-1.5">Three minutes to set up, then we'll match you to your first challenge.</p>
               </header>
 
@@ -133,7 +133,7 @@ export function SignupPage() {
                   <span className="text-[12.5px] font-medium ink-2">I'm signing up as</span>
                   <span className="text-[11px] muted font-mono">required</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {ROLES.map(r => {
                     const on = role === r.id
                     return (

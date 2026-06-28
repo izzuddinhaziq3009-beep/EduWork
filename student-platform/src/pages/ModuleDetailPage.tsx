@@ -60,7 +60,7 @@ export function ModuleDetailPage() {
       {/* Enrollment / progress bar */}
       <div className="bg-surface hairline rounded-2xl p-5 mb-8">
         {!enrolled ? (
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="text-[15px] font-semibold">Ready to start?</div>
               <div className="text-[13px] muted mt-0.5">Enroll to track your progress and earn this module in your portfolio.</div>

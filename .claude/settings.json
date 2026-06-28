@@ -6,7 +6,9 @@
       "Bash(tee /tmp/tsc_restruct3.txt)",
       "Bash(tee /tmp/tsc_landing.txt)",
       "Bash(tee /tmp/tsc_landing2.txt)",
-      "Bash(tee /tmp/tsc_thumb.txt)"
+      "Bash(tee /tmp/tsc_thumb.txt)",
+      "Bash(npm run *)",
+      "Bash(taskkill //F //IM node.exe //T)"
     ]
   }
 }

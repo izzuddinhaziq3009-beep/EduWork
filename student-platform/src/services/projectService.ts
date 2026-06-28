@@ -85,6 +85,8 @@ export async function submitProject(
     .select()
     .single()
   if (error) throw error
-  await logActivity(studentId, 'project_submitted', `Submitted project ${projectId}`)
+  const { data: project } = await supabase.from('projects').select('title').eq('id', projectId).single()
+  const title = (project as { title: string } | null)?.title ?? 'a project'
+  await logActivity(studentId, 'project_submitted', `Submitted ${title}`)
   return data as unknown as ProjectSubmission
 }

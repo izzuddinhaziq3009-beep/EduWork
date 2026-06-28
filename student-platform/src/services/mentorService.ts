@@ -158,7 +158,13 @@ export async function submitFeedback(
       : 'Your mentor has requested revisions on your project submission.',
     type: 'feedback',
   })
-  await logActivity(mentorId, 'feedback_given', `Gave feedback on submission ${submissionId}`)
+  const { data: submission } = await supabase.from('project_submissions').select('project_id').eq('id', submissionId).single()
+  const projectId = (submission as { project_id: string } | null)?.project_id
+  const { data: project } = projectId
+    ? await supabase.from('projects').select('title').eq('id', projectId).single()
+    : { data: null }
+  const title = (project as { title: string } | null)?.title ?? 'a submission'
+  await logActivity(mentorId, 'feedback_given', `Gave feedback on ${title}`)
 }
 
 // ── Mentorship requests ────────────────────────────────────────────────────
@@ -189,7 +195,13 @@ export async function acceptRequest(requestId: string, studentId: string): Promi
     message: 'Your mentorship request has been accepted. You can now message your mentor.',
     type:    'mentorship',
   })
-  await logActivity(studentId, 'mentorship_accepted', `Mentorship request ${requestId} accepted`)
+  const { data: request } = await supabase.from('mentorship_requests').select('mentor_id').eq('id', requestId).single()
+  const mentorId = (request as { mentor_id: string } | null)?.mentor_id
+  const { data: mentor } = mentorId
+    ? await supabase.from('profiles').select('full_name').eq('id', mentorId).single()
+    : { data: null }
+  const mentorName = (mentor as { full_name: string } | null)?.full_name ?? 'a mentor'
+  await logActivity(studentId, 'mentorship_accepted', `${mentorName} accepted your mentorship request`)
 }
 
 export async function rejectRequest(requestId: string, studentId: string): Promise<void> {

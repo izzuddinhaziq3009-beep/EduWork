@@ -66,54 +66,78 @@ export function SubmissionsPage() {
           description="Students from your accepted mentorship requests will appear here."
         />
       ) : (
-        <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="hairline-b">
-                <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Student</th>
-                <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase hidden md:table-cell">Project</th>
-                <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase hidden lg:table-cell">Submitted</th>
-                <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Status</th>
-                <th className="px-6 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--hair)]">
-              {filtered.map(({ submission, project, student }) => (
-                <tr key={submission.id} className="hover:bg-[var(--hair-2)] transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
-                        style={{ background: avatarColor(student.full_name) }}>
-                        {fmtInitials(student.full_name)}
-                      </div>
-                      <div>
-                        <div className="text-[13.5px] font-medium">{student.full_name}</div>
-                        <div className="text-[11.5px] muted md:hidden">{project.title}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 hidden md:table-cell">
-                    <div className="text-[13.5px] font-medium">{project.title}</div>
-                    <div className="text-[12px] muted">Due {fmtDate(project.due_date)}</div>
-                  </td>
-                  <td className="px-6 py-4 text-[12.5px] font-mono muted hidden lg:table-cell">
-                    {fmtRelative(submission.submitted_at)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <SubmissionStatus status={submission.status} />
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Link to={`/mentor/submissions/${submission.id}`}
-                      className="h-9 px-4 rounded-xl hairline text-[12.5px] font-semibold hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
-                      style={{ color: 'var(--primary)' }}>
-                      Review →
-                    </Link>
-                  </td>
+        <>
+          {/* Desktop: table */}
+          <div className="hidden lg:block bg-surface hairline rounded-2xl shadow-card overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="hairline-b">
+                  <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Student</th>
+                  <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Project</th>
+                  <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Submitted</th>
+                  <th className="text-left px-6 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Status</th>
+                  <th className="px-6 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-[var(--hair)]">
+                {filtered.map(({ submission, project, student }) => (
+                  <tr key={submission.id} className="hover:bg-[var(--hair-2)] transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
+                          style={{ background: avatarColor(student.full_name) }}>
+                          {fmtInitials(student.full_name)}
+                        </div>
+                        <div className="text-[13.5px] font-medium">{student.full_name}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-[13.5px] font-medium">{project.title}</div>
+                      <div className="text-[12px] muted">Due {fmtDate(project.due_date)}</div>
+                    </td>
+                    <td className="px-6 py-4 text-[12.5px] font-mono muted">
+                      {fmtRelative(submission.submitted_at)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <SubmissionStatus status={submission.status} />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link to={`/mentor/submissions/${submission.id}`}
+                        className="h-9 px-4 rounded-xl hairline text-[12.5px] font-semibold hover:bg-[var(--hair-2)] inline-flex items-center transition-colors"
+                        style={{ color: 'var(--primary)' }}>
+                        Review →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile/tablet: cards */}
+          <div className="lg:hidden space-y-3">
+            {filtered.map(({ submission, project, student }) => (
+              <Link key={submission.id} to={`/mentor/submissions/${submission.id}`}
+                className="block bg-surface hairline rounded-2xl shadow-card p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
+                    style={{ background: avatarColor(student.full_name) }}>
+                    {fmtInitials(student.full_name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13.5px] font-medium truncate">{student.full_name}</div>
+                    <div className="text-[12px] muted truncate">{project.title}</div>
+                  </div>
+                  <SubmissionStatus status={submission.status} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11.5px] font-mono muted">Submitted {fmtRelative(submission.submitted_at)}</span>
+                  <span className="text-[12.5px] font-semibold" style={{ color: 'var(--primary)' }}>Review →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

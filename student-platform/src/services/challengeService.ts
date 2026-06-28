@@ -165,7 +165,9 @@ export async function submitChallenge(
     .select()
     .single()
   if (error) throw error
-  await logActivity(studentId, 'challenge_submitted', `Submitted challenge ${challengeId}`)
+  const { data: challenge } = await supabase.from('industry_challenges').select('title').eq('id', challengeId).single()
+  const title = (challenge as { title: string } | null)?.title ?? 'a challenge'
+  await logActivity(studentId, 'challenge_submitted', `Submitted ${title}`)
   return data as unknown as ChallengeSubmission
 }
 

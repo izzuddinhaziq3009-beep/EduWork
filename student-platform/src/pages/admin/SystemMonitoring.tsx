@@ -53,20 +53,36 @@ function LogTable({ logs, isLoading }: { logs: ActivityLog[]; isLoading: boolean
   )
 
   return (
-    <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
-      <table className="w-full">
-        <thead>
-          <tr className="hairline-b">
-            <th className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Action</th>
-            <th className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Description</th>
-            <th className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Time</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[var(--hair)]">
-          {logs.map(log => <LogRow key={log.id} log={log} />)}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {/* Desktop: table */}
+      <div className="hidden lg:block bg-surface hairline rounded-2xl shadow-card overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="hairline-b">
+              <th className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Action</th>
+              <th className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Description</th>
+              <th className="text-left px-5 py-3 text-[11.5px] font-mono tracking-wide muted uppercase">Time</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--hair)]">
+            {logs.map(log => <LogRow key={log.id} log={log} />)}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile: compact cards */}
+      <div className="lg:hidden space-y-2">
+        {logs.map(log => (
+          <div key={log.id} className="bg-surface hairline rounded-xl px-4 py-3 flex items-start gap-3">
+            <span className="text-lg shrink-0">{ACTION_ICONS[log.action] ?? '📋'}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] ink-2 leading-snug">{log.description}</div>
+              <div className="text-[11px] font-mono muted mt-1">{log.action} · {fmtDateTime(log.created_at)}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 
@@ -85,7 +101,7 @@ function AllActivityTab() {
         placeholder="Search activity descriptions…"
         value={search}
         onChange={e => { setSearch(e.target.value); setPage(0) }}
-        className="max-w-[320px] h-10"
+        className="max-w-[320px]"
       />
       <LogTable logs={data?.data ?? []} isLoading={isLoading} />
       {total > perPage && (

@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores/authStore'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/services/supabase'
 import { useRealtimeNotifications, notifKeys } from '@/hooks/useMessages'
+import { MobileMenu } from './MobileMenu'
+import { MobileSearchModal } from './MobileSearchModal'
 import type { Notification } from '@/types'
 
 // Narrow builders for notifications.update — bypasses `never` inference
@@ -36,6 +38,7 @@ export function Navbar() {
 
   const [openBell, setOpenBell] = useState(false)
   const [openMenu, setOpenMenu] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const bellRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -116,22 +119,24 @@ export function Navbar() {
 
   return (
     <header className="chrome-dark hairline-b bg-surface sticky top-0 z-40" style={{ height: 64 }}>
-      <div className="h-full flex items-center px-6 gap-6">
+      <div className="h-full flex items-center px-4 md:px-6 gap-3 md:gap-6">
+        <MobileMenu />
+
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 select-none shrink-0" style={{ color: 'var(--primary)' }}>
-          <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" className="w-7 h-7 lg:w-[28px] lg:h-[28px]">
             <rect x="2" y="2" width="28" height="28" rx="7" fill="currentColor"/>
             <path d="M9 20.5L16 9l7 11.5H17.5L16 18l-1.5 2.5H9z" fill="#fff"/>
             <circle cx="16" cy="22.5" r="1.5" fill="#fff"/>
           </svg>
-          <span className="font-display text-[20px] font-semibold tracking-tight" style={{ color: 'var(--ink)' }}>Eduwork</span>
+          <span className="font-display text-[20px] font-semibold tracking-tight hidden sm:inline" style={{ color: 'var(--ink)' }}>Eduwork</span>
           {badge && (
             <span className="font-mono text-[10px] px-1.5 py-0.5 rounded hidden sm:inline"
               style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>{badge}</span>
           )}
         </Link>
 
-        {/* Search */}
+        {/* Search (desktop bar) */}
         <div className="flex-1 max-w-[520px] hidden md:block">
           <label className="flex items-center gap-3 hairline rounded-xl px-3.5 h-10 bg-[var(--surface)] focus-within:ring-2 focus-within:ring-[var(--primary-soft)] focus-within:border-[color:var(--primary)] cursor-text">
             <SearchIcon width={17} height={17} className="text-[color:var(--muted)] shrink-0" />
@@ -141,11 +146,18 @@ export function Navbar() {
           </label>
         </div>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1 md:gap-2 ml-auto">
+          {/* Search (mobile icon — opens full-screen modal) */}
+          <button onClick={() => setSearchOpen(true)}
+            className="md:hidden w-11 h-11 grid place-items-center rounded-xl hover:bg-[var(--hair-2)] ring-focus transition-colors"
+            aria-label="Search">
+            <SearchIcon width={19} height={19} style={{ color: 'var(--ink-2)' }} />
+          </button>
+
           {/* Bell */}
           <div className="relative" ref={bellRef}>
             <button onClick={e => { e.stopPropagation(); setOpenBell(v => !v); setOpenMenu(false) }}
-              className="relative w-10 h-10 grid place-items-center rounded-xl hover:bg-[var(--hair-2)] ring-focus transition-colors">
+              className="relative w-11 h-11 grid place-items-center rounded-xl hover:bg-[var(--hair-2)] ring-focus transition-colors">
               <BellIcon width={20} height={20} style={{ color: 'var(--ink-2)' }} />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 rounded-full flex items-center justify-center font-mono text-[9px] font-bold text-white px-1"
@@ -186,6 +198,8 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      <MobileSearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   )
 }

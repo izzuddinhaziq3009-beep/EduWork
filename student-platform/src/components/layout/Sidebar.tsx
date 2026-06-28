@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useOverallProgress } from '@/hooks/useProgress'
 import type { SVGProps } from 'react'
 
 type P = SVGProps<SVGSVGElement>
@@ -40,7 +41,7 @@ const STUDENT_NAV: NavItem[] = [
   { label: 'Mentorship',            to: '/mentorship',            icon: 'users'  },
   { label: 'Portfolio',             to: '/portfolio',             icon: 'brief'  },
   { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark'  },
-  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag', badge: 'NEW' },
+  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag' },
   { label: 'Messages',              to: '/messages',              icon: 'msg'  },
 ]
 
@@ -53,7 +54,7 @@ const MENTOR_NAV: NavItem[] = [
 
 const COMPANY_NAV: NavItem[] = [
   { label: 'Dashboard',      to: '/company/dashboard',    icon: 'home'   },
-  { label: 'Post Challenge', to: '/company/post-challenge', icon: 'plus', badge: 'NEW' },
+  { label: 'Post Challenge', to: '/company/post-challenge', icon: 'plus' },
   { label: 'My Challenges',  to: '/company/challenges',   icon: 'flag'   },
   { label: 'Submissions',    to: '/company/submissions',  icon: 'inbox'  },
   { label: 'Messages',       to: '/company/messages',     icon: 'msg'    },
@@ -67,9 +68,22 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'System Monitoring',   to: '/admin/monitoring',  icon: 'server' },
 ]
 
-export function Sidebar() {
-  const { role, profile } = useAuthStore()
+interface Props {
+  /** Called when a nav link is clicked — lets the mobile drawer close itself. */
+  onNavigate?: () => void
+}
+
+export function Sidebar({ onNavigate }: Props) {
+  const { role, profile, user } = useAuthStore()
   const location = useLocation()
+  const { data: overall } = useOverallProgress(role === 'student' ? user?.id ?? '' : '')
+
+  const overallPct = overall
+    ? Math.round(
+        ((overall.completedModules + overall.approvedSubmissions) /
+          Math.max(1, overall.totalModules + overall.totalSubmissions)) * 100,
+      )
+    : 0
 
   const nav =
     role === 'mentor'  ? MENTOR_NAV  :
@@ -87,7 +101,7 @@ export function Sidebar() {
       : location.pathname === to || location.pathname.startsWith(to + '/')
 
   return (
-    <aside className="chrome-dark hairline-r bg-surface flex flex-col" style={{ width: 264, minHeight: '100%' }}>
+    <aside className="chrome-dark hairline-r bg-surface flex flex-col w-64 h-full">
       <div className="px-5 pt-6 pb-3">
         <div className="font-mono text-[10px] tracking-[0.14em] muted">{sectionLabel}</div>
       </div>
@@ -97,7 +111,7 @@ export function Sidebar() {
           const Ico = Icons[item.icon]
           const active = isActive(item.to)
           return (
-            <NavLink key={item.to} to={item.to}
+            <NavLink key={item.to} to={item.to} onClick={onNavigate}
               className={() =>
                 `nav-item ${active ? 'active' : ''} flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium`
               }
@@ -124,23 +138,25 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Track card (students only) */}
+      {/* Progress card (students only) */}
       {role === 'student' && (
         <>
           <div className="px-5 pt-8 pb-2">
-            <div className="font-mono text-[10px] tracking-[0.14em] muted">YOUR TRACK</div>
+            <div className="font-mono text-[10px] tracking-[0.14em] muted">YOUR PROGRESS</div>
           </div>
           <div className="px-3 pb-4">
             <div className="hairline rounded-xl p-4 relative overflow-hidden" style={{ background: 'var(--hair-2)' }}>
               <div className="absolute inset-0 stripe-soft opacity-60 pointer-events-none" />
               <div className="relative">
-                <div className="text-[11px] font-mono muted uppercase">PRODUCT DESIGN · YR 2</div>
-                <div className="text-[15px] font-semibold mt-0.5">Designer-to-PM Pathway</div>
+                <div className="text-[11px] font-mono muted uppercase">
+                  {overall?.completedModules ?? 0} of {overall?.totalModules ?? 0} modules done
+                </div>
+                <div className="text-[15px] font-semibold mt-0.5">Keep up the momentum</div>
                 <div className="mt-3 flex items-baseline justify-between">
                   <div className="text-[11px] muted">Overall progress</div>
-                  <div className="font-mono text-[12px] font-semibold">60%</div>
+                  <div className="font-mono text-[12px] font-semibold">{overallPct}%</div>
                 </div>
-                <div className="pbar teal mt-1.5"><span style={{ width: '60%' }} /></div>
+                <div className="pbar teal mt-1.5"><span style={{ width: `${overallPct}%` }} /></div>
               </div>
             </div>
           </div>

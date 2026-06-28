@@ -46,7 +46,7 @@ function PendingTab({ companyId }: { companyId: string }) {
     <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
       <div className="divide-y divide-[var(--hair)]">
         {challenges.map(c => (
-          <div key={c.id} className="flex items-center gap-4 px-5 py-4">
+          <div key={c.id} className="flex flex-col sm:flex-row sm:items-center gap-2 px-5 py-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap mb-1">
                 <span className="text-[14.5px] font-semibold">{c.title}</span>
@@ -81,7 +81,7 @@ function ApprovedTab({ companyId, userId }: { companyId: string; userId: string 
     <div className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
       <div className="divide-y divide-[var(--hair)]">
         {challenges.map(c => (
-          <div key={c.id} className="flex items-center gap-4 px-5 py-4">
+          <div key={c.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap mb-1">
                 <span className="text-[14.5px] font-semibold">{c.title}</span>
@@ -130,7 +130,7 @@ function RejectedTab({ companyId }: { companyId: string }) {
     <div className="space-y-4">
       {challenges.map(c => (
         <div key={c.id} className="bg-surface hairline rounded-2xl shadow-card overflow-hidden">
-          <div className="flex items-start gap-4 px-5 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 px-5 py-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap mb-1">
                 <span className="text-[14.5px] font-semibold">{c.title}</span>
@@ -150,7 +150,7 @@ function RejectedTab({ companyId }: { companyId: string }) {
               )}
             </div>
             <Link to={`/company/challenges/${c.id}/edit`}
-              className="shrink-0 h-10 px-4 rounded-xl text-[13.5px] font-semibold text-white mt-0.5 transition-opacity hover:opacity-90"
+              className="shrink-0 h-10 px-4 rounded-xl text-[13.5px] font-semibold text-white mt-0.5 text-center transition-opacity hover:opacity-90"
               style={{ background: 'var(--primary)' }}>
               Edit &amp; Resubmit
             </Link>
@@ -188,7 +188,7 @@ function AllTab({ companyId, userId }: { companyId: string; userId: string }) {
                       :              { label: 'Active',           bg: 'var(--accent-soft)',  color: 'var(--accent)'  }
 
           return (
-            <div key={c.id} className="flex items-center gap-4 px-5 py-4">
+            <div key={c.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2.5 flex-wrap mb-1">
                   <span className="text-[14.5px] font-semibold">{c.title}</span>
@@ -201,7 +201,7 @@ function AllTab({ companyId, userId }: { companyId: string; userId: string }) {
                   <span>{c.submissionCount} submission{c.submissionCount !== 1 ? 's' : ''}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
                 {c.submissionCount > 0 && (
                   <Link to={`/company/submissions?challenge=${c.id}`}
                     className="h-8 px-3 rounded-lg text-[12.5px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors"

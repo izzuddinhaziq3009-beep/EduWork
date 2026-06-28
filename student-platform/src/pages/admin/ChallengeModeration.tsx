@@ -27,41 +27,43 @@ function ChallengeRow({
   rejecting: boolean
 }) {
   return (
-    <div className="flex items-start gap-4 px-6 py-4">
-      <div className="w-9 h-9 rounded-xl grid place-items-center font-mono font-bold text-white text-[12px] shrink-0 mt-0.5"
-        style={{ background: cColor(c.company.full_name) }}>
-        {fmtInitials(c.company.full_name)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-          <span className="text-[14.5px] font-semibold">{c.title}</span>
-          <DifficultyBadge level={c.difficulty_level} />
-          {c.is_approved && (
-            <span className="tag" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>Approved</span>
+    <div className="flex flex-col sm:flex-row sm:items-start gap-4 px-4 sm:px-6 py-4">
+      <div className="flex items-start gap-3 flex-1 min-w-0">
+        <div className="w-9 h-9 rounded-xl grid place-items-center font-mono font-bold text-white text-[12px] shrink-0 mt-0.5"
+          style={{ background: cColor(c.company.full_name) }}>
+          {fmtInitials(c.company.full_name)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <span className="text-[14.5px] font-semibold">{c.title}</span>
+            <DifficultyBadge level={c.difficulty_level} />
+            {c.is_approved && (
+              <span className="tag" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>Approved</span>
+            )}
+          </div>
+          <div className="text-[12px] font-mono muted">
+            {c.company.full_name} · Deadline {fmtDate(c.deadline)} · Posted {fmtRelative(c.created_at)}
+          </div>
+          {/* Show rejection reason if present */}
+          {c.rejection_reason && (
+            <div className="mt-2 text-[12.5px] ink-2 hairline rounded-lg px-3 py-2 leading-relaxed"
+              style={{ background: 'var(--rose-soft)', borderColor: 'var(--rose)' }}>
+              <span className="font-semibold" style={{ color: 'var(--rose)' }}>Rejection reason: </span>
+              {c.rejection_reason}
+              {c.rejected_at && <span className="muted ml-2">· {fmtRelative(c.rejected_at)}</span>}
+            </div>
           )}
         </div>
-        <div className="text-[12px] font-mono muted">
-          {c.company.full_name} · Deadline {fmtDate(c.deadline)} · Posted {fmtRelative(c.created_at)}
-        </div>
-        {/* Show rejection reason if present */}
-        {c.rejection_reason && (
-          <div className="mt-2 text-[12.5px] ink-2 hairline rounded-lg px-3 py-2 leading-relaxed"
-            style={{ background: 'var(--rose-soft)', borderColor: 'var(--rose)' }}>
-            <span className="font-semibold" style={{ color: 'var(--rose)' }}>Rejection reason: </span>
-            {c.rejection_reason}
-            {c.rejected_at && <span className="muted ml-2">· {fmtRelative(c.rejected_at)}</span>}
-          </div>
-        )}
       </div>
       {showActions && (
         <div className="flex gap-2 shrink-0">
           <button onClick={() => onReject?.(c)} disabled={rejecting || approving}
-            className="h-9 px-3.5 rounded-xl hairline text-[13px] font-semibold hover:bg-[var(--rose-soft)] disabled:opacity-60 transition-colors"
+            className="flex-1 sm:flex-none h-9 px-3.5 rounded-xl hairline text-[13px] font-semibold hover:bg-[var(--rose-soft)] disabled:opacity-60 transition-colors"
             style={{ color: 'var(--rose)' }}>
             Reject
           </button>
           <button onClick={() => onApprove?.(c)} disabled={approving || rejecting}
-            className="h-9 px-4 rounded-xl text-[13px] font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+            className="flex-1 sm:flex-none h-9 px-4 rounded-xl text-[13px] font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
             style={{ background: 'var(--accent)' }}>
             {approving ? '…' : 'Approve'}
           </button>

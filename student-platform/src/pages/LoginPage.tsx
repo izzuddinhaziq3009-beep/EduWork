@@ -54,9 +54,9 @@ export function LoginPage() {
         <BrandPanel />
       </div>
 
-      <main className="flex flex-col p-8 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
+      <main className="flex flex-col p-4 sm:p-6 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
         {/* Top bar */}
-        <header className="flex items-center justify-between mb-10">
+        <header className="flex items-center justify-between flex-wrap gap-3 mb-8 sm:mb-10">
           <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
             <Link to="/login"
               className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-[var(--surface)] shadow-card ink">
@@ -75,11 +75,11 @@ export function LoginPage() {
 
         {/* Card */}
         <div className="flex-1 flex items-start justify-center">
-          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-8 lg:p-10">
+          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-5 sm:p-8 lg:p-10">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 slide-up">
               <header>
                 <div className="font-mono text-[11px] tracking-[0.18em] uppercase muted mb-1.5">Log in to Eduwork</div>
-                <h2 className="font-display text-[32px] font-semibold tracking-tight leading-tight">Welcome back.</h2>
+                <h2 className="font-display text-[26px] sm:text-[30px] lg:text-[32px] font-semibold tracking-tight leading-tight">Welcome back.</h2>
                 <p className="muted text-[14px] mt-1.5">Pick up where you left off — your cohort is waiting.</p>
               </header>
 
@@ -87,11 +87,11 @@ export function LoginPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button type="button"
                   className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GoogleIcon width={18} height={18} />Continue with Google
+                  <GoogleIcon width={18} height={18} className="shrink-0" /><span className="hidden sm:inline">Continue with </span>Google
                 </button>
                 <button type="button"
                   className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GithubIcon width={18} height={18} />Continue with GitHub
+                  <GithubIcon width={18} height={18} className="shrink-0" /><span className="hidden sm:inline">Continue with </span>GitHub
                 </button>
               </div>
 

@@ -39,7 +39,9 @@ export async function sendMentorshipRequest(
     .select()
     .single()
   if (error) throw error
-  await logActivity(studentId, 'mentorship_request', `Sent mentorship request to mentor ${mentorId}`)
+  const { data: mentor } = await supabase.from('profiles').select('full_name').eq('id', mentorId).single()
+  const mentorName = (mentor as { full_name: string } | null)?.full_name ?? 'a mentor'
+  await logActivity(studentId, 'mentorship_request', `Sent mentorship request to ${mentorName}`)
   return data as unknown as MentorshipRequest
 }
 
