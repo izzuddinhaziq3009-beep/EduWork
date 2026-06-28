@@ -75,7 +75,7 @@ export function LoginPage() {
 
         {/* Card */}
         <div className="flex-1 flex items-start justify-center">
-          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-5 sm:p-8 lg:p-10">
+          <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[400px] p-5 sm:p-6 lg:p-7">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 slide-up">
               <header>
                 <div className="font-mono text-[11px] tracking-[0.18em] uppercase muted mb-1.5">Log in to Eduwork</div>
@@ -87,11 +87,11 @@ export function LoginPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button type="button"
                   className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GoogleIcon width={18} height={18} className="shrink-0" /><span className="hidden sm:inline">Continue with </span>Google
+                  <GoogleIcon width={18} height={18} className="shrink-0" />Google
                 </button>
                 <button type="button"
                   className="hairline rounded-xl h-12 flex items-center justify-center gap-2 text-[13.5px] font-semibold bg-surface hover:bg-[var(--hair-2)] transition-colors">
-                  <GithubIcon width={18} height={18} className="shrink-0" /><span className="hidden sm:inline">Continue with </span>GitHub
+                  <GithubIcon width={18} height={18} className="shrink-0" />GitHub
                 </button>
               </div>
 
