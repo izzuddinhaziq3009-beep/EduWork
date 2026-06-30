@@ -378,10 +378,13 @@ export async function getStudentSummary(studentId: string): Promise<StudentSumma
       .select('*', { count: 'exact', head: true })
       .eq('student_id', studentId)
       .eq('status', 'approved'),
+    // Count all challenge submissions regardless of status, matching the
+    // dashboard's challengesAttempted metric (progressService.ts line 64).
+    // Filtering by status='completed' produced 0 because that terminal state
+    // is rarely reached; the student dashboard counts every submission.
     supabase.from('challenge_submissions')
       .select('*', { count: 'exact', head: true })
-      .eq('student_id', studentId)
-      .eq('status', 'completed'),
+      .eq('student_id', studentId),
   ])
   return { completedModules: modules ?? 0, approvedProjects: projects ?? 0, completedChallenges: challenges ?? 0 }
 }

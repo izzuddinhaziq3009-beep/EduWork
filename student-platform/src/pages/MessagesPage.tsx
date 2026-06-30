@@ -5,10 +5,16 @@ import { useConversationList } from '@/hooks/useMessages'
 import { ConversationList } from '@/components/features/messages/ConversationList'
 import { ChatWindow } from '@/components/features/messages/ChatWindow'
 import { supabase } from '@/services/supabase'
+import { useQuery } from '@tanstack/react-query'
+import { getStudentSummary } from '@/services/companyService'
+import { fmtInitials, fmtRelative } from '@/utils/formatters'
 import type { Profile } from '@/types'
 
+const AVATAR_COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
+function avatarColor(name: string) { return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length] }
+
 export function MessagesPage() {
-  const { user }          = useAuthStore()
+  const { user, role }    = useAuthStore()
   const [params]          = useSearchParams()
   const [explicitPartnerId, setExplicitPartnerId] = useState<string>(params.get('with') ?? '')
   const [fetchedPartner, setFetchedPartner]       = useState<Profile | null>(null)
@@ -32,6 +38,15 @@ export function MessagesPage() {
       .single()
       .then(({ data }) => setFetchedPartner((data ?? null) as unknown as Profile | null))
   }, [partnerId, conversationPartner])
+
+  const isMentorViewingStudent = role === 'mentor' && partner?.role === 'student'
+  const lastMessageAt = conversations.find(c => c.partnerId === partnerId)?.lastMessage.created_at
+
+  const { data: studentSummary } = useQuery({
+    queryKey: ['student-summary', partner?.id],
+    queryFn:  () => getStudentSummary(partner!.id),
+    enabled:  isMentorViewingStudent && !!partner?.id,
+  })
 
   const handleSelect = (id: string) => {
     setExplicitPartnerId(id)
@@ -57,7 +72,50 @@ export function MessagesPage() {
       {/* Right: chat window */}
       <main className="flex-1 min-w-0 flex flex-col">
         {partner && user ? (
-          <ChatWindow currentUserId={user.id} partner={partner} />
+          <>
+            {/* Combined student header — shown to mentors only when chatting with a student.
+                Passes hideHeader to ChatWindow so the built-in header is suppressed. */}
+            {isMentorViewingStudent && (
+              <div className="px-5 py-4 hairline-b bg-surface flex items-center gap-4 shrink-0">
+                <div className="w-10 h-10 rounded-xl grid place-items-center font-mono font-bold text-white text-[14px] shrink-0"
+                  style={{ background: avatarColor(partner.full_name) }}>
+                  {fmtInitials(partner.full_name)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="text-[15px] font-semibold">{partner.full_name}</div>
+                    <span className="text-[10px] font-mono capitalize px-1.5 py-0.5 rounded"
+                      style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
+                      {partner.role}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] muted">{partner.email}</span>
+                    {lastMessageAt && (
+                      <span className="text-[11.5px] font-mono muted">· {fmtRelative(lastMessageAt)}</span>
+                    )}
+                  </div>
+                </div>
+                {studentSummary && (
+                  <div className="flex gap-5 text-center shrink-0">
+                    {[
+                      { label: 'Modules',    value: studentSummary.completedModules    },
+                      { label: 'Projects',   value: studentSummary.approvedProjects    },
+                      { label: 'Challenges', value: studentSummary.completedChallenges },
+                    ].map(s => (
+                      <div key={s.label}>
+                        <div className="font-display text-[18px] font-semibold leading-none">{s.value}</div>
+                        <div className="text-[10px] font-mono muted mt-0.5">{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex-1 min-h-0">
+              <ChatWindow currentUserId={user.id} partner={partner} hideHeader={isMentorViewingStudent} />
+            </div>
+          </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8"
             style={{ background: 'var(--hair-2)' }}>

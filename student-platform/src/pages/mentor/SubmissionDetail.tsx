@@ -6,6 +6,8 @@ import { SubmissionStatus } from '@/components/features/projects/SubmissionStatu
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { fmtDate, fmtDateTime, fmtInitials } from '@/utils/formatters'
+import { useQuery } from '@tanstack/react-query'
+import { getStudentSummary } from '@/services/companyService'
 
 const COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
 function avatarColor(name: string) { return COLORS[name.charCodeAt(0) % COLORS.length] }
@@ -18,6 +20,12 @@ export function SubmissionDetail() {
 
   const { data: ctx, isLoading } = useSubmissionDetail(id)
   const submitFeedback = useSubmitFeedback()
+
+  const { data: summary } = useQuery({
+    queryKey: ['student-summary', ctx?.student.id],
+    queryFn:  () => getStudentSummary(ctx!.student.id),
+    enabled:  !!ctx?.student.id,
+  })
 
   const handleAction = (status: 'approved' | 'revision_requested') => {
     if (!user || !ctx) return
@@ -70,6 +78,20 @@ export function SubmissionDetail() {
               <div className="text-[16px] font-semibold">{student.full_name}</div>
               <div className="text-[12.5px] muted">{student.email}</div>
             </div>
+            {summary && (
+              <div className="flex gap-4 text-center shrink-0">
+                {[
+                  { label: 'Modules',    value: summary.completedModules    },
+                  { label: 'Projects',   value: summary.approvedProjects    },
+                  { label: 'Challenges', value: summary.completedChallenges },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div className="font-display text-[20px] font-semibold leading-none">{s.value}</div>
+                    <div className="text-[10px] font-mono muted mt-0.5">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
             <SubmissionStatus status={submission.status} />
           </div>
 

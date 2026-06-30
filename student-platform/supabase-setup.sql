@@ -342,8 +342,18 @@ DROP POLICY IF EXISTS "Students view own progress"   ON student_module_progress;
 DROP POLICY IF EXISTS "Students manage own progress" ON student_module_progress;
 CREATE POLICY "Students view own progress"
   ON student_module_progress FOR SELECT TO authenticated
-  USING (student_id = auth.uid()
-         OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
+  USING (
+    student_id = auth.uid()
+    OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor')
+    -- Companies can read progress for students who have submitted to their challenges,
+    -- so the student stats card on the submission detail page shows real counts.
+    OR EXISTS (
+      SELECT 1 FROM challenge_submissions cs
+      JOIN industry_challenges ic ON ic.id = cs.challenge_id
+      WHERE cs.student_id = student_module_progress.student_id
+        AND ic.company_id = auth.uid()
+    )
+  );
 CREATE POLICY "Students manage own progress"
   ON student_module_progress FOR ALL TO authenticated
   USING (student_id = auth.uid());
@@ -366,8 +376,18 @@ DROP POLICY IF EXISTS "Students update own submissions"   ON project_submissions
 DROP POLICY IF EXISTS "Mentors review mentee submissions" ON project_submissions;
 CREATE POLICY "Students view own submissions"
   ON project_submissions FOR SELECT TO authenticated
-  USING (student_id = auth.uid()
-         OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
+  USING (
+    student_id = auth.uid()
+    OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor')
+    -- Companies can read project submissions for students who submitted to their
+    -- challenges, so the student stats card shows accurate project counts.
+    OR EXISTS (
+      SELECT 1 FROM challenge_submissions cs
+      JOIN industry_challenges ic ON ic.id = cs.challenge_id
+      WHERE cs.student_id = project_submissions.student_id
+        AND ic.company_id = auth.uid()
+    )
+  );
 CREATE POLICY "Students create submissions"
   ON project_submissions FOR INSERT TO authenticated
   WITH CHECK (student_id = auth.uid());

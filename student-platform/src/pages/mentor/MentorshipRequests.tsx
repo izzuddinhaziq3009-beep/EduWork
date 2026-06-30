@@ -6,9 +6,30 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fmtRelative, fmtInitials } from '@/utils/formatters'
 import { useNavigate } from 'react-router-dom'
+import { useQueries } from '@tanstack/react-query'
+import { getStudentSummary } from '@/services/companyService'
+import type { StudentSummary } from '@/services/companyService'
 
 const COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
 function avatarColor(name: string) { return COLORS[name.charCodeAt(0) % COLORS.length] }
+
+function StatPill({ summary }: { summary: StudentSummary | undefined }) {
+  if (!summary) return null
+  return (
+    <div className="flex gap-4 mt-2.5">
+      {[
+        { label: 'Modules',    value: summary.completedModules    },
+        { label: 'Projects',   value: summary.approvedProjects    },
+        { label: 'Challenges', value: summary.completedChallenges },
+      ].map(s => (
+        <div key={s.label} className="text-center">
+          <div className="font-display text-[16px] font-semibold leading-none">{s.value}</div>
+          <div className="text-[10px] font-mono muted mt-0.5">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export function MentorshipRequests() {
   const { user } = useAuthStore()
@@ -19,6 +40,22 @@ export function MentorshipRequests() {
   const { data: mentees  = [],  isLoading: loadingMentees } = useAcceptedMentees(mid)
   const accept = useAcceptRequest()
   const reject = useRejectRequest()
+
+  // Batch-fetch student stats for every request + mentee without repeating IDs
+  const requestStudentIds = requests.map(r => r.student.id)
+  const menteeStudentIds  = mentees.map(m => m.student.id)
+  const allIds = [...new Set([...requestStudentIds, ...menteeStudentIds])]
+
+  const summaryResults = useQueries({
+    queries: allIds.map(id => ({
+      queryKey: ['student-summary', id],
+      queryFn:  () => getStudentSummary(id),
+    })),
+  })
+
+  const summaryByStudentId = Object.fromEntries(
+    allIds.map((id, i) => [id, summaryResults[i].data])
+  )
 
   return (
     <div className="p-6 lg:p-8 max-w-[900px]">
@@ -66,6 +103,7 @@ export function MentorshipRequests() {
                         <span className="text-[11.5px] font-mono muted">{fmtRelative(req.created_at)}</span>
                       </div>
                       <p className="text-[13.5px] ink-2 mt-2 leading-relaxed">{req.message}</p>
+                      <StatPill summary={summaryByStudentId[req.student.id]} />
                     </div>
                     <div className="flex gap-2 shrink-0 mt-0.5">
                       <button
@@ -113,6 +151,7 @@ export function MentorshipRequests() {
                     <div className="text-[14.5px] font-semibold truncate">{student.full_name}</div>
                     <div className="text-[12px] muted font-mono">Student</div>
                     <div className="text-[11.5px] muted mt-0.5">Since {fmtRelative(request.created_at)}</div>
+                    <StatPill summary={summaryByStudentId[student.id]} />
                   </div>
                   <button
                     onClick={() => navigate(`/messages?with=${student.id}`)}

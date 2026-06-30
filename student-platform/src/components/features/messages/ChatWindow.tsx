@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useConversation, useSendMessage, useRealtimeMessages, useMarkRead } from '@/hooks/useMessages'
 import { Skeleton } from '@/components/ui/skeleton'
-import { fmtInitials, fmtDateTime } from '@/utils/formatters'
+import { fmtInitials, fmtDateTime, fmtRelative } from '@/utils/formatters'
 import type { Profile } from '@/types'
 
 const COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
@@ -10,9 +10,11 @@ function avatarColor(name: string) { return COLORS[name.charCodeAt(0) % COLORS.l
 interface Props {
   currentUserId: string
   partner: Profile
+  /** When true, suppresses the built-in header so the parent can render its own. */
+  hideHeader?: boolean
 }
 
-export function ChatWindow({ currentUserId, partner }: Props) {
+export function ChatWindow({ currentUserId, partner, hideHeader = false }: Props) {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -47,18 +49,27 @@ export function ChatWindow({ currentUserId, partner }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-5 py-4 hairline-b flex items-center gap-3 bg-surface">
-        <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
-          style={{ background: avatarColor(partner.full_name) }}>
-          {fmtInitials(partner.full_name)}
+    <div className="flex flex-col h-full min-h-0">
+      {/* Header — hidden when the parent supplies its own header card */}
+      {!hideHeader && (
+        <div className="px-5 py-4 hairline-b flex items-center gap-3 bg-surface">
+          <div className="w-9 h-9 rounded-lg grid place-items-center font-mono font-semibold text-white text-[12px] shrink-0"
+            style={{ background: avatarColor(partner.full_name) }}>
+            {fmtInitials(partner.full_name)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[14px] font-semibold">{partner.full_name}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11.5px] muted font-mono capitalize">{partner.role}</span>
+              {messages.length > 0 && (
+                <span className="text-[11.5px] muted font-mono">
+                  · {fmtRelative(messages[messages.length - 1].created_at)}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        <div>
-          <div className="text-[14px] font-semibold">{partner.full_name}</div>
-          <div className="text-[11.5px] muted font-mono capitalize">{partner.role}</div>
-        </div>
-      </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto scroll-thin px-5 py-4 space-y-3"

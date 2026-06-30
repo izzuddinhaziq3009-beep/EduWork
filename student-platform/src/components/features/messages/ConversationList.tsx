@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { fmtRelative, fmtInitials } from '@/utils/formatters'
+import { fmtInitials } from '@/utils/formatters'
 import type { ConversationPreview } from '@/services/messageService'
 
 const COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
@@ -64,21 +64,16 @@ export function ConversationList({ conversations, activePartnerId, onSelect, loa
               {fmtInitials(conv.partner.full_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-1 mb-0.5">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className={`text-[13.5px] truncate ${conv.unreadCount > 0 ? 'font-semibold ink' : 'font-medium ink-2'}`}>
-                    {conv.partner.full_name}
-                  </span>
-                  {rb && (
-                    <span className="shrink-0 text-[9.5px] font-semibold px-1.5 py-0.5 rounded"
-                      style={{ background: rb.bg, color: rb.color }}>
-                      {rb.label}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[11px] font-mono muted shrink-0">
-                  {fmtRelative(conv.lastMessage.created_at)}
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className={`text-[13.5px] truncate ${conv.unreadCount > 0 ? 'font-semibold ink' : 'font-medium ink-2'}`}>
+                  {conv.partner.full_name}
                 </span>
+                {rb && (
+                  <span className="shrink-0 text-[9.5px] font-semibold px-1.5 py-0.5 rounded"
+                    style={{ background: rb.bg, color: rb.color }}>
+                    {rb.label}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <span className={`text-[12.5px] truncate ${conv.unreadCount > 0 ? 'ink-2 font-medium' : 'muted'}`}>
