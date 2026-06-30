@@ -76,30 +76,43 @@ export function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-[1fr_minmax(560px,720px)]">
-      <div className="hidden lg:block">
-        <BrandPanel />
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0">
+        <BrandPanel compact />
       </div>
 
-      <main className="flex flex-col p-4 sm:p-6 lg:p-10 bg-[var(--bg)]" style={{ minHeight: '100vh' }}>
-        <header className="flex items-center justify-between flex-wrap gap-3 mb-8 sm:mb-10">
-          <div className="hairline rounded-xl p-1 flex bg-[var(--hair-2)] w-fit">
-            <Link to="/login"
-              className="px-4 py-1.5 rounded-lg text-[13px] font-semibold muted hover:text-[color:var(--ink)]">
-              Log in
-            </Link>
-            <Link to="/signup"
-              className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-[var(--surface)] shadow-card ink">
-              Sign up
-            </Link>
+      <div className="relative z-10 flex flex-col p-4 sm:p-6 lg:p-10" style={{ minHeight: '100vh' }}>
+        <header className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 mb-8 sm:mb-10">
+          <Link to="/" className="flex items-center gap-2.5 text-white">
+            <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+              <rect x="2" y="2" width="28" height="28" rx="7" fill="#FFFFFF"/>
+              <path d="M9 20.5L16 9l7 11.5H17.5L16 18l-1.5 2.5H9z" fill="#0F4C5C"/>
+              <circle cx="16" cy="22.5" r="1.5" fill="#0F4C5C"/>
+            </svg>
+            <span className="font-display text-[20px] font-semibold tracking-tight">Eduwork</span>
+          </Link>
+
+          <div className="flex items-center justify-center gap-4 flex-wrap text-center">
+            <div className="rounded-xl p-1 flex w-fit" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <Link to="/login"
+                className="px-4 py-1.5 rounded-lg text-[13px] font-semibold text-white/70 hover:text-white transition-colors">
+                Log in
+              </Link>
+              <Link to="/signup"
+                className="px-4 py-1.5 rounded-lg text-[13px] font-semibold bg-white shadow-card" style={{ color: 'var(--ink)' }}>
+                Sign up
+              </Link>
+            </div>
+            <div className="text-[12.5px] text-white/70">
+              Need help?{' '}
+              <a className="font-medium underline text-white cursor-pointer">Contact support</a>
+            </div>
           </div>
-          <div className="text-[12.5px] muted">
-            Need help?{' '}
-            <a className="font-medium underline ink-2 cursor-pointer">Contact support</a>
-          </div>
+
+          <div aria-hidden="true" />
         </header>
 
-        <div className="flex-1 flex items-start justify-center overflow-y-auto pb-4">
+        <div className="flex-1 flex items-start justify-center overflow-y-auto pt-4 sm:pt-8 pb-4">
           <section className="bg-surface hairline rounded-3xl shadow-card w-full max-w-[520px] p-5 sm:p-8 lg:p-10">
             {pendingApproval ? (
               <div className="slide-up text-center flex flex-col items-center gap-4 py-4">
@@ -242,10 +255,10 @@ export function SignupPage() {
           </section>
         </div>
 
-        <footer className="mt-4 text-center text-[11.5px] muted font-mono">
+        <footer className="mt-4 text-center text-[11.5px] text-white/60 font-mono">
           EDUWORK · STUDENT EXPERIENCE PLATFORM · v1.0
         </footer>
-      </main>
+      </div>
     </div>
   )
 }
