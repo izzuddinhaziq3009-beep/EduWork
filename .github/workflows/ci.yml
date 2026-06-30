@@ -1,0 +1,65 @@
+name: CI
+
+on: push
+
+jobs:
+  lint-test-build:
+    name: Lint · Test · Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: student-platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: student-platform/package-lock.json
+      - run: npm ci
+
+      - name: Lint
+        id: lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Test
+        id: test
+        run: npx vitest run --reporter=default --reporter=json --outputFile.json=vitest-results.json
+        continue-on-error: true
+
+      - name: Build
+        id: build
+        run: npm run build
+        continue-on-error: true
+
+      - name: Write job summary
+        if: always()
+        run: |
+          {
+            echo "## Lint · Test · Build"
+            echo ""
+            echo "| Step | Result |"
+            echo "|------|--------|"
+            echo "| Lint | ${{ steps.lint.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |"
+            echo "| Test | ${{ steps.test.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |"
+            echo "| Build | ${{ steps.build.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |"
+            echo ""
+            if [ -f vitest-results.json ]; then
+              echo "### Vitest Test Report"
+              echo ""
+              echo "| | Passed | Total |"
+              echo "|---|---|---|"
+              node -e "
+                const r = require('./vitest-results.json');
+                const files = r.testResults ?? [];
+                const filesPassed = files.filter(f => f.status === 'passed').length;
+                console.log('| Test Files | ' + filesPassed + ' | ' + files.length + ' |');
+                console.log('| Tests | ' + r.numPassedTests + ' | ' + r.numTotalTests + ' |');
+              "
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail job if any step failed
+        if: steps.lint.outcome != 'success' || steps.test.outcome != 'success' || steps.build.outcome != 'success'
+        run: exit 1
