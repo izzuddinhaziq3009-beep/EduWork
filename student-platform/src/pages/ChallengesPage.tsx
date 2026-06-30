@@ -98,7 +98,7 @@ export function ChallengesPage() {
             <>
               {submittedIds.size > 0 && (
                 <div className="mb-4 text-[13px] muted">
-                  You've submitted to <strong>{submittedIds.size}</strong> of {challenges.length} challenge{challenges.length !== 1 ? 's' : ''}.
+                  You've submitted to <strong>{challenges.filter(c => submittedIds.has(c.id)).length}</strong> of {challenges.length} challenge{challenges.length !== 1 ? 's' : ''}.
                 </div>
               )}
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
-import { ok, queueFromResults } from '@/test/supabaseMock'
+import { ok, fail, queueFromResults } from '@/test/supabaseMock'
 
 vi.mock('./supabase', () => ({ supabase: { from: vi.fn() } }))
 vi.mock('@/utils/activityLog', () => ({ logActivity: vi.fn() }))
@@ -67,12 +67,28 @@ describe('submitFeedback', () => {
   it('upserts feedback, updates submission status, and notifies + logs activity', async () => {
     queueFromResults(fromMock, [
       ok(null), // mfTable upsert
-      ok(null), // psUpdateTable update
+      { data: null, error: null, count: 1 } as never, // psUpdateTable update
       ok(null), // notifTable insert
       ok({ project_id: 'proj1' }), // submission lookup
       ok({ title: 'Project 1' }), // project lookup
     ])
     await expect(submitFeedback('sub1', 'mentor-1', 'stu1', 'Nice work', 'approved')).resolves.toBeUndefined()
+  })
+
+  it('throws without notifying the student when the status update silently affects zero rows (e.g. missing RLS policy)', async () => {
+    queueFromResults(fromMock, [
+      ok(null), // mfTable upsert
+      { data: null, error: null, count: 0 } as never, // psUpdateTable update — RLS filtered it out
+    ])
+    await expect(submitFeedback('sub1', 'mentor-1', 'stu1', 'Nice work', 'approved'))
+      .rejects.toThrow(/permission to review/)
+    // exactly 2 calls — proves the notification insert never ran
+    expect(fromMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('throws when the feedback upsert itself errors', async () => {
+    queueFromResults(fromMock, [fail(new Error('insert failed'))])
+    await expect(submitFeedback('sub1', 'mentor-1', 'stu1', 'Nice work', 'approved')).rejects.toThrow('insert failed')
   })
 })
 

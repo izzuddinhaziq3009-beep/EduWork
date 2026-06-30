@@ -152,7 +152,9 @@ ALTER TABLE mentorship_requests ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 CREATE TABLE IF NOT EXISTS mentor_feedback (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  submission_id UUID NOT NULL REFERENCES project_submissions(id) ON DELETE CASCADE,
+  -- One feedback record per submission — re-reviewing upserts onto this
+  -- column (see mentorService.ts's submitFeedback), so it must be unique.
+  submission_id UUID NOT NULL UNIQUE REFERENCES project_submissions(id) ON DELETE CASCADE,
   mentor_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   student_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   feedback_text TEXT NOT NULL,
@@ -358,9 +360,10 @@ CREATE POLICY "Admins and mentors manage projects"
   USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin','mentor'));
 
 -- project_submissions
-DROP POLICY IF EXISTS "Students view own submissions"   ON project_submissions;
-DROP POLICY IF EXISTS "Students create submissions"     ON project_submissions;
-DROP POLICY IF EXISTS "Students update own submissions" ON project_submissions;
+DROP POLICY IF EXISTS "Students view own submissions"     ON project_submissions;
+DROP POLICY IF EXISTS "Students create submissions"       ON project_submissions;
+DROP POLICY IF EXISTS "Students update own submissions"   ON project_submissions;
+DROP POLICY IF EXISTS "Mentors review mentee submissions" ON project_submissions;
 CREATE POLICY "Students view own submissions"
   ON project_submissions FOR SELECT TO authenticated
   USING (student_id = auth.uid()
@@ -371,6 +374,18 @@ CREATE POLICY "Students create submissions"
 CREATE POLICY "Students update own submissions"
   ON project_submissions FOR UPDATE TO authenticated
   USING (student_id = auth.uid() AND status = 'submitted');
+-- Without this, a mentor's status update (approved/revision_requested) when
+-- leaving feedback silently affects zero rows under RLS — no error, so the
+-- app proceeds to notify the student "approved" without it actually happening.
+CREATE POLICY "Mentors review mentee submissions"
+  ON project_submissions FOR UPDATE TO authenticated
+  USING (
+    EXISTS (SELECT 1 FROM mentorship_requests mr
+            WHERE mr.student_id = project_submissions.student_id
+              AND mr.mentor_id = auth.uid()
+              AND mr.status = 'accepted')
+    OR (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
+  );
 
 -- mentorship_requests
 DROP POLICY IF EXISTS "Users view their mentorship requests"   ON mentorship_requests;
@@ -391,6 +406,7 @@ CREATE POLICY "Mentors update mentorship requests"
 -- mentor_feedback
 DROP POLICY IF EXISTS "Involved parties view mentor feedback" ON mentor_feedback;
 DROP POLICY IF EXISTS "Mentors create feedback"               ON mentor_feedback;
+DROP POLICY IF EXISTS "Mentors update own feedback"           ON mentor_feedback;
 CREATE POLICY "Involved parties view mentor feedback"
   ON mentor_feedback FOR SELECT TO authenticated
   USING (mentor_id = auth.uid() OR student_id = auth.uid()
@@ -399,6 +415,12 @@ CREATE POLICY "Mentors create feedback"
   ON mentor_feedback FOR INSERT TO authenticated
   WITH CHECK (mentor_id = auth.uid()
               AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'mentor');
+-- Needed for submitFeedback's upsert(..., {onConflict:'submission_id'}) to
+-- reach its ON CONFLICT DO UPDATE path when re-reviewing a submission.
+CREATE POLICY "Mentors update own feedback"
+  ON mentor_feedback FOR UPDATE TO authenticated
+  USING (mentor_id = auth.uid()
+         OR (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
 
 -- messages
 DROP POLICY IF EXISTS "Users view own messages"       ON messages;
@@ -469,9 +491,10 @@ CREATE POLICY "Companies manage own challenges"
          OR (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
 
 -- challenge_submissions
-DROP POLICY IF EXISTS "Students view own challenge submissions" ON challenge_submissions;
-DROP POLICY IF EXISTS "Students create challenge submissions"   ON challenge_submissions;
-DROP POLICY IF EXISTS "Students update own submissions"        ON challenge_submissions;
+DROP POLICY IF EXISTS "Students view own challenge submissions"   ON challenge_submissions;
+DROP POLICY IF EXISTS "Students create challenge submissions"     ON challenge_submissions;
+DROP POLICY IF EXISTS "Students update own submissions"           ON challenge_submissions;
+DROP POLICY IF EXISTS "Companies review their challenge submissions" ON challenge_submissions;
 CREATE POLICY "Students view own challenge submissions"
   ON challenge_submissions FOR SELECT TO authenticated
   USING (
@@ -486,6 +509,17 @@ CREATE POLICY "Students create challenge submissions"
 CREATE POLICY "Students update own submissions"
   ON challenge_submissions FOR UPDATE TO authenticated
   USING (student_id = auth.uid());
+-- Without this, a company's status update (feedback_given) when leaving
+-- feedback silently affects zero rows under RLS — same failure class as the
+-- missing mentor policy on project_submissions above.
+CREATE POLICY "Companies review their challenge submissions"
+  ON challenge_submissions FOR UPDATE TO authenticated
+  USING (
+    EXISTS (SELECT 1 FROM industry_challenges ic
+            WHERE ic.id = challenge_submissions.challenge_id
+              AND ic.company_id = auth.uid())
+    OR (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
+  );
 
 -- challenge_feedback
 DROP POLICY IF EXISTS "Involved parties view challenge feedback" ON challenge_feedback;

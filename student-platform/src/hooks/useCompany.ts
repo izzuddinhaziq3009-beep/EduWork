@@ -94,6 +94,7 @@ export function useCreateChallenge() {
       createChallenge(companyId, payload),
     onSuccess: (_, { companyId }) => {
       qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })
+      qc.invalidateQueries({ queryKey: companyKeys.pending(companyId) })
       qc.invalidateQueries({ queryKey: companyKeys.stats(companyId) })
       toast({ title: 'Challenge submitted!', description: 'It will go live after admin approval.' })
     },

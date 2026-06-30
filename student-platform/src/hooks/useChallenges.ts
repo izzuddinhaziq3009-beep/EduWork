@@ -68,6 +68,7 @@ export function useSubmitChallenge() {
     }) => submitChallenge(challengeId, studentId, validation),
     onSuccess: (_, { studentId }) => {
       qc.invalidateQueries({ queryKey: challengeKeys.mySubs(studentId) })
+      qc.invalidateQueries({ queryKey: challengeKeys.mySUbsCtx(studentId) })
       qc.invalidateQueries({ queryKey: challengeKeys.active })
       toast({ title: 'Submission received!', description: 'Your GitHub repository has been submitted.' })
     },

@@ -34,7 +34,11 @@ type CfBuilder = { insert(d: CfInsert): Promise<{ error: Error | null }> }
 function cfTable() { return supabase.from('challenge_feedback') as unknown as CfBuilder }
 
 // Narrow builder for challenge_submissions status update
-type CsUpdateBuilder = { update(d: { status: string }): EqOne }
+// .update().eq() alone returns 0 affected rows *without an error* if RLS silently
+// filters the row out — requesting an exact count lets callers detect that
+// without depending on the SELECT policy (unlike chaining .select() to read the row back).
+type CsEqWithCount = { eq(c: string, v: string): Promise<{ error: Error | null; count: number | null }> }
+type CsUpdateBuilder = { update(d: { status: string }, opts: { count: 'exact' }): CsEqWithCount }
 function csTable() { return supabase.from('challenge_submissions') as unknown as CsUpdateBuilder }
 
 export interface ChallengeWithStats extends IndustryChallenge {
@@ -389,14 +393,19 @@ export async function leaveFeedback(
   feedbackText: string,
   rating: number,
 ): Promise<void> {
-  await cfTable().insert({
+  const { error: feedbackError } = await cfTable().insert({
     submission_id: submissionId,
     reviewer_id:   reviewerId,
     reviewer_type: 'company',
     feedback_text: feedbackText,
     rating,
   })
-  await csTable().update({ status: 'feedback_given' }).eq('id', submissionId)
+  if (feedbackError) throw feedbackError
+
+  const { error: statusError, count } = await csTable().update({ status: 'feedback_given' }, { count: 'exact' }).eq('id', submissionId)
+  if (statusError) throw statusError
+  if (!count) throw new Error("Couldn't update the submission status — you may not have permission to review this submission.")
+
   await notifTable().insert({
     user_id: studentId,
     title:   'Feedback received on your challenge submission!',

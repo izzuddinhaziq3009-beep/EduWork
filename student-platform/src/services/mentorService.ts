@@ -8,7 +8,11 @@ type MfBuilder = { upsert(d: MfUpsert, o: { onConflict: string }): Promise<{ err
 function mfTable() { return supabase.from('mentor_feedback') as unknown as MfBuilder }
 
 type PsStatusUpdate = { status: 'submitted' | 'reviewing' | 'approved' | 'revision_requested' }
-type PsUpdateBuilder = { update(d: PsStatusUpdate): { eq(c: string, v: string): Promise<{ error: Error | null }> } }
+// .update().eq() alone returns 0 affected rows *without an error* if RLS silently
+// filters the row out — requesting an exact count lets callers detect that
+// without depending on the SELECT policy (unlike chaining .select() to read the row back).
+type PsEqWithCount = { eq(c: string, v: string): Promise<{ error: Error | null; count: number | null }> }
+type PsUpdateBuilder = { update(d: PsStatusUpdate, opts: { count: 'exact' }): PsEqWithCount }
 function psUpdateTable() { return supabase.from('project_submissions') as unknown as PsUpdateBuilder }
 
 type NotifInsert = { user_id: string; title: string; message: string; type: string }
@@ -145,11 +149,16 @@ export async function submitFeedback(
   feedbackText: string,
   status: 'approved' | 'revision_requested',
 ): Promise<void> {
-  await mfTable().upsert(
+  const { error: feedbackError } = await mfTable().upsert(
     { submission_id: submissionId, mentor_id: mentorId, student_id: studentId, feedback_text: feedbackText, status },
     { onConflict: 'submission_id' },
   )
-  await psUpdateTable().update({ status }).eq('id', submissionId)
+  if (feedbackError) throw feedbackError
+
+  const { error: statusError, count } = await psUpdateTable().update({ status }, { count: 'exact' }).eq('id', submissionId)
+  if (statusError) throw statusError
+  if (!count) throw new Error("Couldn't update the submission status — you may not have permission to review this student's work.")
+
   await notifTable().insert({
     user_id: studentId,
     title:   status === 'approved' ? 'Project approved!' : 'Revision requested',

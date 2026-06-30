@@ -126,8 +126,27 @@ describe('getChallengeSubmissions', () => {
 
 describe('leaveFeedback', () => {
   it('inserts feedback, updates submission status, and notifies the student', async () => {
-    queueFromResults(fromMock, [ok(null), ok(null), ok(null)])
+    queueFromResults(fromMock, [
+      ok(null), // cfTable insert
+      { data: null, error: null, count: 1 } as never, // csTable update
+      ok(null), // notifTable insert
+    ])
     await expect(leaveFeedback('sub1', 'co1', 'stu1', 'Great work', 5)).resolves.toBeUndefined()
+  })
+
+  it('throws without notifying the student when the status update silently affects zero rows (e.g. missing RLS policy)', async () => {
+    queueFromResults(fromMock, [
+      ok(null), // cfTable insert
+      { data: null, error: null, count: 0 } as never, // csTable update — RLS filtered it out
+    ])
+    await expect(leaveFeedback('sub1', 'co1', 'stu1', 'Great work', 5))
+      .rejects.toThrow(/permission to review/)
+    expect(fromMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('throws when the feedback insert itself errors', async () => {
+    queueFromResults(fromMock, [fail(new Error('insert failed'))])
+    await expect(leaveFeedback('sub1', 'co1', 'stu1', 'Great work', 5)).rejects.toThrow('insert failed')
   })
 })
 
