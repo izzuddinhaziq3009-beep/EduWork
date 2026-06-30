@@ -67,29 +67,46 @@ describe('getPublicPortfolio', () => {
     expect(await getPublicPortfolio('nope')).toBeNull()
   })
 
-  it('returns the portfolio with its items', async () => {
+  it('returns the portfolio with its items and enriches titles from source tables', async () => {
     queueFromResults(fromMock, [
       ok({ id: 'port1', public_url: 'abc123' }),
-      ok([{ id: 'item1' }]),
+      ok([{ id: 'item1', type: 'module', reference_id: 'mod1', title: 'Completed Module', description: '' }]),
+      ok([{ id: 'mod1', title: 'Advanced Reacts', description: 'Learn React' }]), // learning_modules lookup
+      // project and challenge lookups return nothing (no items of those types)
     ])
     const result = await getPublicPortfolio('abc123')
     expect(result?.portfolio.public_url).toBe('abc123')
+    expect(result?.items[0].title).toBe('Advanced Reacts')
+  })
+
+  it('falls back to stored title when reference_id does not match an entity', async () => {
+    queueFromResults(fromMock, [
+      ok({ id: 'port1', public_url: 'abc123' }),
+      ok([{ id: 'item1', type: 'module', reference_id: 'old-sub-id', title: 'Completed Module', description: '' }]),
+      ok([]), // no match in learning_modules
+    ])
+    const result = await getPublicPortfolio('abc123')
+    expect(result?.items[0].title).toBe('Completed Module')
   })
 })
 
 describe('autoGeneratePortfolioItems', () => {
-  it('inserts new items for completed modules/projects/challenges not already present', async () => {
+  it('inserts new items with real titles fetched from source tables', async () => {
     queueFromResults(fromMock, [
-      ok([{ module_id: 'mod1' }]),
-      ok([{ id: 'sub1', project_id: 'proj1' }]),
-      ok([{ id: 'chal1' }]),
-      ok([]), // existing items
+      ok([{ module_id: 'mod1' }]),                    // student_module_progress
+      ok([{ project_id: 'proj1' }]),                  // project_submissions (project_id only)
+      ok([{ challenge_id: 'chal1' }]),                // challenge_submissions (challenge_id only)
+      ok([]),                                          // existing portfolio_items
+      // Second round: fetch real titles
+      ok([{ id: 'mod1',  title: 'Advanced Reacts', description: 'Learn React'     }]), // learning_modules
+      ok([{ id: 'proj1', title: 'Hospital Mgmt',   description: 'Build a system'  }]), // projects
+      ok([{ id: 'chal1', title: 'Text Encrypter',  description: 'Crypto challenge' }]), // industry_challenges
       ok(null), // insert
     ])
     await expect(autoGeneratePortfolioItems('stu1', 'port1')).resolves.toBeUndefined()
   })
 
-  it('skips the insert call when every item already exists', async () => {
+  it('skips the title fetch and insert when every item already exists', async () => {
     queueFromResults(fromMock, [
       ok([{ module_id: 'mod1' }]),
       ok([]),
@@ -97,6 +114,7 @@ describe('autoGeneratePortfolioItems', () => {
       ok([{ reference_id: 'mod1' }]), // already has this module
     ])
     await autoGeneratePortfolioItems('stu1', 'port1')
+    // Only the 4 initial parallel queries fire; no title-fetch or insert queries
     expect(fromMock).toHaveBeenCalledTimes(4)
   })
 })

@@ -320,6 +320,12 @@ DROP POLICY IF EXISTS "Modules viewable by authenticated users"        ON learni
 DROP POLICY IF EXISTS "Admins and mentors can create modules"          ON learning_modules;
 DROP POLICY IF EXISTS "Admins and mentors can update modules"          ON learning_modules;
 DROP POLICY IF EXISTS "Admins and mentors can delete modules"          ON learning_modules;
+DROP POLICY IF EXISTS "Active modules publicly readable"               ON learning_modules;
+-- Allows the unauthenticated public portfolio page to look up real module
+-- titles by reference_id without requiring a logged-in session.
+CREATE POLICY "Active modules publicly readable"
+  ON learning_modules FOR SELECT
+  USING (is_active = TRUE);
 CREATE POLICY "Modules viewable by authenticated users"
   ON learning_modules FOR SELECT TO authenticated
   USING (is_active = TRUE OR created_by = auth.uid()
@@ -361,6 +367,12 @@ CREATE POLICY "Students manage own progress"
 -- projects
 DROP POLICY IF EXISTS "Active projects viewable by authenticated users" ON projects;
 DROP POLICY IF EXISTS "Admins and mentors manage projects"              ON projects;
+DROP POLICY IF EXISTS "Active projects publicly readable"               ON projects;
+-- Allows the unauthenticated public portfolio page to look up real project
+-- titles by reference_id without requiring a logged-in session.
+CREATE POLICY "Active projects publicly readable"
+  ON projects FOR SELECT
+  USING (is_active = TRUE);
 CREATE POLICY "Active projects viewable by authenticated users"
   ON projects FOR SELECT TO authenticated
   USING (is_active = TRUE OR created_by = auth.uid()
@@ -498,6 +510,12 @@ CREATE POLICY "Students manage own independent projects"
 -- industry_challenges
 DROP POLICY IF EXISTS "Approved active challenges viewable by all authenticated" ON industry_challenges;
 DROP POLICY IF EXISTS "Companies manage own challenges"                          ON industry_challenges;
+DROP POLICY IF EXISTS "Approved challenges publicly readable"                    ON industry_challenges;
+-- Allows the unauthenticated public portfolio page to look up real challenge
+-- titles by reference_id without requiring a logged-in session.
+CREATE POLICY "Approved challenges publicly readable"
+  ON industry_challenges FOR SELECT
+  USING (is_active = TRUE AND is_approved = TRUE);
 CREATE POLICY "Approved active challenges viewable by all authenticated"
   ON industry_challenges FOR SELECT TO authenticated
   USING (
