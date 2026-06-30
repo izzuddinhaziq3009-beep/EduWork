@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useCompanyDashboardStats, useAllCompanySubmissions } from '@/hooks/useCompany'
-import { DifficultyBadge } from '@/components/common/DifficultyBadge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fmtRelative, fmtInitials } from '@/utils/formatters'
 

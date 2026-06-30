@@ -4,7 +4,7 @@ import { useCompanyChallenge, useUpdateChallenge, useResubmitChallenge } from '@
 import { ChallengeForm } from '@/components/features/challenges/ChallengeForm'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { ChallengeFormValues } from '@/components/features/challenges/ChallengeForm'
+import type { ChallengeFormValues } from '@/components/features/challenges/challengeFormSchema'
 
 export function EditChallenge() {
   const { id = '' }  = useParams()

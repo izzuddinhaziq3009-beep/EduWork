@@ -49,4 +49,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
+// buttonVariants is exported alongside Button so other components can reuse
+// the same style variants on non-<button> elements — standard shadcn/ui
+// pattern; Fast Refresh still works fine for this file in practice.
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants }

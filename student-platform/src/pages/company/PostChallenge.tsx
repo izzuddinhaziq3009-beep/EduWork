@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useCreateChallenge } from '@/hooks/useCompany'
 import { ChallengeForm } from '@/components/features/challenges/ChallengeForm'
 import { PageHeader } from '@/components/common/PageHeader'
-import type { ChallengeFormValues } from '@/components/features/challenges/ChallengeForm'
+import type { ChallengeFormValues } from '@/components/features/challenges/challengeFormSchema'
 
 export function PostChallenge() {
   const { user } = useAuthStore()

@@ -105,7 +105,7 @@ export function useUpdateChallenge() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ challengeId, companyId, payload }: { challengeId: string; companyId: string; payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string }> }) =>
+    mutationFn: ({ challengeId, payload }: { challengeId: string; companyId: string; payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string }> }) =>
       updateChallenge(challengeId, payload),
     onSuccess: (_, { companyId, challengeId }) => {
       qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })
@@ -160,7 +160,7 @@ export function useLeaveFeedback() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ submissionId, reviewerId, studentId, feedbackText, rating, companyId }: {
+    mutationFn: ({ submissionId, reviewerId, studentId, feedbackText, rating }: {
       submissionId: string; reviewerId: string; studentId: string; feedbackText: string; rating: number; companyId: string
     }) => leaveFeedback(submissionId, reviewerId, studentId, feedbackText, rating),
     onSuccess: (_, { submissionId, companyId }) => {

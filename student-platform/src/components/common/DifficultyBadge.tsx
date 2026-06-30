@@ -15,6 +15,3 @@ export function DifficultyBadge({ level }: { level: DifficultyLevel }) {
   )
 }
 
-export function difficultyColor(level: DifficultyLevel): string {
-  return { beginner: 'var(--accent)', intermediate: 'var(--warn)', advanced: 'var(--rose)' }[level]
-}

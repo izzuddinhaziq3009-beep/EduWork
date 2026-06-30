@@ -81,8 +81,9 @@ export function useValidateGitHub(url: string) {
 
   useEffect(() => {
     const isLikelyComplete = url.includes('github.com/') && url.split('/').filter(Boolean).length >= 4
-    if (!isLikelyComplete) { setDebouncedUrl(''); return }
-    const t = setTimeout(() => setDebouncedUrl(url.trim()), 500)
+    // Both branches resolve through the timeout so neither calls setState
+    // synchronously in the effect body — clearing is just an immediate (0ms) one.
+    const t = setTimeout(() => setDebouncedUrl(isLikelyComplete ? url.trim() : ''), isLikelyComplete ? 500 : 0)
     return () => clearTimeout(t)
   }, [url])
 

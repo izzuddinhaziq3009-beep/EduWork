@@ -10,34 +10,31 @@ import type { Profile } from '@/types'
 export function MessagesPage() {
   const { user }          = useAuthStore()
   const [params]          = useSearchParams()
-  const [partnerId, setPartnerId] = useState<string>(params.get('with') ?? '')
-  const [partner, setPartner]     = useState<Profile | null>(null)
+  const [explicitPartnerId, setExplicitPartnerId] = useState<string>(params.get('with') ?? '')
+  const [fetchedPartner, setFetchedPartner]       = useState<Profile | null>(null)
 
   const { data: conversations = [], isLoading } = useConversationList(user?.id ?? '')
 
-  // If a partnerId is set (e.g. from ?with= query param or conversation click), load their profile
+  // Falls back to the first conversation once conversations load, if the
+  // user hasn't explicitly picked one (e.g. via ?with= or clicking in the list).
+  const partnerId = explicitPartnerId || conversations[0]?.partnerId || ''
+  const conversationPartner = conversations.find(c => c.partnerId === partnerId)?.partner ?? null
+  const partner = conversationPartner ?? fetchedPartner
+
+  // Only need to fetch when the partner isn't already part of a loaded
+  // conversation (e.g. landing here via a ?with= link with no conversation yet).
   useEffect(() => {
-    if (!partnerId) return
+    if (!partnerId || conversationPartner) return
     supabase
       .from('profiles')
       .select('*')
       .eq('id', partnerId)
       .single()
-      .then(({ data }) => setPartner((data ?? null) as unknown as Profile | null))
-  }, [partnerId])
-
-  // When conversations load and no active partner, auto-select the first
-  useEffect(() => {
-    if (!partnerId && conversations.length > 0) {
-      setPartnerId(conversations[0].partnerId)
-      setPartner(conversations[0].partner)
-    }
-  }, [conversations, partnerId])
+      .then(({ data }) => setFetchedPartner((data ?? null) as unknown as Profile | null))
+  }, [partnerId, conversationPartner])
 
   const handleSelect = (id: string) => {
-    const conv = conversations.find(c => c.partnerId === id)
-    setPartnerId(id)
-    if (conv) setPartner(conv.partner)
+    setExplicitPartnerId(id)
   }
 
   return (

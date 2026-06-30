@@ -35,7 +35,7 @@ async function ensureProfile(
 
 // Mentor/company accounts need admin approval before they can use the app.
 // Students and admins are never gated.
-function needsApproval(role: UserRole, profile: Profile | null): boolean {
+export function needsApproval(role: UserRole, profile: Profile | null): boolean {
   return (role === 'mentor' || role === 'company') && profile?.is_approved === false
 }
 

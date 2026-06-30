@@ -1,14 +1,11 @@
 import { useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-
-const schema = z.object({
-  content: z.string().min(20, 'Please provide at least 20 characters describing your work.'),
-})
+import { projectSubmissionSchema } from './projectSubmissionSchema'
 
 interface Props {
   onSubmit: (content: string, file?: File) => void
@@ -17,15 +14,16 @@ interface Props {
 
 export function ProjectSubmissionForm({ onSubmit, loading }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) })
+  const form = useForm<z.infer<typeof projectSubmissionSchema>>({ resolver: zodResolver(projectSubmissionSchema) })
 
-  const handleSubmit = (vals: z.infer<typeof schema>) => {
+  const handleSubmit = (vals: z.infer<typeof projectSubmissionSchema>) => {
     onSubmit(vals.content, fileRef.current?.files?.[0])
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+      {/* Wrapped so form.handleSubmit(...) is only constructed at submit time, not during render. */}
+      <form onSubmit={e => { void form.handleSubmit(handleSubmit)(e) }} className="space-y-5">
         <FormField control={form.control} name="content" render={({ field }) => (
           <FormItem>
             <FormLabel>Your submission</FormLabel>

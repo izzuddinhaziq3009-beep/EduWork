@@ -5,7 +5,7 @@ import { useAllCompanySubmissions, useCompanyChallenges } from '@/hooks/useCompa
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
-import { fmtDate, fmtRelative, fmtInitials } from '@/utils/formatters'
+import { fmtRelative, fmtInitials } from '@/utils/formatters'
 import type { ChallengeSubmissionStatus } from '@/types'
 
 const COLORS = ['#1E5BFF', '#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A']

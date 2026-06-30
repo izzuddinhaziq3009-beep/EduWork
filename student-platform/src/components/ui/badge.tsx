@@ -27,4 +27,6 @@ function Badge({ className, variant, ...props }: BadgeProps) {
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />
 }
 
+// Standard shadcn/ui pattern (see button.tsx for the same comment).
+// eslint-disable-next-line react-refresh/only-export-components
 export { Badge, badgeVariants }

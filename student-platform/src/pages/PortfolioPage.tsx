@@ -81,6 +81,8 @@ export function PortfolioPage() {
                       studentId: user.id,
                     })}
                     disabled={toggle.isPending}
+                    aria-label="Toggle public portfolio"
+                    aria-pressed={data.portfolio.is_public}
                     className="relative w-11 h-6 rounded-full transition-colors focus:outline-none"
                     style={{ background: data.portfolio.is_public ? 'var(--accent)' : 'var(--hair)' }}>
                     <span className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform"

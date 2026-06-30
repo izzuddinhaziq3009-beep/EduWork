@@ -12,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fmtDate, fmtRelative } from '@/utils/formatters'
-import type { ChallengeWithStats } from '@/services/companyService'
 
 const FlagIcon = () => (
   <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -67,9 +66,8 @@ function PendingTab({ companyId }: { companyId: string }) {
 
 // ── Approved tab ────────────────────────────────────────────────────────────
 
-function ApprovedTab({ companyId, userId }: { companyId: string; userId: string }) {
+function ApprovedTab({ companyId }: { companyId: string }) {
   const { data: challenges = [], isLoading } = useCompanyApprovedChallenges(companyId)
-  const deleteChallenge = useDeleteChallenge()
 
   if (isLoading) return <SkeletonList />
   if (challenges.length === 0) return (
@@ -181,7 +179,6 @@ function AllTab({ companyId, userId }: { companyId: string; userId: string }) {
         {challenges.map(c => {
           const isRejected = !!c.rejection_reason
           const isPending  = !c.is_approved && !isRejected
-          const isApproved = c.is_approved
 
           const badge = isRejected ? { label: 'Rejected',        bg: 'var(--rose-soft)',    color: 'var(--rose)'    }
                       : isPending  ? { label: 'Pending approval', bg: 'var(--warn-soft)',    color: 'var(--warn)'    }
@@ -284,7 +281,7 @@ export function MyChallenges() {
         </TabsList>
 
         <TabsContent value="pending"><PendingTab companyId={cid} /></TabsContent>
-        <TabsContent value="approved"><ApprovedTab companyId={cid} userId={cid} /></TabsContent>
+        <TabsContent value="approved"><ApprovedTab companyId={cid} /></TabsContent>
         <TabsContent value="rejected"><RejectedTab companyId={cid} /></TabsContent>
         <TabsContent value="all"><AllTab companyId={cid} userId={cid} /></TabsContent>
       </Tabs>

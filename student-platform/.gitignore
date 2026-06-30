@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .claude
+report
+
+# Vitest
+/coverage/
+vitest-results.json

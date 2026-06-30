@@ -1,13 +1,10 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-
-const schema = z.object({
-  message: z.string().min(20, 'Please write at least 20 characters.').max(500, 'Keep it under 500 characters.'),
-})
+import { mentorshipRequestSchema } from './mentorshipRequestSchema'
 
 interface Props {
   mentorName: string
@@ -16,7 +13,10 @@ interface Props {
 }
 
 export function MentorshipRequestForm({ mentorName, onSubmit, loading }: Props) {
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) })
+  const form = useForm<z.infer<typeof mentorshipRequestSchema>>({
+    resolver: zodResolver(mentorshipRequestSchema),
+    defaultValues: { message: '' },
+  })
 
   return (
     <Form {...form}>

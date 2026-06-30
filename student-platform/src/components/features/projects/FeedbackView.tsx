@@ -1,5 +1,4 @@
 import { fmtRelative } from '@/utils/formatters'
-import { fmtInitials } from '@/utils/formatters'
 import type { MentorFeedback } from '@/types'
 
 export function FeedbackView({ feedback }: { feedback: MentorFeedback }) {

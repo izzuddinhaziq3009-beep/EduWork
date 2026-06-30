@@ -1,18 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import type { DigitalPortfolio } from '@/types'
-
-const schema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters.'),
-  bio:   z.string().min(20, 'Bio must be at least 20 characters.').max(600, 'Keep bio under 600 characters.'),
-  skills: z.string(),
-})
+import { portfolioEditorSchema } from './portfolioEditorSchema'
 
 interface Props {
   portfolio?: DigitalPortfolio
@@ -21,8 +16,8 @@ interface Props {
 }
 
 export function PortfolioEditor({ portfolio, onSave, saving }: Props) {
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof portfolioEditorSchema>>({
+    resolver: zodResolver(portfolioEditorSchema),
     defaultValues: {
       title:  portfolio?.title  ?? '',
       bio:    portfolio?.bio    ?? '',
@@ -40,7 +35,7 @@ export function PortfolioEditor({ portfolio, onSave, saving }: Props) {
     }
   }, [portfolio, form])
 
-  const handleSubmit = (vals: z.infer<typeof schema>) => {
+  const handleSubmit = (vals: z.infer<typeof portfolioEditorSchema>) => {
     const skills = vals.skills.split(',').map(s => s.trim()).filter(Boolean)
     onSave({ title: vals.title, bio: vals.bio, skills })
   }

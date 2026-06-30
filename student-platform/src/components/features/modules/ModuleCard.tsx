@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
-import { DifficultyBadge, difficultyColor } from '@/components/common/DifficultyBadge'
+import { DifficultyBadge } from '@/components/common/DifficultyBadge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fmtDuration } from '@/utils/formatters'
 import { resolveModuleColor } from '@/utils/moduleColors'
+import { difficultyColor } from '@/utils/difficultyColor'
 import type { LearningModule, StudentModuleProgress } from '@/types'
 
 const PATTERNS: Record<string, string> = {

@@ -1,26 +1,16 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { IndustryChallenge } from '@/types'
+import { challengeSchema, type ChallengeFormValues } from './challengeFormSchema'
 
-export const challengeSchema = z.object({
-  title:            z.string().min(5,  'Title must be at least 5 characters.'),
-  description:      z.string().min(20, 'Description must be at least 20 characters.'),
-  requirements:     z.string().min(20, 'Requirements must be at least 20 characters.'),
-  difficulty_level: z.enum(['beginner', 'intermediate', 'advanced']),
-  deadline:         z.string().min(1, 'Deadline is required.').refine(
-    v => new Date(v) > new Date(),
-    'Deadline must be in the future.',
-  ),
-})
-
-export type ChallengeFormValues = z.infer<typeof challengeSchema>
+// Computed once at module load rather than during render — Date.now() is an
+// impure call, and the "tomorrow" boundary doesn't need to track the live clock.
+const MIN_DEADLINE = new Date(Date.now() + 86400000).toISOString().slice(0, 16)
 
 interface Props {
   defaultValues?: Partial<ChallengeFormValues>
@@ -95,8 +85,7 @@ export function ChallengeForm({ defaultValues, onSubmit, loading, submitLabel = 
             <FormItem>
               <FormLabel>Deadline</FormLabel>
               <FormControl>
-                <Input {...field} type="datetime-local"
-                  min={new Date(Date.now() + 86400000).toISOString().slice(0, 16)} />
+                <Input {...field} type="datetime-local" min={MIN_DEADLINE} />
               </FormControl>
               <FormMessage />
             </FormItem>

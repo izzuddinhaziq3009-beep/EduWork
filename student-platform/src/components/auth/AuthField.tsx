@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AlertIcon, LockIcon, EyeIcon, EyeOffIcon } from './AuthIcons'
+import { passwordStrength } from './passwordStrength'
 import type { ReactElement, ReactNode, SVGProps } from 'react'
 
 type IconComponent = (p: SVGProps<SVGSVGElement>) => ReactElement
@@ -89,17 +90,6 @@ export function PasswordField({ label, value, onChange, error, name, hint, right
   )
 }
 
-function passwordStrength(pw: string) {
-  if (!pw) return { level: 0, label: '' }
-  let s = 0
-  if (pw.length >= 8) s++
-  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++
-  if (/\d/.test(pw)) s++
-  if (/[^A-Za-z0-9]/.test(pw)) s++
-  const labels = ['Too short', 'Weak', 'Okay', 'Good', 'Strong']
-  return { level: s, label: labels[s] }
-}
-
 export function StrengthBar({ pw }: { pw: string }) {
   const { level, label } = passwordStrength(pw)
   const colors = ['var(--rose)', 'var(--rose)', 'var(--warn)', 'var(--accent)', 'var(--accent)']
@@ -120,5 +110,3 @@ export function StrengthBar({ pw }: { pw: string }) {
     </div>
   )
 }
-
-export { passwordStrength }

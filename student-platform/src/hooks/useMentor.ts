@@ -95,7 +95,7 @@ export function useAcceptRequest() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ requestId, studentId, mentorId }: { requestId: string; studentId: string; mentorId: string }) =>
+    mutationFn: ({ requestId, studentId }: { requestId: string; studentId: string; mentorId: string }) =>
       acceptRequest(requestId, studentId),
     onSuccess: (_, { mentorId }) => {
       qc.invalidateQueries({ queryKey: mentorKeys.requests(mentorId) })

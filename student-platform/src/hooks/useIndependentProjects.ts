@@ -54,7 +54,7 @@ export function useSubmitIndependentProject() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ projectId, githubUrl, studentId }: { projectId: string; githubUrl?: string; studentId: string }) =>
+    mutationFn: ({ projectId, githubUrl }: { projectId: string; githubUrl?: string; studentId: string }) =>
       submitIndependentProject(projectId, githubUrl),
     onSuccess: (_, { studentId }) => {
       qc.invalidateQueries({ queryKey: indieKeys.student(studentId) })
@@ -69,7 +69,7 @@ export function useCompleteIndependentProject() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ projectId, studentId }: { projectId: string; studentId: string }) =>
+    mutationFn: ({ projectId }: { projectId: string; studentId: string }) =>
       markIndependentProjectCompleted(projectId),
     onSuccess: (_, { studentId }) => {
       qc.invalidateQueries({ queryKey: indieKeys.student(studentId) })
