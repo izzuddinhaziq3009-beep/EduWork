@@ -8,7 +8,19 @@
       "Bash(tee /tmp/tsc_landing2.txt)",
       "Bash(tee /tmp/tsc_thumb.txt)",
       "Bash(npm run *)",
-      "Bash(taskkill //F //IM node.exe //T)"
+      "Bash(taskkill //F //IM node.exe //T)",
+      "Bash(npx playwright *)",
+      "Bash(npm install *)",
+      "Bash(node -e ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python -c ' *)",
+      "Read(//c/Users/AjiQ/AppData/Local/Temp/claude/c--Users-AjiQ-OneDrive-Documents-EduWork/160ff478-6140-4d09-ac6b-4e1c78ec7663/scratchpad/**)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(cd \"c:/Users/AjiQ/OneDrive/Documents/EduWork/student-platform\" && ls e2e/ && echo \"---\" && ls playwright.config.ts .env.test .env.test.example 2>&1 && echo \"---\" && ls \"../.github/workflows/\")",
+      "Read(//c/Users/AjiQ/OneDrive/Documents/.github/**)",
+      "Bash(npx vitest *)",
+      "Bash(mkdir -p /tmp/yamlcheck)",
+      "Bash(git check-ignore *)"
     ]
   }
 }
