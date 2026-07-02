@@ -38,5 +38,7 @@ export type {
   ChallengeFeedback,
   Notification,
   ActivityLog,
+  Class,
+  ClassEnrollment,
   Database,
 } from './database'

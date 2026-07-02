@@ -163,3 +163,4 @@ describe('uploadModuleImage validation', () => {
     await expect(uploadModuleImage(file, 'admin-1')).rejects.toThrow('Image must be less than 5MB.')
   })
 })
+

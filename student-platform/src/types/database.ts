@@ -291,6 +291,23 @@ export interface ActivityLog {
   created_at: string
 }
 
+export interface Class {
+  id: string
+  module_id: string
+  mentor_id: string
+  name: string
+  join_code: string
+  is_active: boolean
+  created_at: string
+}
+
+export interface ClassEnrollment {
+  id: string
+  class_id: string
+  student_id: string
+  joined_at: string
+}
+
 // ── Database type for the Supabase client ──────────────────────────────────
 // Insert/Update types are written as explicit flat types (not Omit<> intersections)
 // so Supabase's TypeScript client can resolve them correctly.
@@ -782,6 +799,32 @@ export interface Database {
           action?: string
           description?: string
         }
+      }
+      classes: {
+        Row: Class
+        Insert: {
+          id?: string
+          module_id: string
+          mentor_id: string
+          name: string
+          join_code: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          is_active?: boolean
+        }
+      }
+      class_enrollments: {
+        Row: ClassEnrollment
+        Insert: {
+          id?: string
+          class_id: string
+          student_id: string
+          joined_at?: string
+        }
+        Update: Record<string, never>
       }
     }
     Views: {

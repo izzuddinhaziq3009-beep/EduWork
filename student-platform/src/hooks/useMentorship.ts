@@ -2,14 +2,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getAvailableMentors, getMentorProfile,
   sendMentorshipRequest, getStudentRequests, getStudentMentor,
+  getStudentMentors,
 } from '@/services/mentorshipService'
 import { useToast } from './use-toast'
 
 export const mentorshipKeys = {
-  mentors: ['mentors'] as const,
-  mentorById: (id: string) => ['mentors', id] as const,
-  requests: (studentId: string) => ['mentorship-requests', studentId] as const,
-  activeMentor: (studentId: string) => ['active-mentor', studentId] as const,
+  mentors:       ['mentors'] as const,
+  mentorById:    (id: string) => ['mentors', id] as const,
+  requests:      (studentId: string) => ['mentorship-requests', studentId] as const,
+  activeMentor:  (studentId: string) => ['active-mentor',  studentId] as const,
+  activeMentors: (studentId: string) => ['active-mentors', studentId] as const,
 }
 
 export function useAvailableMentors() {
@@ -41,6 +43,14 @@ export function useStudentMentor(studentId: string) {
   })
 }
 
+export function useStudentMentors(studentId: string) {
+  return useQuery({
+    queryKey: mentorshipKeys.activeMentors(studentId),
+    queryFn: () => getStudentMentors(studentId),
+    enabled: !!studentId,
+  })
+}
+
 export function useSendMentorshipRequest() {
   const qc = useQueryClient()
   const { toast } = useToast()
@@ -54,3 +64,4 @@ export function useSendMentorshipRequest() {
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })
 }
+

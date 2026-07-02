@@ -21,7 +21,8 @@ const Icons = {
   shield:  (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3l9 3v6c0 5-4 9-9 9s-9-4-9-9V6l9-3z"/><path d="M9 12l2 2 4-4"/></svg>,
   server:  (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="0.5" fill="currentColor"/><circle cx="7" cy="17" r="0.5" fill="currentColor"/></svg>,
   arrow:   (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>,
-  fire:    (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3s4 4 4 8a4 4 0 1 1-8 0c0-1 .4-2 .8-2.6C9 9.8 8 8 8 6c1 1.4 2 1.6 3 1.4C10 5 12 3 12 3z"/></svg>,
+  fire:        (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3s4 4 4 8a4 4 0 1 1-8 0c0-1 .4-2 .8-2.6C9 9.8 8 8 8 6c1 1.4 2 1.6 3 1.4C10 5 12 3 12 3z"/></svg>,
+  chalkboard:  (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
 }
 
 interface NavItem {
@@ -34,9 +35,10 @@ interface NavItem {
 }
 
 const STUDENT_NAV: NavItem[] = [
-  { label: 'Dashboard',             to: '/dashboard',             icon: 'home'   },
-  { label: 'Learning Modules',      to: '/modules',               icon: 'book'   },
-  { label: 'Projects',              to: '/projects',              icon: 'folder' },
+  { label: 'Dashboard',             to: '/dashboard',             icon: 'home'        },
+  { label: 'Learning Modules',      to: '/modules',               icon: 'book'        },
+  { label: 'My Classes',            to: '/classes',               icon: 'chalkboard'  },
+  { label: 'Projects',              to: '/projects',              icon: 'folder'      },
   { label: 'My Progress',           to: '/progress',              icon: 'chart'  },
   { label: 'Mentorship',            to: '/mentorship',            icon: 'users'  },
   { label: 'Portfolio',             to: '/portfolio',             icon: 'brief'  },
@@ -46,10 +48,11 @@ const STUDENT_NAV: NavItem[] = [
 ]
 
 const MENTOR_NAV: NavItem[] = [
-  { label: 'Dashboard',            to: '/mentor/dashboard',           icon: 'home'  },
-  { label: 'Student Submissions',  to: '/mentor/submissions',         icon: 'inbox' },
+  { label: 'Dashboard',            to: '/mentor/dashboard',           icon: 'home'        },
+  { label: 'My Classes',           to: '/mentor/classes',             icon: 'chalkboard'  },
+  { label: 'Student Submissions',  to: '/mentor/submissions',         icon: 'inbox'       },
   { label: 'Mentorship Requests',  to: '/mentor/mentorship-requests', icon: 'hand', dot: true },
-  { label: 'Messages',             to: '/mentor/messages',            icon: 'msg'   },
+  { label: 'Messages',             to: '/mentor/messages',            icon: 'msg'         },
 ]
 
 const COMPANY_NAV: NavItem[] = [

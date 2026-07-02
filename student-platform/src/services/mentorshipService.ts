@@ -55,18 +55,40 @@ export async function getStudentRequests(studentId: string): Promise<MentorshipR
   return (data ?? []) as unknown as MentorshipRequest[]
 }
 
+// Returns the most recently accepted mentor. Safe when the student has multiple
+// accepted mentors (e.g. from joining multiple classes).
 export async function getStudentMentor(studentId: string): Promise<Profile | null> {
   const { data } = await supabase
     .from('mentorship_requests')
     .select('mentor_id')
     .eq('student_id', studentId)
     .eq('status', 'accepted')
-    .single()
-  if (!data) return null
+    .order('created_at', { ascending: false })
+    .limit(1)
+  const rows = (data ?? []) as { mentor_id: string }[]
+  if (!rows.length) return null
   const { data: mentor } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', (data as { mentor_id: string }).mentor_id)
+    .eq('id', rows[0].mentor_id)
     .single()
   return (mentor ?? null) as unknown as Profile | null
 }
+
+// Returns ALL accepted mentors for a student (deduplicated), newest first.
+export async function getStudentMentors(studentId: string): Promise<Profile[]> {
+  const { data } = await supabase
+    .from('mentorship_requests')
+    .select('mentor_id')
+    .eq('student_id', studentId)
+    .eq('status', 'accepted')
+  const rows = (data ?? []) as { mentor_id: string }[]
+  if (!rows.length) return []
+  const ids = [...new Set(rows.map(r => r.mentor_id))]
+  const { data: mentors } = await supabase
+    .from('profiles')
+    .select('*')
+    .in('id', ids)
+  return (mentors ?? []) as unknown as Profile[]
+}
+

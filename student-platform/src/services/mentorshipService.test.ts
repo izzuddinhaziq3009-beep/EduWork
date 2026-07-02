@@ -8,7 +8,7 @@ vi.mock('@/utils/activityLog', () => ({ logActivity: vi.fn() }))
 import { supabase } from './supabase'
 import {
   getAvailableMentors, getMentorProfile, sendMentorshipRequest,
-  getStudentRequests, getStudentMentor,
+  getStudentRequests, getStudentMentor, getStudentMentors,
 } from './mentorshipService'
 
 const fromMock = supabase.from as Mock
@@ -61,17 +61,39 @@ describe('getStudentRequests', () => {
 
 describe('getStudentMentor', () => {
   it('returns null when there is no accepted mentor', async () => {
+    // Implementation now uses limit(1) + array check; null data → empty rows → null
     queueFromResults(fromMock, [ok(null)])
     expect(await getStudentMentor('stu1')).toBeNull()
     expect(fromMock).toHaveBeenCalledTimes(1)
   })
 
-  it('returns the accepted mentor\'s profile', async () => {
+  it('returns the most recent accepted mentor\'s profile', async () => {
     queueFromResults(fromMock, [
-      ok({ mentor_id: 'm1' }),
+      ok([{ mentor_id: 'm1' }]),
       ok({ id: 'm1', full_name: 'Mentor One' }),
     ])
     const result = await getStudentMentor('stu1')
     expect(result?.full_name).toBe('Mentor One')
   })
 })
+
+describe('getStudentMentors', () => {
+  it('returns empty array when student has no accepted mentors', async () => {
+    queueFromResults(fromMock, [ok([])])
+    const result = await getStudentMentors('stu1')
+    expect(result).toEqual([])
+    expect(fromMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns all accepted mentor profiles deduplicated by id', async () => {
+    // Row 1 & 3 share the same mentor id — deduplication should yield 2 profiles
+    queueFromResults(fromMock, [
+      ok([{ mentor_id: 'm1' }, { mentor_id: 'm2' }, { mentor_id: 'm1' }]),
+      ok([{ id: 'm1', full_name: 'Mentor One' }, { id: 'm2', full_name: 'Mentor Two' }]),
+    ])
+    const result = await getStudentMentors('stu1')
+    expect(result).toHaveLength(2)
+    expect(result.map(m => m.id)).toEqual(expect.arrayContaining(['m1', 'm2']))
+  })
+})
+

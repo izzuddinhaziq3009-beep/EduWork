@@ -12,7 +12,7 @@ export function MentorDashboard() {
   const { user, profile } = useAuthStore()
   const mid = user?.id ?? ''
 
-  const { data: stats, isLoading: loadingStats }     = useMentorDashboardStats(mid)
+  const { data: stats, isLoading: loadingStats }          = useMentorDashboardStats(mid)
   const { data: submissions = [], isLoading: loadingSubs } = useMentorSubmissions(mid)
   const { data: requests = [],    isLoading: loadingReqs } = useMentorshipRequests(mid)
 
@@ -130,6 +130,7 @@ export function MentorDashboard() {
           )}
         </div>
       </div>
+
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { fmtRelative } from '@/utils/formatters'
 import type { MentorshipRequest, MentorshipStatus } from '@/types'
 
@@ -8,6 +9,7 @@ const STATUS_CONFIG: Record<MentorshipStatus, { label: string; bg: string; color
 }
 
 export function RequestStatusList({ requests }: { requests: MentorshipRequest[] }) {
+  const navigate = useNavigate()
   return (
     <div className="space-y-3">
       {requests.map(req => {
@@ -28,6 +30,14 @@ export function RequestStatusList({ requests }: { requests: MentorshipRequest[] 
               <p className="text-[13px] muted mt-1 line-clamp-2">{req.message}</p>
               <div className="text-[11.5px] muted font-mono mt-1">{fmtRelative(req.created_at)}</div>
             </div>
+            {req.status === 'accepted' && (
+              <button
+                onClick={() => navigate(`/messages?with=${req.mentor_id}`)}
+                className="shrink-0 h-8 px-3 rounded-lg text-[12.5px] font-semibold text-white hover:opacity-90 transition-opacity"
+                style={{ background: 'var(--primary)' }}>
+                Message
+              </button>
+            )}
           </div>
         )
       })}

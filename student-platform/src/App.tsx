@@ -20,6 +20,7 @@ const ProjectsPage         = lazy(() => import('@/pages/ProjectsPage').then(m =>
 const ProjectDetailPage    = lazy(() => import('@/pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage })))
 const ProgressPage         = lazy(() => import('@/pages/ProgressPage').then(m => ({ default: m.ProgressPage })))
 const MentorshipPage       = lazy(() => import('@/pages/MentorshipPage').then(m => ({ default: m.MentorshipPage })))
+const StudentClasses       = lazy(() => import('@/pages/StudentClasses').then(m => ({ default: m.StudentClasses })))
 const PortfolioPage        = lazy(() => import('@/pages/PortfolioPage').then(m => ({ default: m.PortfolioPage })))
 const PublicPortfolioPage  = lazy(() => import('@/pages/PublicPortfolioPage').then(m => ({ default: m.PublicPortfolioPage })))
 const IndependentProjectsPage = lazy(() => import('@/pages/IndependentProjectsPage').then(m => ({ default: m.IndependentProjectsPage })))
@@ -27,6 +28,7 @@ const PlaceholderPage      = lazy(() => import('@/pages/PlaceholderPage').then(m
 const NotFoundPage         = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
 const MentorDashboard         = lazy(() => import('@/pages/mentor/MentorDashboard').then(m => ({ default: m.MentorDashboard })))
+const MentorClasses           = lazy(() => import('@/pages/mentor/MentorClasses').then(m => ({ default: m.MentorClasses })))
 const SubmissionsPage         = lazy(() => import('@/pages/mentor/SubmissionsPage').then(m => ({ default: m.SubmissionsPage })))
 const SubmissionDetail        = lazy(() => import('@/pages/mentor/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })))
 const MentorshipRequests      = lazy(() => import('@/pages/mentor/MentorshipRequests').then(m => ({ default: m.MentorshipRequests })))
@@ -127,6 +129,9 @@ export default function App() {
         <Route path="/mentorship" element={
           <StudentRoute><AppLayout><MentorshipPage /></AppLayout></StudentRoute>
         }/>
+        <Route path="/classes" element={
+          <StudentRoute><AppLayout><StudentClasses /></AppLayout></StudentRoute>
+        }/>
         <Route path="/portfolio" element={
           <StudentRoute><AppLayout><PortfolioPage /></AppLayout></StudentRoute>
         }/>
@@ -143,6 +148,9 @@ export default function App() {
         {/* ── Mentor ── */}
         <Route path="/mentor/dashboard" element={
           <MentorRoute><AppLayout><MentorDashboard /></AppLayout></MentorRoute>
+        }/>
+        <Route path="/mentor/classes" element={
+          <MentorRoute><AppLayout><MentorClasses /></AppLayout></MentorRoute>
         }/>
         <Route path="/mentor/submissions" element={
           <MentorRoute><AppLayout><SubmissionsPage /></AppLayout></MentorRoute>

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useOverallProgress, useModuleProgressDetails, useProjectProgressDetails, useUserActivity } from '@/hooks/useProgress'
-import { useStudentMentor, useStudentRequests } from '@/hooks/useMentorship'
+import { useStudentMentors, useStudentRequests } from '@/hooks/useMentorship'
 import { useActiveChallenges, useStudentChallengeSubmissions } from '@/hooks/useChallenges'
 import { DifficultyBadge } from '@/components/common/DifficultyBadge'
 import { SubmissionStatus } from '@/components/features/projects/SubmissionStatus'
@@ -28,7 +28,7 @@ export function Dashboard() {
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Student'
 
   const { data: overall,         isLoading: loadingOverall   } = useOverallProgress(sid)
-  const { data: mentor,          isLoading: loadingMentor    } = useStudentMentor(sid)
+  const { data: mentors = [],    isLoading: loadingMentors   } = useStudentMentors(sid)
   const { data: requests = [] }                                = useStudentRequests(sid)
   const { data: modules = [],    isLoading: loadingModules   } = useModuleProgressDetails(sid)
   const { data: projects = [],   isLoading: loadingProjects  } = useProjectProgressDetails(sid)
@@ -36,7 +36,7 @@ export function Dashboard() {
   const { data: challengeSubs = [] }                            = useStudentChallengeSubmissions(sid)
   const { data: activity = [],   isLoading: loadingActivity  } = useUserActivity(sid)
 
-  const loadingKpi = loadingOverall || loadingMentor
+  const loadingKpi = loadingOverall || loadingMentors
 
   const overallPct = overall
     ? Math.round(
@@ -79,7 +79,7 @@ export function Dashboard() {
         )) : [
           { label: 'Modules Completed',  value: overall?.completedModules ?? 0,    color: 'var(--primary)', to: '/modules'    },
           { label: 'Projects Submitted', value: overall?.totalSubmissions ?? 0,    color: 'var(--accent)',  to: '/projects'   },
-          { label: 'Active Mentorship',  value: mentor ? 1 : 0,                    color: 'var(--warn)',    to: '/mentorship' },
+          { label: 'Active Mentorship',  value: mentors.length,                    color: 'var(--warn)',    to: '/mentorship' },
           { label: 'Challenges',         value: overall?.challengesAttempted ?? 0, color: 'var(--rose)',    to: '/challenges' },
         ].map(card => (
           <Link key={card.label} to={card.to}
@@ -191,23 +191,27 @@ export function Dashboard() {
           {/* Mentorship status */}
           <div className="bg-surface hairline rounded-2xl shadow-card p-5">
             <h2 className="text-[16px] font-semibold mb-4">Mentorship</h2>
-            {loadingMentor ? (
+            {loadingMentors ? (
               <Skeleton className="h-14 w-full rounded-xl" />
-            ) : mentor ? (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg grid place-items-center font-mono font-semibold text-white text-[13px] shrink-0"
-                  style={{ background: avatarColor(mentor.full_name) }}>
-                  {fmtInitials(mentor.full_name)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13.5px] font-semibold truncate">{mentor.full_name}</div>
-                  <div className="text-[11.5px] muted">Your mentor</div>
-                </div>
-                <Link to="/messages"
-                  className="h-8 px-3 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] shrink-0 transition-colors"
-                  style={{ color: 'var(--primary)' }}>
-                  Message
-                </Link>
+            ) : mentors.length > 0 ? (
+              <div className="space-y-2">
+                {mentors.map(m => (
+                  <div key={m.id} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg grid place-items-center font-mono font-semibold text-white text-[13px] shrink-0"
+                      style={{ background: avatarColor(m.full_name) }}>
+                      {fmtInitials(m.full_name)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13.5px] font-semibold truncate">{m.full_name}</div>
+                      <div className="text-[11.5px] muted">Your mentor</div>
+                    </div>
+                    <Link to="/messages"
+                      className="h-8 px-3 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] shrink-0 transition-colors"
+                      style={{ color: 'var(--primary)' }}>
+                      Message
+                    </Link>
+                  </div>
+                ))}
               </div>
             ) : pendingRequests > 0 ? (
               <p className="text-[13px] muted">

@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import {
-  useAvailableMentors, useStudentRequests, useSendMentorshipRequest,
+  useAvailableMentors, useStudentRequests, useSendMentorshipRequest, useStudentMentors,
 } from '@/hooks/useMentorship'
 import { MentorCard, MentorCardSkeleton } from '@/components/features/mentorship/MentorCard'
 import { MentorshipRequestForm } from '@/components/features/mentorship/MentorshipRequestForm'
@@ -16,10 +17,11 @@ import type { Profile } from '@/types'
 
 export function MentorshipPage() {
   const { user } = useAuthStore()
+  const navigate = useNavigate()
   const [selected, setSelected] = useState<Profile | null>(null)
-
-  const { data: mentors = [],  isLoading: loadingMentors } = useAvailableMentors()
-  const { data: requests = [], isLoading: loadingReqs    } = useStudentRequests(user?.id ?? '')
+  const { data: mentors = [],        isLoading: loadingMentors   } = useAvailableMentors()
+  const { data: requests = [],       isLoading: loadingReqs      } = useStudentRequests(user?.id ?? '')
+  const { data: myMentors = [],      isLoading: loadingMyMentors } = useStudentMentors(user?.id ?? '')
   const send = useSendMentorshipRequest()
 
   const requestedIds = new Set(requests.map(r => r.mentor_id))
@@ -94,23 +96,48 @@ export function MentorshipPage() {
           )}
         </TabsContent>
 
-        {/* Messages — redirect to the shared messages page */}
+        {/* Messages — list accepted mentors with direct message links */}
         <TabsContent value="messages">
-          <div className="text-center py-12 space-y-4">
-            <div className="w-14 h-14 rounded-2xl grid place-items-center mx-auto"
-              style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/>
-              </svg>
+          {loadingMyMentors ? (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="bg-surface hairline rounded-2xl p-4">
+                  <div className="flex gap-4 items-center">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--hair-2)] shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-[var(--hair-2)] rounded w-1/3" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-[14px] muted">Message your mentor directly from the messages panel.</p>
-            <a href="/messages"
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-xl text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ background: 'var(--primary)' }}>
-              Open messages
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </a>
-          </div>
+          ) : myMentors.length === 0 ? (
+            <EmptyState
+              icon={<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/></svg>}
+              title="No mentors yet"
+              description="Browse mentors or join with a class code to get connected."
+            />
+          ) : (
+            <div className="space-y-3 max-w-lg">
+              {myMentors.map(mentor => (
+                <div key={mentor.id} className="bg-surface hairline rounded-2xl p-4 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl grid place-items-center shrink-0"
+                    style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="8" r="3.5"/><path d="M2 21c.7-3.6 3.6-5.5 7-5.5s6.3 1.9 7 5.5"/>
+                    </svg>
+                  </div>
+                  <span className="flex-1 text-[14px] font-semibold">{mentor.full_name}</span>
+                  <button
+                    onClick={() => navigate(`/messages?with=${mentor.id}`)}
+                    className="h-9 px-4 rounded-xl text-[13px] font-semibold text-white hover:opacity-90 transition-opacity shrink-0"
+                    style={{ background: 'var(--primary)' }}>
+                    Message
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
