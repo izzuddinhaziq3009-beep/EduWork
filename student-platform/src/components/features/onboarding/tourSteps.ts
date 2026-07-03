@@ -1,6 +1,14 @@
 import type { Step } from 'react-joyride'
 import type { UserRole } from '@/types'
 
+// Shared final step that points users to the profile menu where they can replay the tour
+const PROFILE_MENU_STEP: Step = {
+  target:    '[data-tour="profile-menu"]',
+  title:     'Replay this tour anytime',
+  content:   'Need a refresher? Open this profile menu and choose "Take a tour" to run this walkthrough again.',
+  placement: 'bottom',
+}
+
 export function tourStepsForRole(role: UserRole): Step[] {
   switch (role) {
     case 'student':
@@ -49,11 +57,24 @@ export function tourStepsForRole(role: UserRole): Step[] {
           placement: 'right',
         },
         {
+          target:    '[data-tour="independent-projects"]',
+          title:     'Independent Projects',
+          content:   'Work on your own projects outside of modules and challenges, and track them here.',
+          placement: 'right',
+        },
+        {
+          target:    '[data-tour="challenges"]',
+          title:     'Industry Challenges',
+          content:   'Browse challenges posted by companies and submit your solutions with a GitHub repository.',
+          placement: 'right',
+        },
+        {
           target:    '[data-tour="messages"]',
           title:     'Messages',
           content:   'Chat with your mentor or company contacts here.',
           placement: 'right',
         },
+        PROFILE_MENU_STEP,
       ]
 
     case 'mentor':
@@ -83,6 +104,7 @@ export function tourStepsForRole(role: UserRole): Step[] {
           content:   'Chat with any of your students directly.',
           placement: 'right',
         },
+        PROFILE_MENU_STEP,
       ]
 
     case 'company':
@@ -112,6 +134,7 @@ export function tourStepsForRole(role: UserRole): Step[] {
           content:   'Chat with students who have submitted to your challenges.',
           placement: 'right',
         },
+        PROFILE_MENU_STEP,
       ]
 
     case 'admin':
@@ -141,6 +164,7 @@ export function tourStepsForRole(role: UserRole): Step[] {
           content:   'View system health, recent activity logs, and platform usage metrics.',
           placement: 'right',
         },
+        PROFILE_MENU_STEP,
       ]
   }
 }

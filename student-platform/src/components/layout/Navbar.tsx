@@ -188,7 +188,8 @@ export function Navbar() {
 
           {/* Avatar dropdown */}
           <div className="relative" ref={menuRef}>
-            <button onClick={e => { e.stopPropagation(); setOpenMenu(v => !v); setOpenBell(false) }}
+            <button data-tour="profile-menu"
+              onClick={e => { e.stopPropagation(); setOpenMenu(v => !v); setOpenBell(false) }}
               className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-[var(--hair-2)] ring-focus transition-colors">
               <div className="w-8 h-8 rounded-lg grid place-items-center font-mono font-semibold text-white text-[13px] shrink-0"
                 style={{ background: 'var(--primary)' }}>

@@ -45,8 +45,8 @@ const STUDENT_NAV: NavItem[] = [
   { label: 'Mentorship',            to: '/mentorship',            icon: 'users',      tour: 'mentorship' },
   { label: 'Portfolio',             to: '/portfolio',             icon: 'brief',      tour: 'portfolio'  },
   { label: 'My Certificates',       to: '/certificates',          icon: 'award',      tour: 'certificates' },
-  { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark'                        },
-  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag'                         },
+  { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark', tour: 'independent-projects' },
+  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag',  tour: 'challenges'          },
   { label: 'Messages',              to: '/messages',              icon: 'msg',        tour: 'messages'   },
 ]
 
