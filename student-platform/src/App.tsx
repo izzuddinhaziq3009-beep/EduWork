@@ -23,6 +23,8 @@ const MentorshipPage       = lazy(() => import('@/pages/MentorshipPage').then(m 
 const StudentClasses       = lazy(() => import('@/pages/StudentClasses').then(m => ({ default: m.StudentClasses })))
 const PortfolioPage        = lazy(() => import('@/pages/PortfolioPage').then(m => ({ default: m.PortfolioPage })))
 const PublicPortfolioPage  = lazy(() => import('@/pages/PublicPortfolioPage').then(m => ({ default: m.PublicPortfolioPage })))
+const StudentCertificates  = lazy(() => import('@/pages/StudentCertificates').then(m => ({ default: m.StudentCertificates })))
+const VerifyCertificate    = lazy(() => import('@/pages/VerifyCertificate').then(m => ({ default: m.VerifyCertificate })))
 const IndependentProjectsPage = lazy(() => import('@/pages/IndependentProjectsPage').then(m => ({ default: m.IndependentProjectsPage })))
 const PlaceholderPage      = lazy(() => import('@/pages/PlaceholderPage').then(m => ({ default: m.PlaceholderPage })))
 const NotFoundPage         = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
@@ -104,6 +106,9 @@ export default function App() {
         {/* Public portfolio — no auth required */}
         <Route path="/portfolio/:publicUrl" element={<PublicPortfolioPage />} />
 
+        {/* Public certificate verification — no auth required */}
+        <Route path="/verify/:code" element={<VerifyCertificate />} />
+
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
 
@@ -137,6 +142,9 @@ export default function App() {
         }/>
         <Route path="/independent-projects" element={
           <StudentRoute><AppLayout><IndependentProjectsPage /></AppLayout></StudentRoute>
+        }/>
+        <Route path="/certificates" element={
+          <StudentRoute><AppLayout><StudentCertificates /></AppLayout></StudentRoute>
         }/>
         <Route path="/challenges" element={
           <StudentRoute><AppLayout><ChallengesPage /></AppLayout></StudentRoute>

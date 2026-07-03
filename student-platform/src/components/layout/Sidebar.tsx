@@ -23,6 +23,7 @@ const Icons = {
   arrow:   (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>,
   fire:        (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 3s4 4 4 8a4 4 0 1 1-8 0c0-1 .4-2 .8-2.6C9 9.8 8 8 8 6c1 1.4 2 1.6 3 1.4C10 5 12 3 12 3z"/></svg>,
   chalkboard:  (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
+  award:       (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="9" r="6"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>,
 }
 
 interface NavItem {
@@ -43,6 +44,7 @@ const STUDENT_NAV: NavItem[] = [
   { label: 'My Progress',           to: '/progress',              icon: 'chart',      tour: 'progress'   },
   { label: 'Mentorship',            to: '/mentorship',            icon: 'users',      tour: 'mentorship' },
   { label: 'Portfolio',             to: '/portfolio',             icon: 'brief',      tour: 'portfolio'  },
+  { label: 'My Certificates',       to: '/certificates',          icon: 'award',      tour: 'certificates' },
   { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark'                        },
   { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag'                         },
   { label: 'Messages',              to: '/messages',              icon: 'msg',        tour: 'messages'   },

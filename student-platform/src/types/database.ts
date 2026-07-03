@@ -309,6 +309,17 @@ export interface ClassEnrollment {
   joined_at: string
 }
 
+export interface Certificate {
+  id: string
+  student_id: string
+  module_id: string
+  student_name: string
+  module_title: string
+  certificate_code: string
+  issued_at: string
+  is_public: boolean
+}
+
 // ── Database type for the Supabase client ──────────────────────────────────
 // Insert/Update types are written as explicit flat types (not Omit<> intersections)
 // so Supabase's TypeScript client can resolve them correctly.

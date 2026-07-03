@@ -40,5 +40,6 @@ export type {
   ActivityLog,
   Class,
   ClassEnrollment,
+  Certificate,
   Database,
 } from './database'

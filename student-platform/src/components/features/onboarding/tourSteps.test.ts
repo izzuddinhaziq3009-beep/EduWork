@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { tourStepsForRole } from './tourSteps'
 
 describe('tourStepsForRole', () => {
-  it('returns 7 student steps starting with modules', () => {
+  it('returns 8 student steps starting with modules', () => {
     const steps = tourStepsForRole('student')
-    expect(steps).toHaveLength(7)
+    expect(steps).toHaveLength(8)
     expect(steps[0].target).toBe('[data-tour="modules"]')
     expect(steps[1].target).toBe('[data-tour="classes"]')
   })
@@ -17,6 +17,7 @@ describe('tourStepsForRole', () => {
     expect(targets).toContain('[data-tour="progress"]')
     expect(targets).toContain('[data-tour="mentorship"]')
     expect(targets).toContain('[data-tour="portfolio"]')
+    expect(targets).toContain('[data-tour="certificates"]')
     expect(targets).toContain('[data-tour="messages"]')
   })
 

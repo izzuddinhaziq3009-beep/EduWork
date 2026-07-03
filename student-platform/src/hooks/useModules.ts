@@ -8,6 +8,7 @@ import {
   deleteModule, toggleModuleActive, uploadModuleImage,
 } from '@/services/moduleService'
 import type { ModuleBasicInfo, SimpleContentData, ContentPieceInput } from '@/services/moduleService'
+import { issueCertificate } from '@/services/certificateService'
 import { useToast } from './use-toast'
 
 export const moduleKeys = {
@@ -83,9 +84,13 @@ export function useCompleteModule() {
   return useMutation({
     mutationFn: ({ moduleId, studentId }: { moduleId: string; studentId: string }) =>
       markAsCompleted(moduleId, studentId),
-    onSuccess: (_, { studentId }) => {
+    onSuccess: (_, { moduleId, studentId }) => {
       qc.invalidateQueries({ queryKey: moduleKeys.progress(studentId) })
       toast({ title: 'Module completed!', description: 'Great work — this has been added to your portfolio.' })
+      // Non-critical: issue certificate; RPC handles the completion check server-side
+      issueCertificate(moduleId).then(() => {
+        qc.invalidateQueries({ queryKey: ['certificates', studentId] })
+      }).catch(() => {})
     },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })
@@ -111,6 +116,10 @@ export function useMarkItemComplete() {
       qc.invalidateQueries({ queryKey: moduleKeys.itemProgress(studentId, moduleId) })
       qc.invalidateQueries({ queryKey: moduleKeys.progress(studentId) })
       qc.invalidateQueries({ queryKey: moduleKeys.progressForModule(moduleId, studentId) })
+      // Speculatively issue certificate — RPC rejects silently if module not yet complete
+      issueCertificate(moduleId).then(() => {
+        qc.invalidateQueries({ queryKey: ['certificates', studentId] })
+      }).catch(() => {})
     },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })

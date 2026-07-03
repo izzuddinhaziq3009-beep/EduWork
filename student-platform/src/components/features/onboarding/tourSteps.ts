@@ -43,6 +43,12 @@ export function tourStepsForRole(role: UserRole): Step[] {
           placement: 'right',
         },
         {
+          target:    '[data-tour="certificates"]',
+          title:     'My Certificates',
+          content:   "View and download certificates you've earned by completing learning modules.",
+          placement: 'right',
+        },
+        {
           target:    '[data-tour="messages"]',
           title:     'Messages',
           content:   'Chat with your mentor or company contacts here.',
