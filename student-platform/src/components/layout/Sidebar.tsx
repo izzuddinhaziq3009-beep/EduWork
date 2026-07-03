@@ -45,7 +45,6 @@ const STUDENT_NAV: NavItem[] = [
   { label: 'Mentorship',            to: '/mentorship',            icon: 'users',      tour: 'mentorship' },
   { label: 'Portfolio',             to: '/portfolio',             icon: 'brief',      tour: 'portfolio'  },
   { label: 'My Certificates',       to: '/certificates',          icon: 'award',      tour: 'certificates' },
-  { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark', tour: 'independent-projects' },
   { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag',  tour: 'challenges'          },
   { label: 'Messages',              to: '/messages',              icon: 'msg',        tour: 'messages'   },
 ]
@@ -59,11 +58,12 @@ const MENTOR_NAV: NavItem[] = [
 ]
 
 const COMPANY_NAV: NavItem[] = [
-  { label: 'Dashboard',      to: '/company/dashboard',     icon: 'home'                                 },
-  { label: 'Post Challenge', to: '/company/post-challenge', icon: 'plus', tour: 'post-challenge'        },
-  { label: 'My Challenges',  to: '/company/challenges',    icon: 'flag',  tour: 'my-challenges'         },
-  { label: 'Submissions',    to: '/company/submissions',   icon: 'inbox', tour: 'submissions'           },
-  { label: 'Messages',       to: '/company/messages',      icon: 'msg',   tour: 'messages'              },
+  { label: 'Dashboard',        to: '/company/dashboard',     icon: 'home'                                  },
+  { label: 'Post Challenge',   to: '/company/post-challenge', icon: 'plus', tour: 'post-challenge'         },
+  { label: 'My Challenges',    to: '/company/challenges',    icon: 'flag',  tour: 'my-challenges'          },
+  { label: 'Submissions',      to: '/company/submissions',   icon: 'inbox', tour: 'submissions'            },
+  { label: 'Student Showcase', to: '/company/showcase',      icon: 'spark', tour: 'showcase'              },
+  { label: 'Messages',         to: '/company/messages',      icon: 'msg',   tour: 'messages'              },
 ]
 
 const ADMIN_NAV: NavItem[] = [

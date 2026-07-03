@@ -25,7 +25,6 @@ const PortfolioPage        = lazy(() => import('@/pages/PortfolioPage').then(m =
 const PublicPortfolioPage  = lazy(() => import('@/pages/PublicPortfolioPage').then(m => ({ default: m.PublicPortfolioPage })))
 const StudentCertificates  = lazy(() => import('@/pages/StudentCertificates').then(m => ({ default: m.StudentCertificates })))
 const VerifyCertificate    = lazy(() => import('@/pages/VerifyCertificate').then(m => ({ default: m.VerifyCertificate })))
-const IndependentProjectsPage = lazy(() => import('@/pages/IndependentProjectsPage').then(m => ({ default: m.IndependentProjectsPage })))
 const PlaceholderPage      = lazy(() => import('@/pages/PlaceholderPage').then(m => ({ default: m.PlaceholderPage })))
 const NotFoundPage         = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -43,6 +42,7 @@ const EditChallenge           = lazy(() => import('@/pages/company/EditChallenge
 const CompanySubmissions      = lazy(() => import('@/pages/company/Submissions').then(m => ({ default: m.CompanySubmissions })))
 const CompanySubmissionDetail = lazy(() => import('@/pages/company/SubmissionDetail').then(m => ({ default: m.CompanySubmissionDetail })))
 const CompanyMessages         = lazy(() => import('@/pages/company/CompanyMessages').then(m => ({ default: m.CompanyMessages })))
+const CompanyShowcase         = lazy(() => import('@/pages/company/CompanyShowcase').then(m => ({ default: m.CompanyShowcase })))
 
 const ChallengesPage          = lazy(() => import('@/pages/ChallengesPage').then(m => ({ default: m.ChallengesPage })))
 const ChallengeDetail         = lazy(() => import('@/pages/ChallengeDetail').then(m => ({ default: m.ChallengeDetail })))
@@ -140,9 +140,7 @@ export default function App() {
         <Route path="/portfolio" element={
           <StudentRoute><AppLayout><PortfolioPage /></AppLayout></StudentRoute>
         }/>
-        <Route path="/independent-projects" element={
-          <StudentRoute><AppLayout><IndependentProjectsPage /></AppLayout></StudentRoute>
-        }/>
+        <Route path="/independent-projects" element={<Navigate to="/projects?tab=independent" replace />}/>
         <Route path="/certificates" element={
           <StudentRoute><AppLayout><StudentCertificates /></AppLayout></StudentRoute>
         }/>
@@ -194,6 +192,9 @@ export default function App() {
         }/>
         <Route path="/company/submissions/:id" element={
           <CompanyRoute><AppLayout><CompanySubmissionDetail /></AppLayout></CompanyRoute>
+        }/>
+        <Route path="/company/showcase" element={
+          <CompanyRoute><AppLayout><CompanyShowcase /></AppLayout></CompanyRoute>
         }/>
         <Route path="/company/messages" element={
           <CompanyRoute><AppLayout><CompanyMessages /></AppLayout></CompanyRoute>

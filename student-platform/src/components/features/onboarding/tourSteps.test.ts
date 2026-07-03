@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { tourStepsForRole } from './tourSteps'
 
 describe('tourStepsForRole', () => {
-  it('returns 11 student steps starting with modules', () => {
+  it('returns 10 student steps starting with modules', () => {
     const steps = tourStepsForRole('student')
-    expect(steps).toHaveLength(11)
+    expect(steps).toHaveLength(10)
     expect(steps[0].target).toBe('[data-tour="modules"]')
     expect(steps[1].target).toBe('[data-tour="classes"]')
   })
@@ -18,7 +18,6 @@ describe('tourStepsForRole', () => {
     expect(targets).toContain('[data-tour="mentorship"]')
     expect(targets).toContain('[data-tour="portfolio"]')
     expect(targets).toContain('[data-tour="certificates"]')
-    expect(targets).toContain('[data-tour="independent-projects"]')
     expect(targets).toContain('[data-tour="challenges"]')
     expect(targets).toContain('[data-tour="messages"]')
   })
@@ -33,13 +32,14 @@ describe('tourStepsForRole', () => {
     expect(targets).toContain('[data-tour="messages"]')
   })
 
-  it('returns 5 company steps starting with post-challenge', () => {
+  it('returns 6 company steps starting with post-challenge', () => {
     const steps = tourStepsForRole('company')
-    expect(steps).toHaveLength(5)
+    expect(steps).toHaveLength(6)
     expect(steps[0].target).toBe('[data-tour="post-challenge"]')
     const targets = steps.map(s => s.target as string)
     expect(targets).toContain('[data-tour="my-challenges"]')
     expect(targets).toContain('[data-tour="submissions"]')
+    expect(targets).toContain('[data-tour="showcase"]')
     expect(targets).toContain('[data-tour="messages"]')
   })
 

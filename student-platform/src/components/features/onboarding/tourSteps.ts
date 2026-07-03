@@ -29,7 +29,7 @@ export function tourStepsForRole(role: UserRole): Step[] {
         {
           target:    '[data-tour="projects"]',
           title:     'Projects',
-          content:   'Submit your module work for mentor review and receive structured feedback.',
+          content:   'Submit your module work for mentor review, and manage your own independent projects — both live here under Projects.',
           placement: 'right',
         },
         {
@@ -54,12 +54,6 @@ export function tourStepsForRole(role: UserRole): Step[] {
           target:    '[data-tour="certificates"]',
           title:     'My Certificates',
           content:   "View and download certificates you've earned by completing learning modules.",
-          placement: 'right',
-        },
-        {
-          target:    '[data-tour="independent-projects"]',
-          title:     'Independent Projects',
-          content:   'Work on your own projects outside of modules and challenges, and track them here.',
           placement: 'right',
         },
         {
@@ -126,6 +120,12 @@ export function tourStepsForRole(role: UserRole): Step[] {
           target:    '[data-tour="submissions"]',
           title:     'Submissions',
           content:   'Review student submissions and give feedback on their challenge solutions.',
+          placement: 'right',
+        },
+        {
+          target:    '[data-tour="showcase"]',
+          title:     'Student Showcase',
+          content:   'Browse independent projects completed by students and message those whose work interests you.',
           placement: 'right',
         },
         {

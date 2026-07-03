@@ -3,6 +3,8 @@ import {
   getStudentIndependentProjects, getIndependentProjectById,
   createIndependentProject, submitIndependentProject,
   markIndependentProjectCompleted, getAvailableIndependentProjects,
+  updateIndependentProject, deleteIndependentProject,
+  uploadIndependentProjectImage,
 } from '@/services/independentProjectService'
 import { useToast } from './use-toast'
 
@@ -36,12 +38,21 @@ export function useAvailableIndependentProjects() {
   })
 }
 
+export function useUploadIndependentProjectImage() {
+  const { toast } = useToast()
+  return useMutation({
+    mutationFn: ({ studentId, file }: { studentId: string; file: File }) =>
+      uploadIndependentProjectImage(studentId, file),
+    onError: (err: Error) => toast({ title: 'Upload failed', description: err.message, variant: 'destructive' }),
+  })
+}
+
 export function useCreateIndependentProject() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ studentId, title, description }: { studentId: string; title: string; description: string }) =>
-      createIndependentProject(studentId, { title, description }),
+    mutationFn: ({ studentId, title, description, image_url }: { studentId: string; title: string; description: string; image_url?: string | null }) =>
+      createIndependentProject(studentId, { title, description, image_url }),
     onSuccess: (_, { studentId }) => {
       qc.invalidateQueries({ queryKey: indieKeys.student(studentId) })
       toast({ title: 'Project created!', description: 'Your independent project has been started.' })
@@ -65,6 +76,38 @@ export function useSubmitIndependentProject() {
   })
 }
 
+export function useUpdateIndependentProject() {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+  return useMutation({
+    mutationFn: ({ projectId, studentId: _sid, ...payload }: {
+      projectId: string; studentId: string
+      title?: string; description?: string; github_url?: string | null; image_url?: string | null
+    }) => updateIndependentProject(projectId, payload),
+    onSuccess: (_, { studentId }) => {
+      qc.invalidateQueries({ queryKey: indieKeys.student(studentId) })
+      qc.invalidateQueries({ queryKey: indieKeys.available })
+      toast({ title: 'Project updated!' })
+    },
+    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+}
+
+export function useDeleteIndependentProject() {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+  return useMutation({
+    mutationFn: ({ projectId }: { projectId: string; studentId: string }) =>
+      deleteIndependentProject(projectId),
+    onSuccess: (_, { studentId }) => {
+      qc.invalidateQueries({ queryKey: indieKeys.student(studentId) })
+      qc.invalidateQueries({ queryKey: indieKeys.available })
+      toast({ title: 'Project deleted.' })
+    },
+    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+}
+
 export function useCompleteIndependentProject() {
   const qc = useQueryClient()
   const { toast } = useToast()
@@ -73,7 +116,8 @@ export function useCompleteIndependentProject() {
       markIndependentProjectCompleted(projectId),
     onSuccess: (_, { studentId }) => {
       qc.invalidateQueries({ queryKey: indieKeys.student(studentId) })
-      toast({ title: 'Project completed!' })
+      qc.invalidateQueries({ queryKey: indieKeys.available })
+      toast({ title: 'Project completed!', description: 'Your project is now visible in the Showcase.' })
     },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })

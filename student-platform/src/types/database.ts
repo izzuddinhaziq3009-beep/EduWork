@@ -230,8 +230,10 @@ export interface IndependentProject {
   student_id: string
   status: IndependentProjectStatus
   github_url: string | null
+  image_url: string | null
   created_at: string
   completed_at: string | null
+  author_name?: string | null  // populated only on showcase (getAvailableIndependentProjects)
 }
 
 export interface IndustryChallenge {
@@ -701,6 +703,7 @@ export interface Database {
           student_id: string
           status?: IndependentProjectStatus
           github_url?: string | null
+          image_url?: string | null
           created_at?: string
           completed_at?: string | null
         }
@@ -709,6 +712,7 @@ export interface Database {
           description?: string
           status?: IndependentProjectStatus
           github_url?: string | null
+          image_url?: string | null
           completed_at?: string | null
         }
       }
