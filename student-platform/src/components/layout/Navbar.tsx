@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useTourStore } from '@/stores/tourStore'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/services/supabase'
 import { useRealtimeNotifications, notifKeys } from '@/hooks/useMessages'
@@ -21,6 +22,7 @@ const ChevIcon    = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="curre
 const SearchIcon  = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" {...p}><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
 const BriefIcon   = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
 const ExtIcon     = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M7 17L17 7M9 7h8v8"/></svg>
+const TourIcon    = (p: P) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...p}><circle cx="12" cy="12" r="9"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>
 
 const ROLE_LABELS: Record<string, string> = {
   student: 'STUDENT', mentor: 'MENTOR', company: 'COMPANY', admin: 'ADMIN',
@@ -32,6 +34,7 @@ function initials(name: string) {
 
 export function Navbar() {
   const { user, profile, role, signOut } = useAuthStore()
+  const { startTour } = useTourStore()
   const navigate  = useNavigate()
   const qc        = useQueryClient()
 
@@ -114,6 +117,11 @@ export function Navbar() {
     navigate('/login')
   }
 
+  const handleStartTour = () => {
+    setOpenMenu(false)
+    startTour()
+  }
+
   const name     = profile?.full_name ?? user?.email ?? 'User'
   const firstName = name.split(' ')[0]
   const badge    = role ? ROLE_LABELS[role] ?? role.toUpperCase() : ''
@@ -194,7 +202,7 @@ export function Navbar() {
             </button>
 
             {openMenu && (
-              <ProfileMenu name={name} email={user?.email ?? ''} role={role} onSignOut={handleSignOut} />
+              <ProfileMenu name={name} email={user?.email ?? ''} role={role} onSignOut={handleSignOut} onStartTour={handleStartTour} />
             )}
           </div>
         </div>
@@ -247,7 +255,13 @@ function NotificationsPanel({ items, onClose, onMarkAllRead, onItemClick }: { it
   )
 }
 
-function ProfileMenu({ name, email, role, onSignOut }: { name: string; email: string; role: UserRole | null; onSignOut: () => void }) {
+function ProfileMenu({ name, email, role, onSignOut, onStartTour }: {
+  name: string
+  email: string
+  role: UserRole | null
+  onSignOut: () => void
+  onStartTour: () => void
+}) {
   const links = role === 'student'
     ? [{ label: 'Your portfolio', to: '/portfolio', Icon: BriefIcon }]
     : []
@@ -265,17 +279,23 @@ function ProfileMenu({ name, email, role, onSignOut }: { name: string; email: st
           <div className="text-[12px] muted truncate font-mono">{email}</div>
         </div>
       </div>
-      {links.length > 0 && (
-        <div className="py-1.5">
-          {links.map(({ label, to, Icon }) => (
-            <Link key={to} to={to}
-              className="flex items-center gap-3 px-4 py-2 text-[13px] hover:bg-[var(--hair-2)] transition-colors">
-              <Icon width={16} height={16} className="text-[color:var(--muted)] shrink-0" />
-              <span className="ink-2">{label}</span>
-            </Link>
-          ))}
-        </div>
-      )}
+
+      {/* Role-specific links + Take a tour */}
+      <div className="py-1.5">
+        {links.map(({ label, to, Icon }) => (
+          <Link key={to} to={to}
+            className="flex items-center gap-3 px-4 py-2 text-[13px] hover:bg-[var(--hair-2)] transition-colors">
+            <Icon width={16} height={16} className="text-[color:var(--muted)] shrink-0" />
+            <span className="ink-2">{label}</span>
+          </Link>
+        ))}
+        <button onClick={onStartTour}
+          className="w-full flex items-center gap-3 px-4 py-2 text-[13px] hover:bg-[var(--hair-2)] transition-colors">
+          <TourIcon width={16} height={16} className="text-[color:var(--muted)] shrink-0" />
+          <span className="ink-2">Take a tour</span>
+        </button>
+      </div>
+
       <div className="hairline-t py-1.5">
         <button onClick={onSignOut}
           className="w-full flex items-center gap-3 px-4 py-2 text-[13px] hover:bg-[var(--hair-2)] transition-colors"

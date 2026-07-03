@@ -22,6 +22,7 @@ export interface Profile {
   created_at: string
   is_active?: boolean           // added via supabase-admin-migration.sql
   is_approved?: boolean         // added via supabase-mentor-company-approval.sql
+  onboarded?: boolean           // added via supabase-onboarding-migration.sql
   // Company-only fields (added via supabase-company-migration.sql)
   company_description?: string | null
   company_website?:     string | null

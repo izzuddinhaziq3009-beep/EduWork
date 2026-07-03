@@ -1,5 +1,6 @@
 import { Navbar } from './Navbar'
 import { Sidebar } from './Sidebar'
+import { OnboardingTour } from '@/components/features/onboarding/OnboardingTour'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -17,6 +18,7 @@ export function Layout({ children }: LayoutProps) {
           {children}
         </main>
       </div>
+      <OnboardingTour />
     </div>
   )
 }

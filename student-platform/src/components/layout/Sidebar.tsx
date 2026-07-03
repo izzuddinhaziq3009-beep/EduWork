@@ -32,43 +32,44 @@ interface NavItem {
   count?: number
   badge?: string
   dot?: boolean
+  tour?: string  // data-tour attribute for the onboarding tour
 }
 
 const STUDENT_NAV: NavItem[] = [
-  { label: 'Dashboard',             to: '/dashboard',             icon: 'home'        },
-  { label: 'Learning Modules',      to: '/modules',               icon: 'book'        },
-  { label: 'My Classes',            to: '/classes',               icon: 'chalkboard'  },
-  { label: 'Projects',              to: '/projects',              icon: 'folder'      },
-  { label: 'My Progress',           to: '/progress',              icon: 'chart'  },
-  { label: 'Mentorship',            to: '/mentorship',            icon: 'users'  },
-  { label: 'Portfolio',             to: '/portfolio',             icon: 'brief'  },
-  { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark'  },
-  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag' },
-  { label: 'Messages',              to: '/messages',              icon: 'msg'  },
+  { label: 'Dashboard',             to: '/dashboard',             icon: 'home'                         },
+  { label: 'Learning Modules',      to: '/modules',               icon: 'book',       tour: 'modules'    },
+  { label: 'My Classes',            to: '/classes',               icon: 'chalkboard', tour: 'classes'    },
+  { label: 'Projects',              to: '/projects',              icon: 'folder',     tour: 'projects'   },
+  { label: 'My Progress',           to: '/progress',              icon: 'chart',      tour: 'progress'   },
+  { label: 'Mentorship',            to: '/mentorship',            icon: 'users',      tour: 'mentorship' },
+  { label: 'Portfolio',             to: '/portfolio',             icon: 'brief',      tour: 'portfolio'  },
+  { label: 'Independent Projects',  to: '/independent-projects',  icon: 'spark'                        },
+  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag'                         },
+  { label: 'Messages',              to: '/messages',              icon: 'msg',        tour: 'messages'   },
 ]
 
 const MENTOR_NAV: NavItem[] = [
-  { label: 'Dashboard',            to: '/mentor/dashboard',           icon: 'home'        },
-  { label: 'My Classes',           to: '/mentor/classes',             icon: 'chalkboard'  },
-  { label: 'Student Submissions',  to: '/mentor/submissions',         icon: 'inbox'       },
-  { label: 'Mentorship Requests',  to: '/mentor/mentorship-requests', icon: 'hand', dot: true },
-  { label: 'Messages',             to: '/mentor/messages',            icon: 'msg'         },
+  { label: 'Dashboard',            to: '/mentor/dashboard',           icon: 'home'                            },
+  { label: 'My Classes',           to: '/mentor/classes',             icon: 'chalkboard', tour: 'classes'     },
+  { label: 'Student Submissions',  to: '/mentor/submissions',         icon: 'inbox',      tour: 'submissions' },
+  { label: 'Mentorship Requests',  to: '/mentor/mentorship-requests', icon: 'hand', dot: true, tour: 'requests' },
+  { label: 'Messages',             to: '/mentor/messages',            icon: 'msg',        tour: 'messages'    },
 ]
 
 const COMPANY_NAV: NavItem[] = [
-  { label: 'Dashboard',      to: '/company/dashboard',    icon: 'home'   },
-  { label: 'Post Challenge', to: '/company/post-challenge', icon: 'plus' },
-  { label: 'My Challenges',  to: '/company/challenges',   icon: 'flag'   },
-  { label: 'Submissions',    to: '/company/submissions',  icon: 'inbox'  },
-  { label: 'Messages',       to: '/company/messages',     icon: 'msg'    },
+  { label: 'Dashboard',      to: '/company/dashboard',     icon: 'home'                                 },
+  { label: 'Post Challenge', to: '/company/post-challenge', icon: 'plus', tour: 'post-challenge'        },
+  { label: 'My Challenges',  to: '/company/challenges',    icon: 'flag',  tour: 'my-challenges'         },
+  { label: 'Submissions',    to: '/company/submissions',   icon: 'inbox', tour: 'submissions'           },
+  { label: 'Messages',       to: '/company/messages',      icon: 'msg',   tour: 'messages'              },
 ]
 
 const ADMIN_NAV: NavItem[] = [
-  { label: 'Dashboard',           to: '/admin/dashboard',   icon: 'home'   },
-  { label: 'User Management',     to: '/admin/users',       icon: 'users'  },
-  { label: 'Content Management',  to: '/admin/content',     icon: 'book'   },
-  { label: 'Challenge Moderation', to: '/admin/challenges', icon: 'shield', dot: true },
-  { label: 'System Monitoring',   to: '/admin/monitoring',  icon: 'server' },
+  { label: 'Dashboard',            to: '/admin/dashboard',   icon: 'home'                            },
+  { label: 'User Management',      to: '/admin/users',       icon: 'users',  tour: 'users'           },
+  { label: 'Content Management',   to: '/admin/content',     icon: 'book',   tour: 'content'         },
+  { label: 'Challenge Moderation', to: '/admin/challenges',  icon: 'shield', dot: true, tour: 'moderation' },
+  { label: 'System Monitoring',    to: '/admin/monitoring',  icon: 'server', tour: 'monitoring'      },
 ]
 
 interface Props {
@@ -115,6 +116,7 @@ export function Sidebar({ onNavigate }: Props) {
           const active = isActive(item.to)
           return (
             <NavLink key={item.to} to={item.to} onClick={onNavigate}
+              {...(item.tour ? { 'data-tour': item.tour } : {})}
               className={() =>
                 `nav-item ${active ? 'active' : ''} flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium`
               }
