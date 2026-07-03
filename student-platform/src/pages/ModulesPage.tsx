@@ -5,7 +5,6 @@ import { ModuleCard, ModuleCardSkeleton } from '@/components/features/modules/Mo
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Input } from '@/components/ui/input'
-import { JoinWithCodeCard } from '@/components/features/classes/JoinWithCodeCard'
 import type { DifficultyLevel } from '@/types'
 
 const DIFFICULTIES: { label: string; value: DifficultyLevel | 'all' }[] = [
@@ -44,14 +43,6 @@ export function ModulesPage() {
         title="Learning Modules"
         description="Browse, enroll, and track your progress through structured learning modules."
       />
-
-      {/* Join a class */}
-      <div className="mb-8 max-w-md">
-        <div className="font-mono text-[11px] tracking-[0.16em] muted uppercase mb-2">
-          Join a class with a code
-        </div>
-        <JoinWithCodeCard />
-      </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">

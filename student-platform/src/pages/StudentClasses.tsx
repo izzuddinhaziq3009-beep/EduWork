@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { fmtDuration, fmtInitials } from '@/utils/formatters'
 import { resolveModuleColor } from '@/utils/moduleColors'
 import { difficultyColor } from '@/utils/difficultyColor'
+import { JoinWithCodeCard } from '@/components/features/classes/JoinWithCodeCard'
 import type { StudentClassRow } from '@/services/classService'
 
 // ── header texture patterns — identical to ModuleCard ─────────────────────────
@@ -208,6 +209,14 @@ export function StudentClasses() {
         title="My Classes"
         description="Classes you've joined through a mentor's invite code."
       />
+
+      {/* Join with code */}
+      <div className="mb-8 max-w-md">
+        <div className="font-mono text-[11px] tracking-[0.16em] muted uppercase mb-2">
+          Join a class with a code
+        </div>
+        <JoinWithCodeCard />
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
