@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { ProgressTabContent } from '@/pages/ProgressPage'
 import { useAuthStore } from '@/stores/authStore'
 import { useOverallProgress, useModuleProgressDetails, useProjectProgressDetails, useUserActivity } from '@/hooks/useProgress'
 import { useStudentMentors, useStudentRequests } from '@/hooks/useMentorship'
@@ -23,6 +24,9 @@ const MENTOR_COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
 function avatarColor(name: string) { return MENTOR_COLORS[name.charCodeAt(0) % MENTOR_COLORS.length] }
 
 export function Dashboard() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = searchParams.get('tab') === 'progress' ? 'progress' : 'overview'
+
   const { user, profile } = useAuthStore()
   const sid = user?.id ?? ''
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Student'
@@ -58,7 +62,7 @@ export function Dashboard() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="font-mono text-[11px] tracking-[0.18em] muted uppercase mb-1">
           Today · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </div>
@@ -69,6 +73,30 @@ export function Dashboard() {
           Here's what's happening across your modules, projects, mentorship, and challenges.
         </p>
       </div>
+
+      {/* Overview / Progress tab switcher */}
+      <div
+        className="inline-flex p-1 rounded-xl gap-1 mb-8"
+        style={{ background: 'var(--hair-2)', border: '1px solid var(--hair)' }}
+      >
+        {(['overview', 'progress'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setSearchParams(t === 'overview' ? {} : { tab: t }, { replace: true })}
+            className="px-5 py-2 rounded-[10px] text-[13.5px] font-semibold transition-all capitalize"
+            style={tab === t ? {
+              background: 'var(--primary)',
+              color: '#fff',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+            } : { color: 'var(--ink-2)' }}
+          >
+            {t === 'overview' ? 'Overview' : 'My Progress'}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'progress' && <ProgressTabContent />}
+      {tab === 'overview' && <>
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
@@ -294,6 +322,8 @@ export function Dashboard() {
           </div>
         )}
       </div>
+
+      </>}
     </div>
   )
 }

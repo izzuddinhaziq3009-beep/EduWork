@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/common/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fmtDate } from '@/utils/formatters'
 
-export function ProgressPage() {
+export function ProgressTabContent() {
   const { user } = useAuthStore()
   const sid = user?.id ?? ''
 
@@ -17,9 +17,7 @@ export function ProgressPage() {
   const loading = l1 || l2 || l3
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1100px]">
-      <PageHeader label="Your journey" title="My Progress" description="Track everything you've completed across modules, projects, and challenges." />
-
+    <>
       {/* Summary KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {loading ? Array.from({ length: 4 }).map((_, i) => (
@@ -101,6 +99,15 @@ export function ProgressPage() {
           </div>
         </div>
       </div>
+    </>
+  )
+}
+
+export function ProgressPage() {
+  return (
+    <div className="p-6 lg:p-8 max-w-[1100px]">
+      <PageHeader label="Your journey" title="My Progress" description="Track everything you've completed across modules, projects, and challenges." />
+      <ProgressTabContent />
     </div>
   )
 }

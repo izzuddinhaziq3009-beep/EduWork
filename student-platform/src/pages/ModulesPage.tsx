@@ -14,7 +14,7 @@ const DIFFICULTIES: { label: string; value: DifficultyLevel | 'all' }[] = [
   { label: 'Advanced',     value: 'advanced'    },
 ]
 
-export function ModulesPage() {
+export function ModulesTabContent() {
   const { user } = useAuthStore()
   const [search, setSearch]   = useState('')
   const [diff,   setDiff]     = useState<DifficultyLevel | 'all'>('all')
@@ -37,13 +37,7 @@ export function ModulesPage() {
   const loading = loadingModules || loadingProgress
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px]">
-      <PageHeader
-        label="Your learning path"
-        title="Learning Modules"
-        description="Browse, enroll, and track your progress through structured learning modules."
-      />
-
+    <>
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <Input
@@ -86,6 +80,19 @@ export function ModulesPage() {
           ))}
         </div>
       )}
+    </>
+  )
+}
+
+export function ModulesPage() {
+  return (
+    <div className="p-6 lg:p-8 max-w-[1400px]">
+      <PageHeader
+        label="Your learning path"
+        title="Learning Modules"
+        description="Browse, enroll, and track your progress through structured learning modules."
+      />
+      <ModulesTabContent />
     </div>
   )
 }

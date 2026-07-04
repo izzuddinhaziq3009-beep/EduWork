@@ -197,19 +197,13 @@ function ClassBlockSkeleton() {
   )
 }
 
-// ── StudentClasses page ────────────────────────────────────────────────────────
-export function StudentClasses() {
+// ── ClassesTabContent — content only, no page wrapper ────────────────────────
+export function ClassesTabContent() {
   const { user } = useAuthStore()
   const { data: classes = [], isLoading } = useStudentClasses(user?.id ?? '')
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px]">
-      <PageHeader
-        label="Your enrolled classes"
-        title="My Classes"
-        description="Classes you've joined through a mentor's invite code."
-      />
-
+    <>
       {/* Join with code */}
       <div className="mb-8 max-w-md">
         <div className="font-mono text-[11px] tracking-[0.16em] muted uppercase mb-2">
@@ -232,13 +226,27 @@ export function StudentClasses() {
             </svg>
           }
           title="You haven't joined any classes yet"
-          description="Enter a class code on the Learning Modules page to join one."
+          description="Enter a class code from the Learning hub to join one."
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map(row => <ClassBlock key={row.classId} row={row} />)}
         </div>
       )}
+    </>
+  )
+}
+
+// ── StudentClasses page ────────────────────────────────────────────────────────
+export function StudentClasses() {
+  return (
+    <div className="p-6 lg:p-8 max-w-[1400px]">
+      <PageHeader
+        label="Your enrolled classes"
+        title="My Classes"
+        description="Classes you've joined through a mentor's invite code."
+      />
+      <ClassesTabContent />
     </div>
   )
 }

@@ -37,16 +37,13 @@ interface NavItem {
 }
 
 const STUDENT_NAV: NavItem[] = [
-  { label: 'Dashboard',             to: '/dashboard',             icon: 'home'                         },
-  { label: 'Learning Modules',      to: '/modules',               icon: 'book',       tour: 'modules'    },
-  { label: 'My Classes',            to: '/classes',               icon: 'chalkboard', tour: 'classes'    },
-  { label: 'Projects',              to: '/projects',              icon: 'folder',     tour: 'projects'   },
-  { label: 'My Progress',           to: '/progress',              icon: 'chart',      tour: 'progress'   },
-  { label: 'Mentorship',            to: '/mentorship',            icon: 'users',      tour: 'mentorship' },
-  { label: 'Portfolio',             to: '/portfolio',             icon: 'brief',      tour: 'portfolio'  },
-  { label: 'My Certificates',       to: '/certificates',          icon: 'award',      tour: 'certificates' },
-  { label: 'Industry Challenges',   to: '/challenges',            icon: 'flag',  tour: 'challenges'          },
-  { label: 'Messages',              to: '/messages',              icon: 'msg',        tour: 'messages'   },
+  { label: 'Dashboard',           to: '/dashboard',  icon: 'home'                           },
+  { label: 'Learning',            to: '/learning',   icon: 'book',   tour: 'learning'       },
+  { label: 'Projects',            to: '/projects',   icon: 'folder', tour: 'projects'       },
+  { label: 'Mentorship',          to: '/mentorship', icon: 'users',  tour: 'mentorship'     },
+  { label: 'Portfolio',           to: '/portfolio',  icon: 'brief',  tour: 'portfolio'      },
+  { label: 'Industry Challenges', to: '/challenges', icon: 'flag',   tour: 'challenges'     },
+  { label: 'Messages',            to: '/messages',   icon: 'msg',    tour: 'messages'       },
 ]
 
 const MENTOR_NAV: NavItem[] = [

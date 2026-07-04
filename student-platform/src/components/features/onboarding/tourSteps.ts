@@ -14,28 +14,16 @@ export function tourStepsForRole(role: UserRole): Step[] {
     case 'student':
       return [
         {
-          target:      '[data-tour="modules"]',
-          title:       'Learning Modules',
-          content:     'Browse structured modules, enroll, and track your progress step by step.',
-          skipBeacon:  true,
-          placement:   'right',
-        },
-        {
-          target:    '[data-tour="classes"]',
-          title:     'My Classes',
-          content:   'Join a class with a code from your mentor — all your enrolled classes show up here.',
-          placement: 'right',
+          target:     '[data-tour="learning"]',
+          title:      'Learning',
+          content:    'Browse learning modules, join a mentor\'s class with a code, and view the certificates you\'ve earned — all under Learning.',
+          skipBeacon: true,
+          placement:  'right',
         },
         {
           target:    '[data-tour="projects"]',
           title:     'Projects',
           content:   'Submit your module work for mentor review, and manage your own independent projects — both live here under Projects.',
-          placement: 'right',
-        },
-        {
-          target:    '[data-tour="progress"]',
-          title:     'My Progress',
-          content:   'See your overall learning progress — modules completed, submissions approved, and more.',
           placement: 'right',
         },
         {
@@ -48,12 +36,6 @@ export function tourStepsForRole(role: UserRole): Step[] {
           target:    '[data-tour="portfolio"]',
           title:     'Portfolio',
           content:   'Showcase your completed work — modules, projects, and challenges — to companies.',
-          placement: 'right',
-        },
-        {
-          target:    '[data-tour="certificates"]',
-          title:     'My Certificates',
-          content:   "View and download certificates you've earned by completing learning modules.",
           placement: 'right',
         },
         {

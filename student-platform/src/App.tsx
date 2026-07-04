@@ -14,6 +14,7 @@ const SignupPage           = lazy(() => import('@/pages/SignupPage').then(m => (
 const ForgotPasswordPage   = lazy(() => import('@/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })))
 
 const Dashboard            = lazy(() => import('@/pages/Dashboard').then(m => ({ default: m.Dashboard })))
+const LearningPage         = lazy(() => import('@/pages/LearningPage').then(m => ({ default: m.LearningPage })))
 const ModulesPage          = lazy(() => import('@/pages/ModulesPage').then(m => ({ default: m.ModulesPage })))
 const ModuleDetailPage     = lazy(() => import('@/pages/ModuleDetailPage').then(m => ({ default: m.ModuleDetailPage })))
 const ProjectsPage         = lazy(() => import('@/pages/ProjectsPage').then(m => ({ default: m.ProjectsPage })))
@@ -116,9 +117,10 @@ export default function App() {
         <Route path="/dashboard" element={
           <StudentRoute><AppLayout><Dashboard /></AppLayout></StudentRoute>
         }/>
-        <Route path="/modules" element={
-          <StudentRoute><AppLayout><ModulesPage /></AppLayout></StudentRoute>
+        <Route path="/learning" element={
+          <StudentRoute><AppLayout><LearningPage /></AppLayout></StudentRoute>
         }/>
+        <Route path="/modules" element={<Navigate to="/learning?tab=modules" replace />}/>
         <Route path="/modules/:id" element={
           <StudentRoute><AppLayout><ModuleDetailPage /></AppLayout></StudentRoute>
         }/>
@@ -128,22 +130,16 @@ export default function App() {
         <Route path="/projects/:id" element={
           <StudentRoute><AppLayout><ProjectDetailPage /></AppLayout></StudentRoute>
         }/>
-        <Route path="/progress" element={
-          <StudentRoute><AppLayout><ProgressPage /></AppLayout></StudentRoute>
-        }/>
+        <Route path="/progress" element={<Navigate to="/dashboard?tab=progress" replace />}/>
         <Route path="/mentorship" element={
           <StudentRoute><AppLayout><MentorshipPage /></AppLayout></StudentRoute>
         }/>
-        <Route path="/classes" element={
-          <StudentRoute><AppLayout><StudentClasses /></AppLayout></StudentRoute>
-        }/>
+        <Route path="/classes" element={<Navigate to="/learning?tab=classes" replace />}/>
         <Route path="/portfolio" element={
           <StudentRoute><AppLayout><PortfolioPage /></AppLayout></StudentRoute>
         }/>
         <Route path="/independent-projects" element={<Navigate to="/projects?tab=independent" replace />}/>
-        <Route path="/certificates" element={
-          <StudentRoute><AppLayout><StudentCertificates /></AppLayout></StudentRoute>
-        }/>
+        <Route path="/certificates" element={<Navigate to="/learning?tab=certificates" replace />}/>
         <Route path="/challenges" element={
           <StudentRoute><AppLayout><ChallengesPage /></AppLayout></StudentRoute>
         }/>

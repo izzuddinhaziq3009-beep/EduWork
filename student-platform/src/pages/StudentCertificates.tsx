@@ -188,20 +188,15 @@ function CertCardSkeleton() {
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── CertificatesTabContent — content only, no page wrapper ───────────────────
 
-export function StudentCertificates() {
+export function CertificatesTabContent() {
   const { user } = useAuthStore()
   const { data: certs, isLoading } = useMyCertificates(user?.id ?? '')
   const [viewing, setViewing] = useState<CertType | null>(null)
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px]">
-      <PageHeader
-        title="My Certificates"
-        subtitle="Certificates you've earned by completing learning modules."
-      />
-
+    <>
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => <CertCardSkeleton key={i} />)}
@@ -223,6 +218,20 @@ export function StudentCertificates() {
       )}
 
       {viewing && <CertModal cert={viewing} onClose={() => setViewing(null)} />}
+    </>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export function StudentCertificates() {
+  return (
+    <div className="p-6 lg:p-8 max-w-[1400px]">
+      <PageHeader
+        title="My Certificates"
+        subtitle="Certificates you've earned by completing learning modules."
+      />
+      <CertificatesTabContent />
     </div>
   )
 }
