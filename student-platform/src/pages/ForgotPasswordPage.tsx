@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/services/supabase'
+import { getAuthErrorMessage } from '@/lib/authErrors'
 import { AuthField } from '@/components/auth/AuthField'
 import { MailIcon, ArrowIcon, CheckIcon, ShieldIcon } from '@/components/auth/AuthIcons'
 
@@ -23,7 +24,7 @@ export function ForgotPasswordPage() {
       if (err) throw err
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setError(getAuthErrorMessage(err))
     } finally {
       setSend(false)
     }

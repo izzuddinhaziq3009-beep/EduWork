@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore, PENDING_APPROVAL_MESSAGE } from '@/stores/authStore'
+import { getAuthErrorMessage } from '@/lib/authErrors'
 import { BrandPanel } from '@/components/auth/BrandPanel'
 import { AuthField, PasswordField, StrengthBar } from '@/components/auth/AuthField'
 import { passwordStrength } from '@/components/auth/passwordStrength'
@@ -57,7 +58,7 @@ export function SignupPage() {
       if (err instanceof Error && err.message === PENDING_APPROVAL_MESSAGE) {
         setPendingApproval(true)
       } else {
-        setAuthError(err instanceof Error ? err.message : 'Signup failed.')
+        setAuthError(getAuthErrorMessage(err))
       }
     } finally {
       setSub(false)
@@ -70,7 +71,7 @@ export function SignupPage() {
     try {
       await signInWithGoogle()
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Google sign-in failed.')
+      setAuthError(getAuthErrorMessage(err))
       setGoogleLoading(false)
     }
   }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { getAuthErrorMessage } from '@/lib/authErrors'
 import { BrandPanel } from '@/components/auth/BrandPanel'
 import { AuthField, PasswordField } from '@/components/auth/AuthField'
 import { MailIcon, ArrowIcon, ShieldIcon, GoogleIcon, CheckIcon } from '@/components/auth/AuthIcons'
@@ -43,7 +44,7 @@ export function LoginPage() {
       const { role: newRole } = useAuthStore.getState()
       navigate(roleRedirect(newRole))
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Login failed.')
+      setAuthError(getAuthErrorMessage(err))
     } finally {
       setSub(false)
     }
@@ -57,7 +58,7 @@ export function LoginPage() {
       // On success the browser navigates away to Google immediately — this
       // component unmounts, so there's no further state to set here.
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Google sign-in failed.')
+      setAuthError(getAuthErrorMessage(err))
       setGoogleLoading(false)
     }
   }
