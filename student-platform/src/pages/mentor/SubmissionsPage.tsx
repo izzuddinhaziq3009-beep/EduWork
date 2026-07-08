@@ -12,7 +12,6 @@ import type { SubmissionStatus as TStatus } from '@/types'
 const FILTERS: { label: string; value: TStatus | 'all' }[] = [
   { label: 'All',               value: 'all'               },
   { label: 'Needs review',      value: 'submitted'         },
-  { label: 'Reviewing',         value: 'reviewing'         },
   { label: 'Approved',          value: 'approved'          },
   { label: 'Revision requested', value: 'revision_requested' },
 ]
@@ -93,7 +92,7 @@ export function SubmissionsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-[13.5px] font-medium">{project.title}</div>
-                      <div className="text-[12px] muted">Due {fmtDate(project.due_date)}</div>
+                      {project.due_date && <div className="text-[12px] muted">Due {fmtDate(project.due_date)}</div>}
                     </td>
                     <td className="px-6 py-4 text-[12.5px] font-mono muted">
                       {fmtRelative(submission.submitted_at)}

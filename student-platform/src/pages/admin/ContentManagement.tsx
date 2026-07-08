@@ -120,11 +120,11 @@ function ProjectsTab() {
   const [form,   setForm  ] = useState({ title: '', description: '', requirements: '', due_date: '', module_id: '' })
 
   const openCreate = () => { setForm({ title:'', description:'', requirements:'', due_date:'', module_id:'' }); setTarget(null); setMode('create') }
-  const openEdit   = (p: Project) => { setForm({ title: p.title, description: p.description, requirements: p.requirements, due_date: p.due_date.slice(0,10), module_id: p.module_id ?? '' }); setTarget(p); setMode('edit') }
+  const openEdit   = (p: Project) => { setForm({ title: p.title, description: p.description, requirements: p.requirements, due_date: p.due_date ? p.due_date.slice(0,10) : '', module_id: p.module_id ?? '' }); setTarget(p); setMode('edit') }
 
   const handleSave = () => {
     if (!user) return
-    const payload = { ...form, module_id: form.module_id || undefined }
+    const payload = { ...form, due_date: form.due_date || null, module_id: form.module_id || undefined }
     if (mode === 'create') createProject.mutate({ adminId: user.id, payload }, { onSuccess: () => setMode(null) })
     else if (target) updateProject.mutate({ id: target.id, payload: { ...payload, module_id: form.module_id || null } }, { onSuccess: () => setMode(null) })
   }
@@ -148,7 +148,7 @@ function ProjectsTab() {
                     <span className="text-[14px] font-semibold truncate">{p.title}</span>
                     {!p.is_active && <span className="tag" style={{ background: 'var(--hair-2)', color: 'var(--muted)' }}>Inactive</span>}
                   </div>
-                  <div className="text-[12px] font-mono muted">Due {fmtDate(p.due_date)}</div>
+                  {p.due_date && <div className="text-[12px] font-mono muted">Due {fmtDate(p.due_date)}</div>}
                 </div>
                 <div className="flex gap-1.5 shrink-0">
                   <button onClick={() => openEdit(p)} className="flex-1 sm:flex-none h-7 px-2.5 rounded-lg text-[12px] font-semibold hairline hover:bg-[var(--hair-2)] transition-colors ink-2">Edit</button>
@@ -173,7 +173,7 @@ function ProjectsTab() {
             <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Description</label><Textarea rows={2} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} /></div>
             <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Requirements</label><Textarea rows={3} value={form.requirements} onChange={e => setForm(p => ({ ...p, requirements: e.target.value }))} /></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Due date</label><Input type="date" value={form.due_date} onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))} /></div>
+              <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Due date <span className="font-normal muted">(optional)</span></label><Input type="date" value={form.due_date} onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))} /></div>
               <div><label className="text-[12.5px] font-medium ink-2 block mb-1.5">Linked module <span className="muted font-normal">(opt.)</span></label>
                 <Select value={form.module_id || 'none'} onValueChange={v => setForm(p => ({ ...p, module_id: v === 'none' ? '' : v }))}>
                   <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>

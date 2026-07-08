@@ -12,11 +12,11 @@ function profileTable() { return supabase.from('profiles') as unknown as Profile
 // Narrow builder for industry_challenges insert/update (bypass `never` inference)
 type IcInsertPayload = {
   company_id: string; title: string; description: string; requirements: string
-  difficulty_level: DifficultyLevel; deadline: string; is_approved: boolean; is_active: boolean
+  difficulty_level: DifficultyLevel; deadline: string | null; is_approved: boolean; is_active: boolean
 }
 type IcUpdatePayload = Partial<{
   title: string; description: string; requirements: string
-  difficulty_level: DifficultyLevel; deadline: string
+  difficulty_level: DifficultyLevel; deadline: string | null
   is_approved: boolean; is_active: boolean
   rejection_reason: string | null; rejected_at: string | null
 }>
@@ -165,11 +165,11 @@ export async function createChallenge(
     description: string
     requirements: string
     difficulty_level: DifficultyLevel
-    deadline: string
+    deadline?: string | null
   },
 ): Promise<IndustryChallenge> {
   const { data, error } = await icTable()
-    .insert({ company_id: companyId, ...payload, is_approved: false, is_active: true })
+    .insert({ company_id: companyId, ...payload, deadline: payload.deadline ?? null, is_approved: false, is_active: true })
     .select().single()
   if (error) throw error
   return data as unknown as IndustryChallenge
@@ -182,7 +182,7 @@ export async function updateChallenge(
     description: string
     requirements: string
     difficulty_level: DifficultyLevel
-    deadline: string
+    deadline: string | null
   }>,
 ): Promise<void> {
   const { error } = await icTable().update(payload).eq('id', challengeId)
@@ -254,7 +254,7 @@ export async function resubmitChallenge(
   challengeTitle: string,
   payload: Partial<{
     title: string; description: string; requirements: string
-    difficulty_level: DifficultyLevel; deadline: string
+    difficulty_level: DifficultyLevel; deadline: string | null
   }>,
 ): Promise<void> {
   // Update content + clear rejection fields + reset approval

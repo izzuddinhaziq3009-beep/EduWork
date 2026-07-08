@@ -90,7 +90,7 @@ export function useCreateChallenge() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ companyId, payload }: { companyId: string; payload: { title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string } }) =>
+    mutationFn: ({ companyId, payload }: { companyId: string; payload: { title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline?: string | null } }) =>
       createChallenge(companyId, payload),
     onSuccess: (_, { companyId }) => {
       qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })
@@ -106,7 +106,7 @@ export function useUpdateChallenge() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ challengeId, payload }: { challengeId: string; companyId: string; payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string }> }) =>
+    mutationFn: ({ challengeId, payload }: { challengeId: string; companyId: string; payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string | null }> }) =>
       updateChallenge(challengeId, payload),
     onSuccess: (_, { companyId, challengeId }) => {
       qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })
@@ -129,7 +129,7 @@ export function useResubmitChallenge() {
       companyId: string
       companyName: string
       challengeTitle: string
-      payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string }>
+      payload: Partial<{ title: string; description: string; requirements: string; difficulty_level: DifficultyLevel; deadline: string | null }>
     }) => resubmitChallenge(challengeId, companyName, challengeTitle, payload),
     onSuccess: (_, { companyId, challengeId }) => {
       qc.invalidateQueries({ queryKey: companyKeys.challenges(companyId) })

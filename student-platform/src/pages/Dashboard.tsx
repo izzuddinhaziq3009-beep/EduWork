@@ -56,7 +56,11 @@ export function Dashboard() {
   const submittedChallengeIds = new Set(challengeSubs.map(s => s.challenge_id))
   const upcomingChallenges = challenges
     .filter(c => !submittedChallengeIds.has(c.id))
-    .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+    .sort((a, b) => {
+      const at = a.deadline ? new Date(a.deadline).getTime() : Infinity
+      const bt = b.deadline ? new Date(b.deadline).getTime() : Infinity
+      return at - bt
+    })
     .slice(0, 3)
 
   return (
@@ -277,7 +281,7 @@ export function Dashboard() {
                     <div className="text-[13.5px] font-medium truncate mb-1.5">{c.title}</div>
                     <div className="flex items-center justify-between">
                       <DifficultyBadge level={c.difficulty_level} />
-                      <span className="text-[11.5px] font-mono muted">Due {fmtDate(c.deadline)}</span>
+                      {c.deadline && <span className="text-[11.5px] font-mono muted">Due {fmtDate(c.deadline)}</span>}
                     </div>
                   </Link>
                 ))}

@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function ChallengeCard({ challenge, hasSubmission }: Props) {
-  const isPast = new Date(challenge.deadline) < new Date()
+  const isPast = !!challenge.deadline && new Date(challenge.deadline) < new Date()
 
   return (
     <div className="bg-surface hairline rounded-2xl shadow-card p-5 flex flex-col gap-4 hover:shadow-pop transition-shadow">
@@ -41,9 +41,11 @@ export function ChallengeCard({ challenge, hasSubmission }: Props) {
       </div>
 
       <div className="flex items-center justify-between mt-auto">
-        <span className={`text-[12px] font-mono ${isPast ? 'text-[color:var(--rose)]' : 'muted'}`}>
-          {isPast ? 'Ended' : 'Deadline'} {fmtDate(challenge.deadline)}
-        </span>
+        {challenge.deadline && (
+          <span className={`text-[12px] font-mono ${isPast ? 'text-[color:var(--rose)]' : 'muted'}`}>
+            {isPast ? 'Ended' : 'Deadline'} {fmtDate(challenge.deadline)}
+          </span>
+        )}
         <Link to={`/challenges/${challenge.id}`}
           className="h-8 px-3.5 rounded-xl text-[12.5px] font-semibold text-white transition-opacity hover:opacity-90"
           style={{ background: 'var(--primary)' }}>

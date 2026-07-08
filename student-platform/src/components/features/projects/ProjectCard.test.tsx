@@ -15,6 +15,7 @@ const base: Project = {
   created_by: 'mentor-1',
   created_at: '2024-01-01T00:00:00Z',
   is_active: true,
+  module: null,
 }
 
 function render(project: Project) {
@@ -22,6 +23,20 @@ function render(project: Project) {
     createElement(MemoryRouter, null, createElement(ProjectCard, { project })),
   )
 }
+
+describe('ProjectCard due date / no-deadline', () => {
+  it('shows the due date when due_date is set', () => {
+    const html = render({ ...base, due_date: '2030-06-15T00:00:00Z' })
+    expect(html).toContain('Due')
+    expect(html).not.toContain('No deadline')
+  })
+
+  it('omits the deadline element when due_date is null', () => {
+    const html = render({ ...base, due_date: null })
+    expect(html).not.toContain('No deadline')
+    expect(html).not.toContain('Due ')
+  })
+})
 
 describe('ProjectCard module badge', () => {
   it('shows the module name when module is present', () => {

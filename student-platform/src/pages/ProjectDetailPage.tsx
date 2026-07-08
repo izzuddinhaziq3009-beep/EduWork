@@ -45,9 +45,11 @@ export function ProjectDetailPage() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-3 flex-wrap">
           {submission && <SubmissionStatus status={submission.status} />}
-          <span className="tag" style={{ background: 'var(--hair-2)', color: 'var(--ink-2)' }}>
-            Due {fmtDate(project.due_date)}
-          </span>
+          {project.due_date && (
+            <span className="tag" style={{ background: 'var(--hair-2)', color: 'var(--ink-2)' }}>
+              Due {fmtDate(project.due_date)}
+            </span>
+          )}
           {project.module && (
             <Link
               to={`/modules/${project.module.id}`}

@@ -53,7 +53,7 @@ function PendingTab({ companyId }: { companyId: string }) {
                 <DifficultyBadge level={c.difficulty_level} />
               </div>
               <div className="text-[12px] font-mono muted">
-                Deadline {fmtDate(c.deadline)} · Posted {fmtRelative(c.created_at)}
+                {c.deadline ? `Deadline ${fmtDate(c.deadline)} · ` : ''}Posted {fmtRelative(c.created_at)}
               </div>
             </div>
             <div className="shrink-0 text-[12px] muted italic">Awaiting admin review</div>
@@ -87,8 +87,7 @@ function ApprovedTab({ companyId }: { companyId: string }) {
                 <DifficultyBadge level={c.difficulty_level} />
               </div>
               <div className="flex items-center gap-3 text-[12px] font-mono muted flex-wrap">
-                <span>Deadline {fmtDate(c.deadline)}</span>
-                <span>·</span>
+                {c.deadline && <><span>Deadline {fmtDate(c.deadline)}</span><span>·</span></>}
                 <span>{c.submissionCount} submission{c.submissionCount !== 1 ? 's' : ''}</span>
               </div>
             </div>
@@ -136,8 +135,8 @@ function RejectedTab({ companyId }: { companyId: string }) {
                 <DifficultyBadge level={c.difficulty_level} />
               </div>
               <div className="text-[12px] font-mono muted mb-3">
-                Deadline {fmtDate(c.deadline)}
-                {c.rejected_at && <span> · Rejected {fmtRelative(c.rejected_at)}</span>}
+                {c.deadline && `Deadline ${fmtDate(c.deadline)}`}
+                {c.rejected_at && <span>{c.deadline && ' · '}Rejected {fmtRelative(c.rejected_at)}</span>}
               </div>
               {c.rejection_reason && (
                 <div className="hairline rounded-xl px-4 py-3 text-[13px] leading-relaxed"
@@ -193,8 +192,7 @@ function AllTab({ companyId, userId }: { companyId: string; userId: string }) {
                   <DifficultyBadge level={c.difficulty_level} />
                 </div>
                 <div className="flex items-center gap-3 text-[12px] font-mono muted flex-wrap">
-                  <span>Deadline {fmtDate(c.deadline)}</span>
-                  <span>·</span>
+                  {c.deadline && <><span>Deadline {fmtDate(c.deadline)}</span><span>·</span></>}
                   <span>{c.submissionCount} submission{c.submissionCount !== 1 ? 's' : ''}</span>
                 </div>
               </div>

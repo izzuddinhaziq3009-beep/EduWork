@@ -91,7 +91,7 @@ export function ProgressTabContent() {
               <div key={submission.id} className="px-5 py-4 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="text-[13.5px] font-medium truncate">{project.title}</div>
-                  <div className="text-[11.5px] muted font-mono mt-0.5">Due {fmtDate(project.due_date)}</div>
+                  {project.due_date && <div className="text-[11.5px] muted font-mono mt-0.5">Due {fmtDate(project.due_date)}</div>}
                 </div>
                 <SubmissionStatus status={submission.status} />
               </div>

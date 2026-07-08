@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function ProjectCard({ project, submission }: Props) {
-  const isPast = new Date(project.due_date) < new Date()
+  const isPast = !!project.due_date && new Date(project.due_date) < new Date()
 
   return (
     <div className="bg-surface hairline rounded-2xl shadow-card p-5 flex flex-col gap-4 hover:shadow-pop transition-shadow">
@@ -31,9 +31,11 @@ export function ProjectCard({ project, submission }: Props) {
       </div>
 
       <div className="flex items-center gap-3 text-[12px] font-mono muted">
-        <span className={isPast && !submission ? 'text-[color:var(--rose)]' : ''}>
-          Due {fmtDate(project.due_date)}
-        </span>
+        {project.due_date && (
+          <span className={isPast && !submission ? 'text-[color:var(--rose)]' : ''}>
+            Due {fmtDate(project.due_date)}
+          </span>
+        )}
         {submission && (
           <>
             <span>·</span>

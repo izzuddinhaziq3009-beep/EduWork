@@ -50,7 +50,7 @@ export function ChallengeDetail() {
 
   if (!challenge) return <div className="p-8 muted">Challenge not found.</div>
 
-  const isPast = new Date(challenge.deadline) < new Date()
+  const isPast = !!challenge.deadline && new Date(challenge.deadline) < new Date()
   const st     = submission ? STATUS_STYLE[submission.status] : null
 
   return (
@@ -75,9 +75,11 @@ export function ChallengeDetail() {
           </div>
           <DifficultyBadge level={challenge.difficulty_level} />
           {st && <span className="tag" style={{ background: st.bg, color: st.color }}>{st.label}</span>}
-          <span className={`text-[12px] font-mono ${isPast ? 'text-[color:var(--rose)]' : 'muted'}`}>
-            {isPast ? 'Ended' : 'Deadline'} {fmtDate(challenge.deadline)}
-          </span>
+          {challenge.deadline && (
+            <span className={`text-[12px] font-mono ${isPast ? 'text-[color:var(--rose)]' : 'muted'}`}>
+              {isPast ? 'Ended' : 'Deadline'} {fmtDate(challenge.deadline)}
+            </span>
+          )}
         </div>
         <h1 className="font-display text-[30px] font-semibold tracking-tight leading-tight">{challenge.title}</h1>
         <p className="text-[15px] muted mt-2 leading-relaxed">{challenge.description}</p>

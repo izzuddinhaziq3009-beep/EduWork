@@ -43,7 +43,6 @@ export async function getActiveChallenges(): Promise<ChallengeWithCompany[]> {
     .select('*')
     .eq('is_approved', true)
     .eq('is_active', true)
-    .gte('deadline', new Date().toISOString())
     .order('created_at', { ascending: false })
   if (error) throw error
 

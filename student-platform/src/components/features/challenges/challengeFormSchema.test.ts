@@ -34,12 +34,23 @@ describe('challengeSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects a missing deadline', () => {
+  it('accepts an empty deadline (deadline is now optional)', () => {
     const result = challengeSchema.safeParse({ ...VALID, deadline: '' })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 
-  it('rejects a deadline in the past', () => {
+  it('accepts a null deadline', () => {
+    const result = challengeSchema.safeParse({ ...VALID, deadline: null })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts an absent deadline', () => {
+    const { deadline: _, ...withoutDeadline } = VALID
+    const result = challengeSchema.safeParse(withoutDeadline)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a deadline in the past when a date is provided', () => {
     const pastDeadline = new Date(Date.now() - 86_400_000).toISOString().slice(0, 16)
     const result = challengeSchema.safeParse({ ...VALID, deadline: pastDeadline })
     expect(result.success).toBe(false)

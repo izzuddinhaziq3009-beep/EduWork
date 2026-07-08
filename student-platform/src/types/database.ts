@@ -156,7 +156,7 @@ export interface Project {
   title: string
   description: string
   requirements: string
-  due_date: string
+  due_date: string | null
   module_id: string | null
   created_by: string
   created_at: string
@@ -244,7 +244,7 @@ export interface IndustryChallenge {
   description: string
   requirements: string
   difficulty_level: DifficultyLevel
-  deadline: string
+  deadline: string | null
   is_active: boolean
   is_approved: boolean
   created_at: string
@@ -579,7 +579,7 @@ export interface Database {
           title: string
           description: string
           requirements: string
-          due_date: string
+          due_date?: string | null
           module_id?: string | null
           created_by: string
           created_at?: string
@@ -589,7 +589,7 @@ export interface Database {
           title?: string
           description?: string
           requirements?: string
-          due_date?: string
+          due_date?: string | null
           module_id?: string | null
           is_active?: boolean
         }
@@ -726,7 +726,7 @@ export interface Database {
           description: string
           requirements: string
           difficulty_level: DifficultyLevel
-          deadline: string
+          deadline?: string | null
           is_active?: boolean
           is_approved?: boolean
           created_at?: string
@@ -736,7 +736,7 @@ export interface Database {
           description?: string
           requirements?: string
           difficulty_level?: DifficultyLevel
-          deadline?: string
+          deadline?: string | null
           is_active?: boolean
           is_approved?: boolean
           rejection_reason?: string | null

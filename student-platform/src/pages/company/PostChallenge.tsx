@@ -13,7 +13,7 @@ export function PostChallenge() {
   const handleSubmit = (values: ChallengeFormValues) => {
     if (!user) return
     create.mutate(
-      { companyId: user.id, payload: { ...values, deadline: new Date(values.deadline).toISOString() } },
+      { companyId: user.id, payload: { ...values, deadline: values.deadline ? new Date(values.deadline).toISOString() : null } },
       { onSuccess: () => navigate('/company/challenges') },
     )
   }

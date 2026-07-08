@@ -24,6 +24,16 @@ describe('getActiveChallenges', () => {
     expect(result[0].company.full_name).toBe('Acme')
   })
 
+  it('includes challenges with a null deadline (no expiry filter)', async () => {
+    queueFromResults(fromMock, [
+      ok([{ id: 'c2', company_id: 'co1', deadline: null }]),
+      ok([{ id: 'co1', full_name: 'Acme' }]),
+    ])
+    const result = await getActiveChallenges()
+    expect(result).toHaveLength(1)
+    expect(result[0].deadline).toBeNull()
+  })
+
   it('returns an empty array without a company lookup when there are no challenges', async () => {
     queueFromResults(fromMock, [ok([])])
     const result = await getActiveChallenges()

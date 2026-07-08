@@ -99,7 +99,7 @@ export function SubmissionDetail() {
           <div className="bg-surface hairline rounded-2xl p-5 space-y-3">
             <div className="flex items-baseline justify-between">
               <h2 className="text-[17px] font-semibold">{project.title}</h2>
-              <span className="text-[12px] font-mono muted">Due {fmtDate(project.due_date)}</span>
+              {project.due_date && <span className="text-[12px] font-mono muted">Due {fmtDate(project.due_date)}</span>}
             </div>
             <div>
               <div className="text-[12px] font-mono muted uppercase tracking-wide mb-2">Requirements</div>

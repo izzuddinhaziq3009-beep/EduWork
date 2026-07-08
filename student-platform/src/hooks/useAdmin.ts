@@ -99,7 +99,7 @@ export function useAllProjectsAdmin() {
 export function useCreateProject() {
   const qc = useQueryClient(); const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ adminId, payload }: { adminId: string; payload: { title: string; description: string; requirements: string; due_date: string; module_id?: string } }) =>
+    mutationFn: ({ adminId, payload }: { adminId: string; payload: { title: string; description: string; requirements: string; due_date?: string | null; module_id?: string } }) =>
       createProject(adminId, payload),
     onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.projects }); toast({ title: 'Project created!' }) },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
@@ -108,7 +108,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient(); const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<{ title: string; description: string; requirements: string; due_date: string; module_id: string | null }> }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<{ title: string; description: string; requirements: string; due_date: string | null; module_id: string | null }> }) =>
       updateProject(id, payload),
     onSuccess: () => { qc.invalidateQueries({ queryKey: adminKeys.projects }); toast({ title: 'Project updated.' }) },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),

@@ -20,7 +20,7 @@ export function EditChallenge() {
 
   const handleSubmit = (values: ChallengeFormValues) => {
     if (!user || !challenge) return
-    const deadline = new Date(values.deadline).toISOString()
+    const deadline = values.deadline ? new Date(values.deadline).toISOString() : null
 
     if (isRejected) {
       // Resubmit flow — clears rejection fields and notifies admins
@@ -53,7 +53,7 @@ export function EditChallenge() {
     description:      challenge.description,
     requirements:     challenge.requirements,
     difficulty_level: challenge.difficulty_level,
-    deadline:         new Date(challenge.deadline).toISOString().slice(0, 16),
+    deadline:         challenge.deadline ? new Date(challenge.deadline).toISOString().slice(0, 16) : '',
   } : undefined
 
   const submitLabel = isRejected ? 'Resubmit for Approval' : isApproved ? 'Save & Request Re-Approval' : 'Save changes'

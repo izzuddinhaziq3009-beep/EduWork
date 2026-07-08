@@ -83,9 +83,9 @@ export function ChallengeForm({ defaultValues, onSubmit, loading, submitLabel = 
 
           <FormField control={form.control} name="deadline" render={({ field }) => (
             <FormItem>
-              <FormLabel>Deadline</FormLabel>
+              <FormLabel>Deadline <span className="font-normal muted">(optional)</span></FormLabel>
               <FormControl>
-                <Input {...field} type="datetime-local" min={MIN_DEADLINE} />
+                <Input {...field} value={field.value ?? ''} type="datetime-local" min={MIN_DEADLINE} />
               </FormControl>
               <FormMessage />
             </FormItem>

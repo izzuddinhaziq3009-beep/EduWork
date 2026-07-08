@@ -42,8 +42,8 @@ export interface PaginatedActivityLogs {
 
 type ProfileUpdate = { full_name?: string; email?: string; is_active?: boolean; is_approved?: boolean }
 type ProfileUpsertAdmin = { id: string; email: string; full_name: string; role: UserRole; is_approved: boolean }
-type ProjInsert = { created_by: string; title: string; description: string; requirements: string; due_date: string; module_id: string | null }
-type ProjUpdate = Partial<{ title: string; description: string; requirements: string; due_date: string; module_id: string | null; is_active: boolean }>
+type ProjInsert = { created_by: string; title: string; description: string; requirements: string; due_date: string | null; module_id: string | null }
+type ProjUpdate = Partial<{ title: string; description: string; requirements: string; due_date: string | null; module_id: string | null; is_active: boolean }>
 type IcUpdate = { is_approved?: boolean; is_active?: boolean; rejection_reason?: string | null; rejected_at?: string | null }
 type NotifInsert = { user_id: string; title: string; message: string; type: string }
 
@@ -233,10 +233,10 @@ export async function getAllProjectsAdmin(): Promise<Project[]> {
 }
 
 export async function createProject(adminId: string, payload: {
-  title: string; description: string; requirements: string; due_date: string; module_id?: string
+  title: string; description: string; requirements: string; due_date?: string | null; module_id?: string
 }): Promise<Project> {
   const { data, error } = await projTable()
-    .insert({ created_by: adminId, ...payload, module_id: payload.module_id || null })
+    .insert({ created_by: adminId, ...payload, due_date: payload.due_date || null, module_id: payload.module_id || null })
     .select().single()
   if (error) throw error
   return data as unknown as Project

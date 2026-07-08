@@ -42,7 +42,7 @@ function ChallengeRow({
             )}
           </div>
           <div className="text-[12px] font-mono muted">
-            {c.company.full_name} · Deadline {fmtDate(c.deadline)} · Posted {fmtRelative(c.created_at)}
+            {c.company.full_name}{c.deadline ? ` · Deadline ${fmtDate(c.deadline)}` : ''} · Posted {fmtRelative(c.created_at)}
           </div>
           {/* Show rejection reason if present */}
           {c.rejection_reason && (
