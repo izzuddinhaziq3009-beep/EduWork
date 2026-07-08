@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import {
   useMentorClasses, useCreateClass, useResetClassCode, useDeactivateClass, useClassRoster,
@@ -10,6 +11,44 @@ import type { ClassWithMeta } from '@/services/classService'
 
 const COLORS = ['#0F4C5C', '#2C9D6E', '#C97A2D', '#B8456A', '#3B6AC9']
 function avatarColor(name: string) { return COLORS[name.charCodeAt(0) % COLORS.length] }
+
+// ── RosterRow ─────────────────────────────────────────────────────────────────
+
+export function RosterRow({ student, progress, completed, onMessage }: {
+  student: { id: string; full_name: string }
+  progress: number
+  completed: boolean
+  onMessage: () => void
+}) {
+  const pct = Math.min(100, Math.max(0, Math.round(progress)))
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2.5">
+        <div className="w-7 h-7 rounded-lg grid place-items-center text-[11px] font-mono font-semibold text-white shrink-0"
+          style={{ background: avatarColor(student.full_name) }}>
+          {fmtInitials(student.full_name)}
+        </div>
+        <span className="flex-1 text-[13.5px]">{student.full_name}</span>
+        {completed && (
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            Completed
+          </span>
+        )}
+        <span className="font-mono text-[11.5px] font-semibold shrink-0">{pct}%</span>
+        <button
+          onClick={onMessage}
+          className="h-9 w-9 rounded-xl hairline grid place-items-center hover:bg-[var(--hair-2)] transition-colors shrink-0"
+          title="Message student"
+          style={{ color: 'var(--primary)' }}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12a7 7 0 0 1-10.6 6l-4.4 1 1.1-4A7 7 0 1 1 21 12z"/>
+          </svg>
+        </button>
+      </div>
+      <div className="pbar teal ml-9"><span style={{ width: `${pct}%` }} /></div>
+    </div>
+  )
+}
 
 // ── ClassCard ─────────────────────────────────────────────────────────────────
 
@@ -29,6 +68,7 @@ function ClassCard({
   onCopy, onResetCode, onDeactivate,
   isResetting, isDeactivating,
 }: ClassCardProps) {
+  const navigate = useNavigate()
   const [showRoster, setShowRoster] = useState(false)
   const { data: roster = [], isLoading: loadingRoster } = useClassRoster(showRoster ? cls.id : '')
 
@@ -114,27 +154,15 @@ function ClassCard({
             <p className="text-[13px] muted">No students enrolled yet.</p>
           ) : (
             <div className="space-y-3">
-              {roster.map(({ student, progress, completed }) => {
-                const pct = Math.min(100, Math.max(0, Math.round(progress)))
-                return (
-                  <div key={student.id} className="space-y-1.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg grid place-items-center text-[11px] font-mono font-semibold text-white shrink-0"
-                        style={{ background: avatarColor(student.full_name) }}>
-                        {fmtInitials(student.full_name)}
-                      </div>
-                      <span className="flex-1 text-[13.5px]">{student.full_name}</span>
-                      {completed && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          Completed
-                        </span>
-                      )}
-                      <span className="font-mono text-[11.5px] font-semibold shrink-0">{pct}%</span>
-                    </div>
-                    <div className="pbar teal ml-9"><span style={{ width: `${pct}%` }} /></div>
-                  </div>
-                )
-              })}
+              {roster.map(({ student, progress, completed }) => (
+                <RosterRow
+                  key={student.id}
+                  student={student}
+                  progress={progress}
+                  completed={completed}
+                  onMessage={() => navigate(`/messages?with=${student.id}`)}
+                />
+              ))}
             </div>
           )}
         </div>
