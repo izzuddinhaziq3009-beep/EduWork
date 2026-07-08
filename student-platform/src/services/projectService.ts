@@ -12,7 +12,7 @@ function psTable() { return supabase.from('project_submissions') as unknown as P
 export async function getAllProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('projects')
-    .select('*')
+    .select('*, module:learning_modules(id, title)')
     .eq('is_active', true)
     .order('due_date', { ascending: true })
   if (error) throw error
@@ -22,7 +22,7 @@ export async function getAllProjects(): Promise<Project[]> {
 export async function getProjectById(id: string): Promise<Project> {
   const { data, error } = await supabase
     .from('projects')
-    .select('*')
+    .select('*, module:learning_modules(id, title)')
     .eq('id', id)
     .single()
   if (error) throw error

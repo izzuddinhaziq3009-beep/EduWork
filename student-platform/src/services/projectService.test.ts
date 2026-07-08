@@ -16,8 +16,20 @@ beforeEach(() => {
 
 describe('getAllProjects', () => {
   it('returns active projects ordered by due date', async () => {
-    queueFromResults(fromMock, [ok([{ id: 'p1' }])])
-    expect(await getAllProjects()).toEqual([{ id: 'p1' }])
+    queueFromResults(fromMock, [ok([{ id: 'p1', module: null }])])
+    expect(await getAllProjects()).toEqual([{ id: 'p1', module: null }])
+  })
+
+  it('passes through the embedded module when present', async () => {
+    queueFromResults(fromMock, [ok([{ id: 'p1', module: { id: 'm1', title: 'Building Web Apps with React' } }])])
+    const [project] = await getAllProjects()
+    expect(project.module).toEqual({ id: 'm1', title: 'Building Web Apps with React' })
+  })
+
+  it('passes through null module for projects without a linked module', async () => {
+    queueFromResults(fromMock, [ok([{ id: 'p2', module: null }])])
+    const [project] = await getAllProjects()
+    expect(project.module).toBeNull()
   })
 
   it('throws on error', async () => {

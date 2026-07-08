@@ -43,11 +43,23 @@ export function ProjectDetailPage() {
 
       {/* Project info */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-3 flex-wrap">
           {submission && <SubmissionStatus status={submission.status} />}
           <span className="tag" style={{ background: 'var(--hair-2)', color: 'var(--ink-2)' }}>
             Due {fmtDate(project.due_date)}
           </span>
+          {project.module && (
+            <Link
+              to={`/modules/${project.module.id}`}
+              className="tag flex items-center gap-1 hover:opacity-80 transition-opacity"
+              style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}
+            >
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Module: {project.module.title}
+            </Link>
+          )}
         </div>
         <h1 className="font-display text-[30px] font-semibold tracking-tight leading-tight mb-2">{project.title}</h1>
         <p className="text-[15px] muted leading-relaxed">{project.description}</p>

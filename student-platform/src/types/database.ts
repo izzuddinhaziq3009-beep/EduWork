@@ -161,6 +161,7 @@ export interface Project {
   created_by: string
   created_at: string
   is_active: boolean
+  module?: { id: string; title: string } | null
 }
 
 export interface ProjectSubmission {

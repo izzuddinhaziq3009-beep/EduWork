@@ -18,6 +18,14 @@ export function ProjectCard({ project, submission }: Props) {
         <div className="flex-1 min-w-0">
           <h3 className="text-[16px] font-semibold leading-snug line-clamp-2">{project.title}</h3>
           <p className="text-[13px] muted mt-1 line-clamp-2">{project.description}</p>
+          {project.module && (
+            <div className="flex items-center gap-1 mt-1.5 text-[11.5px] font-medium" style={{ color: 'var(--primary)' }}>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Module: {project.module.title}
+            </div>
+          )}
         </div>
         {submission && <SubmissionStatus status={submission.status} />}
       </div>
