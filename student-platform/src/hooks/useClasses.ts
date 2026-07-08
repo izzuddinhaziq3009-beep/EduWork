@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  getMentorClasses, createClass, resetClassCode, deactivateClass, getClassRoster, redeemClassCode,
-  getStudentClasses,
+  getMentorClasses, createClass, updateClass, resetClassCode, deactivateClass, getClassRoster,
+  redeemClassCode, getStudentClasses,
 } from '@/services/classService'
 import type { ClassWithMeta } from '@/services/classService'
 import { mentorshipKeys } from './useMentorship'
@@ -41,8 +41,8 @@ export function useCreateClass() {
   const qc = useQueryClient()
   const { toast } = useToast()
   return useMutation({
-    mutationFn: ({ moduleId, name }: { moduleId: string; name: string; mentorId: string; moduleTitle: string }) =>
-      createClass(moduleId, name),
+    mutationFn: ({ moduleId, name, instructions }: { moduleId: string; name: string; instructions?: string | null; mentorId: string; moduleTitle: string }) =>
+      createClass(moduleId, name, instructions),
     onSuccess: (newClass, { mentorId, moduleTitle }) => {
       // Optimistic update so the card appears instantly without waiting for a refetch.
       qc.setQueryData(classKeys.mentorClasses(mentorId), (old: ClassWithMeta[] | undefined) => [
@@ -52,6 +52,26 @@ export function useCreateClass() {
       // Invalidate so the next background refetch brings fresh server data.
       qc.invalidateQueries({ queryKey: classKeys.mentorClasses(mentorId) })
       toast({ title: 'Class created!', description: `Share code ${newClass.join_code} with your students.` })
+    },
+    onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+}
+
+export function useUpdateClass() {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+  return useMutation({
+    mutationFn: ({ classId, payload }: {
+      classId: string
+      payload: { name?: string; instructions?: string | null }
+      mentorId: string
+    }) => updateClass(classId, payload),
+    onSuccess: (_, { classId, payload, mentorId }) => {
+      qc.setQueryData(classKeys.mentorClasses(mentorId), (old: ClassWithMeta[] | undefined) =>
+        old?.map(c => c.id === classId ? { ...c, ...payload } : c)
+      )
+      qc.invalidateQueries({ queryKey: classKeys.mentorClasses(mentorId) })
+      toast({ title: 'Class updated.' })
     },
     onError: (err: Error) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })

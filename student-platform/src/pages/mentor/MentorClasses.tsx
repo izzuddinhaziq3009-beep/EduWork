@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import {
-  useMentorClasses, useCreateClass, useResetClassCode, useDeactivateClass, useClassRoster,
+  useMentorClasses, useCreateClass, useUpdateClass, useResetClassCode, useDeactivateClass, useClassRoster,
 } from '@/hooks/useClasses'
 import { useModules } from '@/hooks/useModules'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -50,6 +50,64 @@ export function RosterRow({ student, progress, completed, onMessage }: {
   )
 }
 
+// ── ClassEditForm ─────────────────────────────────────────────────────────────
+
+export function ClassEditForm({
+  initialName, initialInstructions, isPending, onSave, onCancel,
+}: {
+  initialName: string
+  initialInstructions: string
+  isPending: boolean
+  onSave: (name: string, instructions: string | null) => void
+  onCancel: () => void
+}) {
+  const [name, setName]                 = useState(initialName)
+  const [instructions, setInstructions] = useState(initialInstructions)
+  return (
+    <div className="hairline-t px-6 py-5 space-y-4">
+      <div className="text-[13px] font-semibold">Edit class</div>
+      <div>
+        <label className="text-[11px] font-mono tracking-wide muted uppercase block mb-1.5">
+          Class name
+        </label>
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          maxLength={120}
+          className="w-full h-10 px-3 rounded-xl hairline bg-[var(--bg)] text-[14px] outline-none focus:ring-2 focus:ring-[var(--primary)]"
+        />
+      </div>
+      <div>
+        <label className="text-[11px] font-mono tracking-wide muted uppercase block mb-1.5">
+          Instructions <span className="normal-case tracking-normal">(optional)</span>
+        </label>
+        <textarea
+          value={instructions}
+          onChange={e => setInstructions(e.target.value)}
+          rows={3}
+          placeholder="e.g. Complete all module lessons, pass the quiz, then submit the linked project."
+          className="w-full px-3 py-2.5 rounded-xl hairline bg-[var(--bg)] text-[14px] outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+        />
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => onSave(name.trim(), instructions.trim() || null)}
+          disabled={!name.trim() || isPending}
+          className="h-9 px-4 rounded-xl text-[13px] font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+          style={{ background: 'var(--primary)' }}>
+          {isPending ? 'Saving…' : 'Save'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="h-9 px-4 rounded-xl text-[13px] font-medium hairline hover:bg-[var(--hair-2)] transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── ClassCard ─────────────────────────────────────────────────────────────────
 
 interface ClassCardProps {
@@ -63,13 +121,15 @@ interface ClassCardProps {
   isDeactivating: boolean
 }
 
-function ClassCard({
+export function ClassCard({
   cls, mentorId, copiedId,
   onCopy, onResetCode, onDeactivate,
   isResetting, isDeactivating,
 }: ClassCardProps) {
-  const navigate = useNavigate()
+  const navigate        = useNavigate()
+  const updateClassMut  = useUpdateClass()
   const [showRoster, setShowRoster] = useState(false)
+  const [showEdit,   setShowEdit]   = useState(false)
   const { data: roster = [], isLoading: loadingRoster } = useClassRoster(showRoster ? cls.id : '')
 
   return (
@@ -124,6 +184,12 @@ function ClassCard({
             {showRoster ? 'Hide roster' : 'View roster'}
           </button>
 
+          <button
+            onClick={() => setShowEdit(v => !v)}
+            className="h-9 px-3 rounded-lg text-[12.5px] font-medium hairline hover:bg-[var(--hair-2)] transition-colors">
+            {showEdit ? 'Cancel edit' : 'Edit'}
+          </button>
+
           {cls.is_active && (
             <button
               onClick={() => onDeactivate(cls.id)}
@@ -135,6 +201,21 @@ function ClassCard({
           )}
         </div>
       </div>
+
+      {showEdit && (
+        <ClassEditForm
+          initialName={cls.name}
+          initialInstructions={cls.instructions ?? ''}
+          isPending={updateClassMut.isPending}
+          onSave={(name, instructions) =>
+            updateClassMut.mutate(
+              { classId: cls.id, payload: { name, instructions }, mentorId },
+              { onSuccess: () => setShowEdit(false) },
+            )
+          }
+          onCancel={() => setShowEdit(false)}
+        />
+      )}
 
       {showRoster && (
         <div className="hairline-t px-6 py-4">
@@ -184,21 +265,23 @@ export function MentorClasses() {
   const resetCode      = useResetClassCode()
   const deactivate     = useDeactivateClass()
 
-  const [showCreate, setShowCreate] = useState(false)
-  const [moduleId, setModuleId]     = useState('')
-  const [className, setClassName]   = useState('')
-  const [copiedId, setCopiedId]     = useState<string | null>(null)
+  const [showCreate, setShowCreate]       = useState(false)
+  const [moduleId, setModuleId]           = useState('')
+  const [className, setClassName]         = useState('')
+  const [instructions, setInstructions]   = useState('')
+  const [copiedId, setCopiedId]           = useState<string | null>(null)
 
   const handleCreate = () => {
     if (!moduleId || !className.trim()) return
     createClassMut.mutate(
       {
         moduleId,
-        name: className.trim(),
-        mentorId: mid,
-        moduleTitle: modules.find(m => m.id === moduleId)?.title ?? 'Unknown Module',
+        name:         className.trim(),
+        instructions: instructions.trim() || null,
+        mentorId:     mid,
+        moduleTitle:  modules.find(m => m.id === moduleId)?.title ?? 'Unknown Module',
       },
-      { onSuccess: () => { setShowCreate(false); setModuleId(''); setClassName('') } },
+      { onSuccess: () => { setShowCreate(false); setModuleId(''); setClassName(''); setInstructions('') } },
     )
   }
 
@@ -260,6 +343,18 @@ export function MentorClasses() {
                 className="w-full h-10 px-3 rounded-xl hairline bg-[var(--bg)] text-[14px] outline-none focus:ring-2 focus:ring-[var(--primary)]"
               />
             </div>
+            <div>
+              <label className="text-[11px] font-mono tracking-wide muted uppercase block mb-1.5">
+                Instructions <span className="normal-case tracking-normal">(optional)</span>
+              </label>
+              <textarea
+                value={instructions}
+                onChange={e => setInstructions(e.target.value)}
+                rows={3}
+                placeholder="e.g. Complete all module lessons, pass the quiz, then submit the linked project."
+                className="w-full px-3 py-2.5 rounded-xl hairline bg-[var(--bg)] text-[14px] outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+              />
+            </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={handleCreate}
@@ -269,7 +364,7 @@ export function MentorClasses() {
                 {createClassMut.isPending ? 'Creating…' : 'Create'}
               </button>
               <button
-                onClick={() => { setShowCreate(false); setModuleId(''); setClassName('') }}
+                onClick={() => { setShowCreate(false); setModuleId(''); setClassName(''); setInstructions('') }}
                 className="h-10 px-4 rounded-xl text-[13.5px] font-medium hairline hover:bg-[var(--hair-2)] transition-colors">
                 Cancel
               </button>

@@ -109,7 +109,7 @@ $$;
 
 -- ── 5. RPC: create_class (mentor only) ───────────────────────────────────────
 
-CREATE OR REPLACE FUNCTION create_class(p_module_id UUID, p_name TEXT)
+CREATE OR REPLACE FUNCTION create_class(p_module_id UUID, p_name TEXT, p_instructions TEXT DEFAULT NULL)
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -133,18 +133,19 @@ BEGIN
     EXIT WHEN NOT EXISTS (SELECT 1 FROM classes WHERE join_code = v_code);
   END LOOP;
 
-  INSERT INTO classes (module_id, mentor_id, name, join_code)
-  VALUES (p_module_id, v_mentor_id, p_name, v_code)
+  INSERT INTO classes (module_id, mentor_id, name, join_code, instructions)
+  VALUES (p_module_id, v_mentor_id, p_name, v_code, p_instructions)
   RETURNING id INTO v_class_id;
 
   RETURN json_build_object(
-    'id',         v_class_id::TEXT,
-    'module_id',  p_module_id::TEXT,
-    'mentor_id',  v_mentor_id::TEXT,
-    'name',       p_name,
-    'join_code',  v_code,
-    'is_active',  TRUE,
-    'created_at', NOW()::TEXT
+    'id',           v_class_id::TEXT,
+    'module_id',    p_module_id::TEXT,
+    'mentor_id',    v_mentor_id::TEXT,
+    'name',         p_name,
+    'join_code',    v_code,
+    'is_active',    TRUE,
+    'created_at',   NOW()::TEXT,
+    'instructions', p_instructions
   );
 END;
 $$;
@@ -244,6 +245,6 @@ $$;
 
 -- ── 8. Permissions ────────────────────────────────────────────────────────────
 
-GRANT EXECUTE ON FUNCTION create_class(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION create_class(UUID, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION reset_class_code(UUID)   TO authenticated;
 GRANT EXECUTE ON FUNCTION redeem_class_code(TEXT)  TO authenticated;

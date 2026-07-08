@@ -303,6 +303,7 @@ export interface Class {
   join_code: string
   is_active: boolean
   created_at: string
+  instructions: string | null
 }
 
 export interface ClassEnrollment {

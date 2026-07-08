@@ -58,7 +58,7 @@ function StatusBadge({ pct, completed }: { pct: number; completed: boolean }) {
 }
 
 // ── ClassBlock: single white card — header + divider + module content ─────────
-function ClassBlock({ row }: { row: StudentClassRow }) {
+export function ClassBlock({ row }: { row: StudentClassRow }) {
   const navigate = useNavigate()
   const pct      = Math.min(100, Math.max(0, Math.round(row.progress)))
   const color    = resolveModuleColor(row.moduleColor) ?? difficultyColor(row.difficultyLevel)
@@ -73,6 +73,9 @@ function ClassBlock({ row }: { row: StudentClassRow }) {
         <div className="min-w-0">
           <h2 className="text-[20px] font-bold leading-tight line-clamp-1">{row.className}</h2>
           <p className="text-[13px] muted mt-0.5 line-clamp-1">{row.moduleTitle}</p>
+          {row.instructions && (
+            <p className="text-[12.5px] muted mt-2 leading-relaxed line-clamp-4">{row.instructions}</p>
+          )}
         </div>
         <button
           onClick={() => navigate(`/modules/${row.moduleId}`)}

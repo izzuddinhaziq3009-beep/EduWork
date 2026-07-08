@@ -13,6 +13,16 @@ type ClassUpdateBuilder = {
 }
 function classUpdateTable() { return supabase.from('classes') as unknown as ClassUpdateBuilder }
 
+// Narrow builder for UPDATE + .select() — needed by updateClass for the 0-row guard.
+type ClassEditPayload = { name?: string; instructions?: string | null }
+type ClassEditBuilder = {
+  update(d: ClassEditPayload): {
+    eq(col: string, val: string): {
+      select(cols: string): Promise<{ data: unknown; error: Error | null }>
+    }
+  }
+}
+
 export interface ClassWithMeta extends Class {
   module_title: string
   enrolled_count: number
@@ -41,6 +51,7 @@ export interface StudentClassRow {
   progress: number
   completed: boolean
   classmatesCount: number
+  instructions: string | null
 }
 
 export async function getStudentClasses(studentId: string): Promise<StudentClassRow[]> {
@@ -55,12 +66,12 @@ export async function getStudentClasses(studentId: string): Promise<StudentClass
 
   const { data: classes, error: e2 } = await supabase
     .from('classes')
-    .select('id, name, module_id, mentor_id')
+    .select('id, name, module_id, mentor_id, instructions')
     .in('id', classIds)
     .eq('is_active', true)
   if (e2) throw e2
 
-  const activeClasses = (classes ?? []) as { id: string; name: string; module_id: string; mentor_id: string }[]
+  const activeClasses = (classes ?? []) as { id: string; name: string; module_id: string; mentor_id: string; instructions: string | null }[]
   if (!activeClasses.length) return []
 
   const moduleIds = [...new Set(activeClasses.map(c => c.module_id))]
@@ -126,6 +137,7 @@ export async function getStudentClasses(studentId: string): Promise<StudentClass
       progress:          progressMap[c.module_id]?.progress  ?? 0,
       completed:         progressMap[c.module_id]?.completed ?? false,
       classmatesCount:   countMap[c.id] ?? 0,
+      instructions:      c.instructions ?? null,
     }
   })
 }
@@ -166,10 +178,25 @@ export async function getMentorClasses(mentorId: string): Promise<ClassWithMeta[
   }))
 }
 
-export async function createClass(moduleId: string, name: string): Promise<Class> {
-  const { data, error } = await rpc('create_class', { p_module_id: moduleId, p_name: name })
+export async function createClass(moduleId: string, name: string, instructions?: string | null): Promise<Class> {
+  const { data, error } = await rpc('create_class', {
+    p_module_id:    moduleId,
+    p_name:         name,
+    p_instructions: instructions ?? null,
+  })
   if (error) throw error
   return data as unknown as Class
+}
+
+export async function updateClass(classId: string, payload: ClassEditPayload): Promise<void> {
+  const { data, error } = await (supabase.from('classes') as unknown as ClassEditBuilder)
+    .update(payload)
+    .eq('id', classId)
+    .select('id')
+  if (error) throw error
+  if (!data || (data as unknown[]).length === 0) {
+    throw new Error('Class could not be updated (no matching row or insufficient permission).')
+  }
 }
 
 export async function resetClassCode(classId: string): Promise<string> {

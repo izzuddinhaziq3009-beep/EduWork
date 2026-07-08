@@ -7,8 +7,8 @@ vi.mock('@/utils/activityLog', () => ({ logActivity: vi.fn() }))
 
 import { supabase } from './supabase'
 import {
-  getMentorClasses, createClass, resetClassCode, deactivateClass, getClassRoster, redeemClassCode,
-  getStudentClasses,
+  getMentorClasses, createClass, updateClass, resetClassCode, deactivateClass, getClassRoster,
+  redeemClassCode, getStudentClasses,
 } from './classService'
 
 const fromMock = supabase.from as Mock
@@ -22,11 +22,12 @@ beforeEach(() => {
 const CLASS_ROW = {
   id: 'cls1', module_id: 'mod1', mentor_id: 'men1',
   name: 'React Cohort A', join_code: 'ABC12345', is_active: true, created_at: '2025-01-01',
+  instructions: null,
 }
 
 describe('getStudentClasses', () => {
   const ENROLLMENT     = { class_id: 'cls1' }
-  const CLASS_ACTIVE   = { id: 'cls1', name: 'React Cohort A', module_id: 'mod1', mentor_id: 'men1' }
+  const CLASS_ACTIVE   = { id: 'cls1', name: 'React Cohort A', module_id: 'mod1', mentor_id: 'men1', instructions: null }
   const MODULE_ROW     = {
     id: 'mod1', title: 'React 101', description: 'Learn React fundamentals',
     difficulty_level: 'beginner', duration_hours: 4,
@@ -58,6 +59,7 @@ describe('getStudentClasses', () => {
     expect(result[0].progress).toBe(42)
     expect(result[0].completed).toBe(false)
     expect(result[0].classmatesCount).toBe(2)
+    expect(result[0].instructions).toBeNull()
     expect(fromMock).toHaveBeenCalledTimes(6)
   })
 
@@ -92,6 +94,20 @@ describe('getStudentClasses', () => {
     expect(row.completed).toBe(false)
     expect(row.classmatesCount).toBe(0)
     expect(fromMock).toHaveBeenCalledTimes(6)
+  })
+
+  it('passes through non-null instructions from the class row', async () => {
+    const CLASS_WITH_INSTRUCTIONS = { ...CLASS_ACTIVE, instructions: 'Complete all lessons then submit.' }
+    queueFromResults(fromMock, [
+      ok([ENROLLMENT]),
+      ok([CLASS_WITH_INSTRUCTIONS]),
+      ok([MODULE_ROW]),
+      ok([MENTOR_PROFILE]),
+      ok([PROGRESS_ROW]),
+      ok([{ class_id: 'cls1' }]),
+    ])
+    const [row] = await getStudentClasses('stu1')
+    expect(row.instructions).toBe('Complete all lessons then submit.')
   })
 
   it('throws when the enrollments query errors', async () => {
@@ -139,16 +155,52 @@ describe('getMentorClasses', () => {
 })
 
 describe('createClass', () => {
-  it('calls create_class RPC and returns the new class', async () => {
+  it('calls create_class RPC with null instructions when omitted', async () => {
     rpcMock.mockResolvedValueOnce({ data: CLASS_ROW, error: null })
     const result = await createClass('mod1', 'React Cohort A')
     expect(result).toEqual(CLASS_ROW)
-    expect(rpcMock).toHaveBeenCalledWith('create_class', { p_module_id: 'mod1', p_name: 'React Cohort A' })
+    expect(rpcMock).toHaveBeenCalledWith('create_class', {
+      p_module_id: 'mod1', p_name: 'React Cohort A', p_instructions: null,
+    })
+  })
+
+  it('passes instructions to the RPC when provided', async () => {
+    const rowWithInstructions = { ...CLASS_ROW, instructions: 'Complete all lessons.' }
+    rpcMock.mockResolvedValueOnce({ data: rowWithInstructions, error: null })
+    const result = await createClass('mod1', 'React Cohort A', 'Complete all lessons.')
+    expect((result as typeof rowWithInstructions).instructions).toBe('Complete all lessons.')
+    expect(rpcMock).toHaveBeenCalledWith('create_class', {
+      p_module_id: 'mod1', p_name: 'React Cohort A', p_instructions: 'Complete all lessons.',
+    })
   })
 
   it('throws when the RPC returns an error', async () => {
     rpcMock.mockResolvedValueOnce({ data: null, error: new Error('Only mentors can create classes') })
     await expect(createClass('mod1', 'Test')).rejects.toThrow('Only mentors can create classes')
+  })
+})
+
+describe('updateClass', () => {
+  it('updates name and instructions and resolves when a row is returned', async () => {
+    queueFromResults(fromMock, [ok([{ id: 'cls1' }])])
+    await expect(updateClass('cls1', { name: 'New Name', instructions: 'Do this.' })).resolves.toBeUndefined()
+    expect(fromMock).toHaveBeenCalledWith('classes')
+  })
+
+  it('updates instructions to null (clearing it)', async () => {
+    queueFromResults(fromMock, [ok([{ id: 'cls1' }])])
+    await expect(updateClass('cls1', { instructions: null })).resolves.toBeUndefined()
+  })
+
+  it('throws the 0-row guard error when no row is returned (RLS block)', async () => {
+    queueFromResults(fromMock, [ok([])])
+    await expect(updateClass('cls1', { name: 'Blocked' }))
+      .rejects.toThrow('Class could not be updated')
+  })
+
+  it('throws when the query itself errors', async () => {
+    queueFromResults(fromMock, [fail(new Error('permission denied'))])
+    await expect(updateClass('cls1', { name: 'Test' })).rejects.toThrow('permission denied')
   })
 })
 
