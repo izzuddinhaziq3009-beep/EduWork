@@ -269,8 +269,22 @@ export async function getAllIndependentProjectsAdmin() {
 }
 
 export async function deleteIndependentProject(id: string): Promise<void> {
-  const { error } = await supabase.from('independent_projects').delete().eq('id', id)
+  const { data, error } = await supabase
+    .from('independent_projects')
+    .delete()
+    .eq('id', id)
+    .select('image_url')
   if (error) throw error
+  if (!data || (data as unknown[]).length === 0) {
+    throw new Error('Project could not be deleted — no matching row or insufficient permission.')
+  }
+  const imageUrl = (data as Array<{ image_url?: string | null }>)[0].image_url
+  if (imageUrl) {
+    const path = imageUrl.split('/independent-project-images/').at(1)
+    if (path) {
+      await supabase.storage.from('independent-project-images').remove([path])
+    }
+  }
 }
 
 // ── Challenge moderation ────────────────────────────────────────────────────

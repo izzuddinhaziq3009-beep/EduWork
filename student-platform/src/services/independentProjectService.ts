@@ -65,8 +65,15 @@ export async function updateIndependentProject(
 }
 
 export async function deleteIndependentProject(projectId: string): Promise<void> {
-  const { error } = await ipTable().delete().eq('id', projectId)
+  const { data, error } = await supabase
+    .from('independent_projects')
+    .delete()
+    .eq('id', projectId)
+    .select('id')
   if (error) throw error
+  if (!data || (data as unknown[]).length === 0) {
+    throw new Error('Project could not be deleted — no matching row or insufficient permission.')
+  }
 }
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']

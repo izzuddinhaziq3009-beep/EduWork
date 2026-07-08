@@ -8,6 +8,7 @@ import { supabase } from './supabase'
 import {
   getAllUsers, deactivateUser, reactivateUser, approveUser,
   getAllProjectsAdmin, deleteProject,
+  getAllIndependentProjectsAdmin, deleteIndependentProject,
   approveChallenge, rejectChallenge, getPendingChallenges,
   getActivityLogs,
 } from './adminService'
@@ -62,6 +63,32 @@ describe('getAllProjectsAdmin / deleteProject', () => {
   it('deletes a project', async () => {
     queueFromResults(fromMock, [ok(null)])
     await expect(deleteProject('p1')).resolves.toBeUndefined()
+  })
+})
+
+describe('getAllIndependentProjectsAdmin / deleteIndependentProject', () => {
+  it('returns all indie projects with student profiles', async () => {
+    queueFromResults(fromMock, [ok([{ id: 'ip1', profiles: { full_name: 'Alice', email: 'a@b.com' } }])])
+    const result = await getAllIndependentProjectsAdmin()
+    expect(result).toHaveLength(1)
+    expect(result[0].profiles.full_name).toBe('Alice')
+  })
+
+  it('deletes a project and resolves when a row is returned', async () => {
+    queueFromResults(fromMock, [ok([{ image_url: null }])])
+    await expect(deleteIndependentProject('ip1')).resolves.toBeUndefined()
+  })
+
+  it('throws when 0 rows are deleted (RLS blocked the delete)', async () => {
+    queueFromResults(fromMock, [ok([])])
+    await expect(deleteIndependentProject('ip1')).rejects.toThrow(
+      'Project could not be deleted',
+    )
+  })
+
+  it('throws on query error', async () => {
+    queueFromResults(fromMock, [fail(new Error('denied'))])
+    await expect(deleteIndependentProject('ip1')).rejects.toThrow('denied')
   })
 })
 

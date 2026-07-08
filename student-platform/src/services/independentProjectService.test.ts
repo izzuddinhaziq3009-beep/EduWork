@@ -130,13 +130,20 @@ describe('updateIndependentProject', () => {
 
 describe('deleteIndependentProject', () => {
   it('resolves on a successful delete', async () => {
-    queueFromResults(fromMock, [ok(null)])
+    queueFromResults(fromMock, [ok([{ id: 'ip1' }])])
     await expect(deleteIndependentProject('ip1')).resolves.toBeUndefined()
   })
 
   it('throws on delete error', async () => {
     queueFromResults(fromMock, [fail(new Error('forbidden'))])
     await expect(deleteIndependentProject('ip1')).rejects.toThrow('forbidden')
+  })
+
+  it('throws when 0 rows are deleted (RLS blocked the delete)', async () => {
+    queueFromResults(fromMock, [ok([])])
+    await expect(deleteIndependentProject('ip1')).rejects.toThrow(
+      'Project could not be deleted',
+    )
   })
 })
 
